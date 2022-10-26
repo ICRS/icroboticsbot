@@ -44,6 +44,7 @@ def init_db(db=DB_PATH):
 
 
 def add_mapping(shortcode, userid, db=DB_PATH):
+    userid=str(userid)
     conn = sq.connect(db)
     cur = conn.cursor()
     if is_shortcode(shortcode):
