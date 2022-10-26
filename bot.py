@@ -43,10 +43,13 @@ async def on_message(message):
                     print(f'registering user {shortcode}')
                     server = discord.utils.get(client.guilds, name=GUILD)
                     member = server.get_member(message.author.id)
-                    role = discord.utils.get(server.roles, name='ICRS Member')
-                    await member.add_roles(role, reason="Membership verified by roboticsbotbot")
-                    print('added role')
-                    await message.channel.send("Membership verified \nEnjoy!")
+                    if member:
+                        role = discord.utils.get(server.roles, name='ICRS Member')
+                        await member.add_roles(role, reason="Membership verified by roboticsbotbot")
+                        print('added role')
+                        await message.channel.send("Membership verified \nEnjoy!")
+                    else:
+                        await message.channel.send("Maybe try joining the ICRS discord server first?")
                 else:
                     await message.channel.send('''
                     Could not find your membership, it's available to buy here: https://www.imperialcollegeunion.org/activities/a-to-z/robotics\nIf you have already bought the membership try again later or contact any committee member
