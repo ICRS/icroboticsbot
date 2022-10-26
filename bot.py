@@ -4,8 +4,8 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from utils import is_shortcode, is_member
-
+from utils import is_shortcode, is_member, init_db, add_mapping, shortcode_exists
+init_db()
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
@@ -37,17 +37,22 @@ async def on_message(message):
     if not message.guild and message.content.startswith('register'):
         try:
             print(message.content)
-            shortcode = message.content.split('register')[-1].strip()
+            shortcode = message.content.split('register')[-1].strip().lower()
             if is_shortcode(shortcode):
                 if is_member(shortcode):
                     print(f'registering user {shortcode}')
                     server = discord.utils.get(client.guilds, name=GUILD)
                     member = server.get_member(message.author.id)
                     if member:
-                        role = discord.utils.get(server.roles, name='ICRS Member')
-                        await member.add_roles(role, reason="Membership verified by roboticsbotbot")
-                        print('added role')
-                        await message.channel.send("Membership verified \nEnjoy!")
+                        if not shortcode_exists(shortcode):
+                            # this is absolutely horrifying 
+                            role = discord.utils.get(server.roles, name='ICRS Member')
+                            await member.add_roles(role, reason="Membership verified by roboticsbotbot")
+                            print('added role')
+                            add_mapping(shortcode, member.id)
+                            await message.channel.send("Membership verified \nEnjoy!")
+                        else:
+                            await message.channel.send("Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
                     else:
                         await message.channel.send("Maybe try joining the ICRS discord server first?")
                 else:
