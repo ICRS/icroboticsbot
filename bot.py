@@ -1,10 +1,8 @@
 # bot.py
 import os
-
 import discord
-from discord.ext import commands
 from dotenv import load_dotenv
-from utils import is_shortcode, is_member, init_db, add_mapping, shortcode_exists
+from utils import is_shortcode, is_member, init_db, add_mapping, shortcode_exists, valid_mapping, change_valid
 init_db()
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -22,7 +20,7 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
-    await member.send(f"Poggies! \nWelcome {member.name} to the ICRS server")
+    await member.send(f"Welcome {member.name} to the ICRS server \nRemember to verify using !register in the bot channel to gain full access to the server")
 
 @client.event
 async def on_message(message):
@@ -52,7 +50,14 @@ async def on_message(message):
                             add_mapping(shortcode, member.id)
                             await message.channel.send("Membership verified \nEnjoy!")
                         else:
-                            await message.channel.send("Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
+                            valid = valid_mapping(shortcode,member.id)
+                            if valid:
+                                await message.channel.send("Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
+                            else:
+                                #   flip valid
+                                change_valid(member.id, 1)
+                                await message.channel.send("Membership reverified \nWelcome back!")
+                                pass
                     else:
                         await message.channel.send("Maybe try joining the ICRS discord server first?")
                 else:
@@ -63,9 +68,15 @@ async def on_message(message):
                 await message.channel.send("Invalid shortcode, try again.")
         except discord.errors.Forbidden:
             pass
-
-
-
     else:
         pass
+
+@client.event
+async def on_member_remove(member):
+    try:
+        change_valid(member.id, 0)
+    except:
+        print(member.id+'did not have membership')
+
+
 client.run(TOKEN)
