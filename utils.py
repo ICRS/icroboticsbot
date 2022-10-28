@@ -81,7 +81,7 @@ def valid_mapping(shortcode, userid, db=DB_PATH):
         )
         val = cur.fetchall()#
         if any(val):
-            valid = [0][0]
+            valid = val[0][0]
         else:
             valid = 1
         print(valid)
