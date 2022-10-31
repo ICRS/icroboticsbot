@@ -9,7 +9,7 @@ load_dotenv()
 
 '''init union API'''
 csp_code = 625
-api_key = 'B90F1C96-5805-4CDF-AE01-22CDC6059A3C'
+api_key = os.getenv('API_KEY')
 year = '22-23'
 society_api = ICUEActivitiesAPI(csp_code, api_key, year)
 
