@@ -1,7 +1,6 @@
 import re
 import os
 import os.path as path
-from xmlrpc.client import Boolean
 from icu_ea_api import ICUEActivitiesAPI
 import sqlite3 as sq
 from dotenv import load_dotenv

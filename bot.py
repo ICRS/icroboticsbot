@@ -7,12 +7,11 @@ init_db()
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
+ADMIN_ID = int(os.getenv('ADMIN_ID'))
 intents = discord.Intents.all()
 intents.message_content = True
-print(TOKEN)
 
 client = discord.Client(intents=intents)
-
 @client.event
 async def on_ready():
     guild = discord.utils.get(client.guilds, name=GUILD)
@@ -24,15 +23,33 @@ async def on_member_join(member):
 
 @client.event
 async def on_message(message):
+    guild = discord.utils.get(client.guilds, name=GUILD)
+    admin = guild.get_member(ADMIN_ID)
+
     if message.author == client.user:
         return
     
+    if message.author == admin:
+        if message.content.startswith('!bot'):
+            # syntax !bot send [id]:[message]
+            body = message.content.split('!bot')
+            id = int(body[-1].split(':')[0])
+            body = message.content.split(':')[-1]
+            user = guild.get_member(id)
+            await user.send(body)
+            await admin.send(f'sent {body} to {user}')
+        else:
+            return
+        
     if message.content.startswith('!register'):
         await message.author.send('''
         To get the membership role please write a message in format: \nregister yourShortcodeHere \ni.e register dc1021
         ''')
-    
-    if not message.guild and message.content.startswith('register'):
+    if not message.guild:
+        if not message.content.startswith('!bot'):    
+            await admin.send(f'{message.author} says {message.content}')
+
+    if not message.guild and message.content.startswith('register') :
         try:
             print(message.content)
             shortcode = message.content.split('register')[-1].strip().lower()
@@ -49,14 +66,18 @@ async def on_message(message):
                             print('added role')
                             add_mapping(shortcode, member.id)
                             await message.channel.send("Membership verified \nEnjoy!")
+                            await admin.send("Bot responded: Membership verified \nEnjoy!")
+
                         else:
                             valid = valid_mapping(shortcode,member.id)
                             if valid:
                                 await message.channel.send("Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
+                                await admin.send("Bot responded: Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
                             else:
                                 #   flip valid
                                 change_valid(member.id, 1)
                                 await message.channel.send("Membership reverified \nWelcome back!")
+                                await admin.send("Bot responded: Membership reverified \nWelcome back!")
                                 pass
                     else:
                         await message.channel.send("Maybe try joining the ICRS discord server first?")
@@ -64,8 +85,13 @@ async def on_message(message):
                     await message.channel.send('''
                     Could not find your membership, it's available to buy here: https://www.imperialcollegeunion.org/activities/a-to-z/robotics\nIf you have already bought the membership try again later or contact any committee member
                     ''')
+                    await admin.send('''
+                    Bot responded: Could not find your membership, it's available to buy here: https://www.imperialcollegeunion.org/activities/a-to-z/robotics\nIf you have already bought the membership try again later or contact any committee member
+                    ''')
             else:
                 await message.channel.send("Invalid shortcode, try again.")
+                await admin.send("Bot responded: Invalid shortcode, try again.")
+
         except discord.errors.Forbidden:
             pass
     else:
