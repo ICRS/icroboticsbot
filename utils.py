@@ -1,9 +1,12 @@
 import re
 import os
+import random
 import os.path as path
 from icu_ea_api import ICUEActivitiesAPI
 import sqlite3 as sq
 from dotenv import load_dotenv
+from quotes import generate
+import json
 load_dotenv()
 
 '''init union API'''
@@ -101,3 +104,14 @@ def change_valid(userid, valid:int, db=DB_PATH):
         conn.commit()
     else:
         raise Exception('Issue changing valid status')
+
+def random_quote(author):
+    images = os.listdir('background_images')
+    backgrounds = ['background_images/'+image for image in images if image.startswith(author.lower())]
+    background = random.choice(backgrounds)
+    with open('quotes.json', 'r') as f:
+        quotes = f.readlines()
+    quotes = [json.loads(quote) for quote in quotes]
+    choices = [quote for quote in quotes if quote['author'] == author]
+    choice = random.choice(choices)
+    generate(background, quote=choice['quote'], author=choice['author'])
