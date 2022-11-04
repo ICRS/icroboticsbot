@@ -2,7 +2,7 @@
 import os
 import discord
 from dotenv import load_dotenv
-from utils import is_shortcode, is_member, init_db, add_mapping, shortcode_exists, valid_mapping, change_valid
+from utils import is_shortcode, is_member, init_db, add_mapping, shortcode_exists, valid_mapping, change_valid, random_quote
 init_db()
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -45,6 +45,15 @@ async def on_message(message):
         await message.author.send('''
         To get the membership role please write a message in format: \nregister yourShortcodeHere \ni.e register dc1021
         ''')
+    
+    if message.content.startswith('!quote'):
+        name = message.content.split('!quote')[-1]
+        try:
+            random_quote(name)
+        except:
+            await message.channel.send('There are no quotes for that person currently.')
+        await message.channel.send(file=discord.File('quote.png'))
+
     if not message.guild:
         if not message.content.startswith('!bot'):    
             await admin.send(f'{message.author} says {message.content}')

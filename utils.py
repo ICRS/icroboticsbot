@@ -107,11 +107,13 @@ def change_valid(userid, valid:int, db=DB_PATH):
 
 def random_quote(author):
     images = os.listdir('background_images')
-    backgrounds = ['background_images/'+image for image in images if image.startswith(author.lower())]
+    backgrounds = ['background_images/'+image for image in images if image.startswith(author.strip().lower())]
     background = random.choice(backgrounds)
+    fonts = os.listdir('fonts')
+    font = 'fonts/'+random.choice(fonts)
     with open('quotes.json', 'r') as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]
-    choices = [quote for quote in quotes if quote['author'] == author]
+    choices = [quote for quote in quotes if quote['author'].lower() == author.strip().lower()]
     choice = random.choice(choices)
-    generate(background, quote=choice['quote'], author=choice['author'])
+    generate(background, quote=choice['quote'], author=choice['author'], font=font)
