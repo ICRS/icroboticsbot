@@ -29,7 +29,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     
-    if message.author == admin:
+    if message.author == admin and not message.guild:
         if message.content.startswith('!bot'):
             # syntax !bot send [id]:[message]
             body = message.content.split('!bot')
