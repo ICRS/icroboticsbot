@@ -29,6 +29,11 @@ async def on_message(message):
     if message.author == client.user:
         return
     
+    username = str(message.author)
+    user_message = str(message.content)
+    channel = str(message.channel)
+    print(f'{username} said: "{user_message}" ({channel})')
+
     if message.author == admin and not message.guild:
         if message.content.startswith('!bot'):
             # syntax !bot send [id]:[message]
@@ -69,7 +74,7 @@ async def on_message(message):
                     member = server.get_member(message.author.id)
                     if member:
                         if not shortcode_exists(shortcode):
-                            # this is absolutely horrifying 
+                            # this is absolutely horrifying
                             role = discord.utils.get(server.roles, name='ICRS Member')
                             await member.add_roles(role, reason="Membership verified by roboticsbotbot")
                             print('added role')
@@ -101,8 +106,8 @@ async def on_message(message):
                 await message.channel.send("Invalid shortcode, try again.")
                 await admin.send("Bot responded: Invalid shortcode, try again.")
 
-        except discord.errors.Forbidden:
-            pass
+        except Exception as e:
+            print("An exception occurred:", e)
     else:
         pass
 
