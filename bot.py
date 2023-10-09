@@ -3,6 +3,7 @@ import os
 import discord
 from dotenv import load_dotenv
 from utils import is_shortcode, is_member, init_db, add_mapping, shortcode_exists, valid_mapping, change_valid, random_quote
+from discord.ext import tasks
 init_db()
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -48,11 +49,13 @@ async def on_message(message):
     
     if message.content.startswith('!quote'):
         name = message.content.split('!quote')[-1]
-        try:
-            random_quote(name)
-        except:
-            await message.channel.send('There are no quotes for that person currently.')
-        await message.channel.send(file=discord.File('quote.png'))
+        random_quote(name)
+        await message.channel.send(file=discord.File('/home/pi/code/icroboticsbot/quote.png'))
+
+    if message.content.startswith('!alert'):
+        await message.channel.send('''
+        Alert! <:ALERT:1033044801714671727> 
+        ''')
 
     if not message.guild:
         if not message.content.startswith('!bot'):    
@@ -114,4 +117,30 @@ async def on_member_remove(member):
         print(member.id+'did not have membership')
 
 
-client.run(TOKEN)
+@tasks.loop(minutes=1200)
+async def alert_background_task():
+    print("send")
+    channel = client.get_channel(1039571159823429673) # channel id as an int
+    await channel.send(f'<:ALERT:1033044801714671727>')
+
+@alert_background_task.before_loop
+async def alert_background_task_before_loop():
+    await client.wait_until_ready()     
+
+#import asyncio
+#
+#asyncio.run(alert_background_task())
+
+async def main():
+    alert_background_task.start()
+    await client.start(TOKEN)
+    # Wait for the client to close (e.g., Ctrl+C or other termination signals)
+    await client.close()
+    
+import asyncio
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+
+#client.run(TOKEN)
+

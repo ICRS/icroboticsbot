@@ -12,7 +12,7 @@ load_dotenv()
 '''init union API'''
 csp_code = 625
 api_key = os.getenv('API_KEY')
-year = '22-23'
+year = '23-24'
 society_api = ICUEActivitiesAPI(csp_code, api_key, year)
 
 
@@ -106,12 +106,12 @@ def change_valid(userid, valid:int, db=DB_PATH):
         raise Exception('Issue changing valid status')
 
 def random_quote(author):
-    images = os.listdir('background_images')
-    backgrounds = ['background_images/'+image for image in images if image.startswith(author.strip().lower())]
+    images = os.listdir('/home/pi/code/icroboticsbot/background_images')
+    backgrounds = ['/home/pi/code/icroboticsbot/background_images/'+image for image in images if image.startswith(author.strip().lower())]
     background = random.choice(backgrounds)
-    fonts = os.listdir('fonts')
-    font = 'fonts/'+random.choice(fonts)
-    with open('quotes.json', 'r') as f:
+    fonts = os.listdir('/home/pi/code/icroboticsbot/fonts')
+    font = '/home/pi/code/icroboticsbot/fonts/'+random.choice(fonts)
+    with open('/home/pi/code/icroboticsbot/quotes.json', 'r') as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]
     choices = [quote for quote in quotes if quote['author'].lower() == author.strip().lower()]
