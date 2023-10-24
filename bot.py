@@ -57,6 +57,7 @@ async def on_message(message):
 
     if message.channel.id == FILE_CHANNEL and message.attachments:
         files = []
+        print("file sent in files")
         for attachment in message.attachments:
             if (
                 attachment.filename.split(".")[-1].lower() in extension_list
