@@ -7,14 +7,31 @@ import sqlite3 as sq
 from dotenv import load_dotenv
 from quotes import generate
 import json
+from datetime import date
+import requests
+import paramiko
+from scp import SCPClient
+import requests
+import io
+
+TARGET_PATH = '/home/member/Downloads/'
 load_dotenv()
 
 '''init union API'''
+date_now = date.today()
+month_now = date_now.month
+year_now = str(date_now.year)
+if month_now > 8:
+    year_string = f"{year_now[2:]}-{int(year_now[2:])+1}"
+else:
+    year_string = f"{int(year_now[2:])-1}-{year_now[2:]}"
 csp_code = 625
 api_key = os.getenv('API_KEY')
-year = '23-24'
-society_api = ICUEActivitiesAPI(csp_code, api_key, year)
+file_path = os.getenv('FILE_PATH')
+society_api = ICUEActivitiesAPI(csp_code, api_key, year_string)
+slicer_secret = os.getenv('SLICER_PW')
 
+extension_list = ['stl','3mf','obj','stp','step']
 
 INIT_SCHEMA = '''
 CREATE TABLE mapping (
@@ -117,3 +134,22 @@ def random_quote(author):
     choices = [quote for quote in quotes if quote['author'].lower() == author.strip().lower()]
     choice = random.choice(choices)
     generate(background, quote=choice['quote'], author=choice['author'], font=font)
+
+def download_files(files):
+    ssh = createSSHClient('slicer.local',22,'member', slicer_secret)
+    scp = SCPClient(ssh.get_transport())
+    for file in files:
+        url = file['url']
+        name = file['name']
+        r = requests.get(url)
+        file = io.BytesIO()
+        file.write(r.content)
+        file.seek(0)
+        scp.putfo(file,TARGET_PATH+name)
+
+def createSSHClient(server, port, user, password):
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(server, port, user, password)
+    return client

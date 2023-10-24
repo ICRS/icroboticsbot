@@ -4,3 +4,6 @@
 memberMap.db
 membermap.db
 server.sh
+database.py
+/files
+*.png
