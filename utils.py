@@ -7,13 +7,20 @@ import sqlite3 as sq
 from dotenv import load_dotenv
 from quotes import generate
 import json
+from datetime import date
 load_dotenv()
 
 '''init union API'''
+date_now = date.today()
+month_now = date_now.month
+year_now = str(date_now.year)
+if month_now > 8:
+    year_string = f"{year_now[2:]}-{int(year_now[2:])+1}"
+else:
+    year_string = f"{int(year_now[2:])-1}-{year_now[2:]}"
 csp_code = 625
 api_key = os.getenv('API_KEY')
-year = '23-24'
-society_api = ICUEActivitiesAPI(csp_code, api_key, year)
+society_api = ICUEActivitiesAPI(csp_code, api_key, year_string)
 
 
 INIT_SCHEMA = '''
