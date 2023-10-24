@@ -2,9 +2,11 @@
 import os
 import discord
 from dotenv import load_dotenv
-from utils import is_shortcode, is_member, init_db, add_mapping, shortcode_exists, valid_mapping, change_valid, random_quote
+from utils import download_files,extension_list, is_shortcode, is_member, init_db, add_mapping, shortcode_exists, valid_mapping, change_valid, random_quote
 init_db()
 load_dotenv()
+FILE_CHANNEL = os.getenv('FILE_CHANNEL')
+MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 ADMIN_ID = int(os.getenv('ADMIN_ID'))
@@ -33,6 +35,17 @@ async def on_message(message):
     user_message = str(message.content)
     channel = str(message.channel)
     print(f'{username} said: "{user_message}" ({channel})')
+
+    if message.channel.id == FILE_CHANNEL and message.attachments:
+        files = []
+        for attachment in message.attachments:
+            if attachment.filename.split(".")[-1].lower() in extension_list and attachment.size < MAX_SIZE:
+                files.append({'url':attachment.url,'name':attachment.filename})
+        
+        download_files(files)
+        await admin.send(f'{message.author} sent {len(files)} files with names {[file["name"] for file in files]}')
+
+
 
     if message.author == admin and not message.guild:
         if message.content.startswith('!bot'):
