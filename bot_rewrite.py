@@ -19,16 +19,19 @@ settings = json.load(open("settings.json", "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+PREFIX = settings['PREFIX']
+GUILD = int(settings['DISCORD_GUILD_ID'])
 FILE_CHANNEL = int(settings['FILE_CHANNEL'])
 ADMIN_ID = int(settings['ADMIN_ID'])
 ALERT_CHANNEL = int(settings['ALERT_CHANNEL'])
 ALERT_INTERVAL = int(settings['ALERT_INTERVAL'])
 
-intents = discord.Intents.all()
+intents = discord.Intents.default()
+intents.members = True
 intents.message_content = True
 
 guild_info = {
+    'PREFIX': PREFIX,
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
     'FILE_CHANNEL': FILE_CHANNEL,
@@ -37,10 +40,8 @@ guild_info = {
     'MAX_SIZE': MAX_SIZE
 }
 
-bot_prefix = "!"
 client = DiscordBot(token=TOKEN,
                     intents=intents,
-                    bot_prefix=bot_prefix,
                     guild_info=guild_info)
 
 if __name__ == "__main__":
