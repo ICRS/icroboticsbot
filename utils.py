@@ -21,6 +21,9 @@ from dotenv import load_dotenv
 
 from quotes import generate
 
+
+__all__ = ["is_shortcode", "is_member", "init_db", "add_mapping", "shortcode_exists", "valid_mapping", "change_valid", "random_quote", "download_files", "createSSHClient"]
+
 # ===== Constants =====
 TARGET_PATH = '/home/member/Downloads/'
 load_dotenv()
