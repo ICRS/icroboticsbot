@@ -28,10 +28,11 @@ __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
            "extension_list"]
 
 # ===== Constants =====
-TARGET_PATH = '/home/member/Downloads/'
 load_dotenv()
+# TARGET_PATH = '/home/member/Downloads/'
+TARGET_PATH = os.getenv('TARGET_PATH')
 
-# ===== Get the current year =====
+# ===== Get the current date =====
 date_now = date.today()
 month_now = date_now.month
 year_now = str(date_now.year)
@@ -215,9 +216,9 @@ def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
     if is_shortcode(shortcode):
         cur.execute('''
         SELECT active FROM mapping WHERE shortcode = ? AND user_id = ?
-        ''', (shortcode.lower().strip(),str(userid))
+        ''', (shortcode.lower().strip(), str(userid))
         )
-        val = cur.fetchall()#
+        val = cur.fetchall()
         if any(val):
             valid = val[0][0]
         else:
