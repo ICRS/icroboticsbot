@@ -24,7 +24,8 @@ from quotes import generate
 
 __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
            "shortcode_exists", "valid_mapping", "change_valid",
-           "random_quote", "download_files", "createSSHClient"]
+           "random_quote", "download_files", "create_sshclient",
+           "extension_list"]
 
 # ===== Constants =====
 TARGET_PATH = '/home/member/Downloads/'
@@ -41,12 +42,12 @@ else:
 
 # =================================
 
-csp_code = 625
+CSP_CODE = 625
 
 # ===== Get the API key and file path =====
 api_key = os.getenv('API_KEY')
 file_path = os.getenv('FILE_PATH')
-society_api = ICUEActivitiesAPI(csp_code, api_key, year_string)
+society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
 slicer_secret = os.getenv('SLICER_PW')
 # =========================================
 
@@ -93,7 +94,7 @@ def is_member(shortcode: str) -> bool:
                          society_api.list_members()]  # noqa: E1101
 
 
-def init_db(db=DB_PATH) -> None:
+def init_db(db=DB_PATH) -> bool:
     """
     init_db creates the database if it does not exist
 
@@ -101,16 +102,22 @@ def init_db(db=DB_PATH) -> None:
     ----------
     db : String, optional
         Path for database file, by default DB_PATH
+
+    Returns
+    -------
+    bool
+        True if the database already exists, False otherwise
     """
     if path.exists(db):
-        return
+        return True
     conn = sq.connect(db)
     cur = conn.cursor()
     cur.execute(INIT_SCHEMA)
     conn.commit()
+    return False
 
 
-def add_mapping(shortcode, userid, db=DB_PATH) -> None:
+def add_mapping(shortcode, userid, db=DB_PATH) -> bool:
     """
     add_mapping adds a mapping between a shortcode and a user id
 
@@ -122,6 +129,11 @@ def add_mapping(shortcode, userid, db=DB_PATH) -> None:
         Discord user id
     db : String, optional
         Path to database file, by default DB_PATH
+
+    Returns
+    -------
+    bool
+        True if the mapping was added, False otherwise
 
     Raises
     ------
@@ -138,6 +150,7 @@ def add_mapping(shortcode, userid, db=DB_PATH) -> None:
         ''', (userid.lower().strip(), shortcode.lower().strip(), 1)
         )
         conn.commit()
+        return True
     else:
         raise ValueError('Invalid shortcode')
 
@@ -253,7 +266,7 @@ def change_valid(userid, valid: int, db=DB_PATH) -> bool:
         raise KeyError('Issue changing valid status')
 
 
-def random_quote(author: str) -> None:
+def random_quote(author: str) -> tuple:
     """
     random_quote generates a random quote image for a given author
 
@@ -261,6 +274,11 @@ def random_quote(author: str) -> None:
     ----------
     author : str
         Author of the quote
+
+    Returns
+    -------
+    tuple
+        A tuple containing the quote and the path to the generated image
     """
     images = os.listdir('/home/pi/code/icroboticsbot/background_images')
     backgrounds = ['/home/pi/code/icroboticsbot/background_images/'+image
@@ -278,8 +296,9 @@ def random_quote(author: str) -> None:
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])
     choice = random.choice(choices[author.strip().lower()])
-    generate(background, quote=choice['quote'],
+    png_path = generate(background, quote=choice['quote'],
              author=choice['author'], font=font)
+    return choice, png_path
 
 
 def download_files(files) -> None:
@@ -291,19 +310,22 @@ def download_files(files) -> None:
     files : List
         List of files to download
     """
-    ssh = createSSHClient('slicer.local', 22, 'member', slicer_secret)
-    scp = SCPClient(ssh.get_transport())
-    for file in files:
-        url = file['url']
-        name = file['name']
-        r = requests.get(url, timeout=60)
-        file = io.BytesIO()
-        file.write(r.content)
-        file.seek(0)
-        scp.putfo(file, TARGET_PATH+name)
+    try:
+        ssh = create_sshclient('slicer.local', 22, 'member', slicer_secret)
+        scp = SCPClient(ssh.get_transport())
+        for file in files:
+            url = file['url']
+            name = file['name']
+            r = requests.get(url, timeout=60)
+            file = io.BytesIO()
+            file.write(r.content)
+            file.seek(0)
+            scp.putfo(file, TARGET_PATH+name)
+    except Exception:
+        print("Error appending files")
 
 
-def createSSHClient(server, port, user, password) -> paramiko.SSHClient:
+def create_sshclient(server, port, user, password) -> paramiko.SSHClient:
     """
     createSSHClient creates an SSH client
 
