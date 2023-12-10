@@ -7,12 +7,13 @@ import asyncio
 
 import discord
 from discord.ext import tasks
+from discord.ext import commands
+
+from dotenv import load_dotenv
 
 from utils import is_shortcode, is_member, shortcode_exists, valid_mapping
 from utils import init_db, add_mapping, change_valid, random_quote
 from utils import download_files, extension_list
-
-from dotenv import load_dotenv
 
 
 init_db()
@@ -26,6 +27,8 @@ GUILD = os.getenv('DISCORD_GUILD')
 ADMIN_ID = int(os.getenv('ADMIN_ID'))
 intents = discord.Intents.all()
 intents.message_content = True
+
+bot_prefix = "!"
 
 client = discord.Client(intents=intents)
 @client.event
@@ -49,6 +52,14 @@ async def on_message(message):
     user_message = str(message.content)
     channel = str(message.channel)
     print(f'{username} said: "{user_message}" ({channel})')
+
+    if message.guild:
+        if message.content.startswith(bot_prefix):
+            if message.content.startswith(bot_prefix+'bot'):
+                print()
+
+    elif not message.guild:
+        print()
 
     if message.channel.id == FILE_CHANNEL and message.attachments:
         files = []
@@ -165,6 +176,14 @@ async def main():
     await client.start(TOKEN)
     # Wait for the client to close (e.g., Ctrl+C or other termination signals)
     await client.close()
+
+
+class IC_bot(commands.Bot):
+    def __init__(self):
+        pass
+
+    def add_commands(self):
+        pass
 
 
 if __name__ == '__main__':
