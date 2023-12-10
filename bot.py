@@ -177,15 +177,6 @@ async def main():
     # Wait for the client to close (e.g., Ctrl+C or other termination signals)
     await client.close()
 
-
-class IC_bot(commands.Bot):
-    def __init__(self):
-        pass
-
-    def add_commands(self):
-        pass
-
-
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
