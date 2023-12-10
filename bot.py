@@ -1,11 +1,25 @@
-# bot.py
+"""
+This is the main file for the discord bot. It handles all the messages and commands sent to the bot.
+"""
+
 import os
+import asyncio
+
 import discord
-from dotenv import load_dotenv
-from utils import download_files,extension_list, is_shortcode, is_member, init_db, add_mapping, shortcode_exists, valid_mapping, change_valid, random_quote
 from discord.ext import tasks
+from discord.ext import commands
+
+from dotenv import load_dotenv
+
+from utils import is_shortcode, is_member, shortcode_exists, valid_mapping
+from utils import init_db, add_mapping, change_valid, random_quote
+from utils import download_files, extension_list
+
+
 init_db()
 load_dotenv()
+
+
 FILE_CHANNEL = os.getenv('FILE_CHANNEL')
 MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -13,6 +27,8 @@ GUILD = os.getenv('DISCORD_GUILD')
 ADMIN_ID = int(os.getenv('ADMIN_ID'))
 intents = discord.Intents.all()
 intents.message_content = True
+
+bot_prefix = "!"
 
 client = discord.Client(intents=intents)
 @client.event
@@ -31,23 +47,29 @@ async def on_message(message):
 
     if message.author == client.user:
         return
-    
+
     username = str(message.author)
     user_message = str(message.content)
     channel = str(message.channel)
     print(f'{username} said: "{user_message}" ({channel})')
+
+    if message.guild:
+        if message.content.startswith(bot_prefix):
+            if message.content.startswith(bot_prefix+'bot'):
+                print()
+
+    elif not message.guild:
+        print()
 
     if message.channel.id == FILE_CHANNEL and message.attachments:
         files = []
         print("file sent in files")
         for attachment in message.attachments:
             if attachment.filename.split(".")[-1].lower() in extension_list and attachment.size < MAX_SIZE:
-                files.append({'url':attachment.url,'name':attachment.filename})
-        
+                files.append({'url': attachment.url, 'name': attachment.filename})
+
         download_files(files)
         await admin.send(f'{message.author} sent {len(files)} files with names {[file["name"] for file in files]}')
-
-
 
     if message.author == admin and not message.guild:
         if message.content.startswith('!bot'):
@@ -60,12 +82,12 @@ async def on_message(message):
             await admin.send(f'sent {body} to {user}')
         else:
             return
-        
+
     if message.content.startswith('!register'):
         await message.author.send('''
         To get the membership role please write a message in format: \nregister yourShortcodeHere \ni.e register dc1021
         ''')
-    
+
     if message.content.startswith('!quote'):
         name = message.content.split('!quote')[-1]
         random_quote(name)
@@ -73,14 +95,14 @@ async def on_message(message):
 
     if message.content.startswith('!alert'):
         await message.channel.send('''
-        Alert! <:ALERT:1033044801714671727> 
+        Alert! <:ALERT:1033044801714671727>
         ''')
 
     if not message.guild:
-        if not message.content.startswith('!bot'):    
+        if not message.content.startswith('!bot'):
             await admin.send(f'{message.author} says {message.content}')
 
-    if not message.guild and message.content.startswith('register') :
+    if not message.guild and message.content.startswith('register'):
         try:
             print(message.content)
             shortcode = message.content.split('register')[-1].strip().lower()
@@ -100,7 +122,7 @@ async def on_message(message):
                             await admin.send("Bot responded: Membership verified \nEnjoy!")
 
                         else:
-                            valid = valid_mapping(shortcode,member.id)
+                            valid = valid_mapping(shortcode, member.id)
                             if valid:
                                 await message.channel.send("Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
                                 await admin.send("Bot responded: Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
@@ -128,38 +150,42 @@ async def on_message(message):
     else:
         pass
 
+
 @client.event
 async def on_member_remove(member):
     try:
         change_valid(member.id, 0)
-    except:
-        print(member.id+'did not have membership')
+    except Exception:
+        print(member.id+' did not have membership')
 
 
 @tasks.loop(minutes=1200)
 async def alert_background_task():
     print("send")
-    channel = client.get_channel(1039571159823429673) # channel id as an int
+    channel = client.get_channel(1039571159823429673)  # channel id as an int
     await channel.send(f'<:ALERT:1033044801714671727>')
+
 
 @alert_background_task.before_loop
 async def alert_background_task_before_loop():
-    await client.wait_until_ready()     
+    await client.wait_until_ready()
 
-#import asyncio
-#
-#asyncio.run(alert_background_task())
 
 async def main():
     alert_background_task.start()
     await client.start(TOKEN)
     # Wait for the client to close (e.g., Ctrl+C or other termination signals)
     await client.close()
-    
-import asyncio
+
+
+class IC_bot(commands.Bot):
+    def __init__(self):
+        pass
+
+    def add_commands(self):
+        pass
+
+
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-
-#client.run(TOKEN)
-
