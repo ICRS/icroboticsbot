@@ -7,7 +7,6 @@ import asyncio
 
 import discord
 from discord.ext import tasks
-from discord.ext import commands
 
 from dotenv import load_dotenv
 
