@@ -8,21 +8,23 @@ import os.path as path
 import random
 import json
 from datetime import date
-import requests
 import io
-
 import sqlite3 as sq
-import paramiko
 
-from icu_ea_api import ICUEActivitiesAPI
-from scp import SCPClient
+import requests  # type: ignore
+import paramiko  # type: ignore
+
+from icu_ea_api import ICUEActivitiesAPI  # type: ignore
+from scp import SCPClient  # type: ignore
 
 from dotenv import load_dotenv
 
 from quotes import generate
 
 
-__all__ = ["is_shortcode", "is_member", "init_db", "add_mapping", "shortcode_exists", "valid_mapping", "change_valid", "random_quote", "download_files", "createSSHClient"]
+__all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
+           "shortcode_exists", "valid_mapping", "change_valid",
+           "random_quote", "download_files", "createSSHClient"]
 
 # ===== Constants =====
 TARGET_PATH = '/home/member/Downloads/'
@@ -48,7 +50,7 @@ society_api = ICUEActivitiesAPI(csp_code, api_key, year_string)
 slicer_secret = os.getenv('SLICER_PW')
 # =========================================
 
-extension_list = ['stl','3mf','obj','stp','step']
+extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
 
 
 # ===== Database Schema =====
@@ -87,7 +89,8 @@ def is_member(shortcode: str) -> bool:
     bool
         True if the shortcode belongs to a member, False otherwise
     """
-    return shortcode in [member['Login'] for member in society_api.list_members()]
+    return shortcode in [member['Login'] for member in
+                         society_api.list_members()]  # noqa: E1101
 
 
 def init_db(db=DB_PATH) -> None:
@@ -122,7 +125,7 @@ def add_mapping(shortcode, userid, db=DB_PATH) -> None:
 
     Raises
     ------
-    Exception
+    ValueError
         Raised if the shortcode is invalid
     """
     userid = str(userid)
@@ -136,7 +139,7 @@ def add_mapping(shortcode, userid, db=DB_PATH) -> None:
         )
         conn.commit()
     else:
-        raise Exception('Invalid shortcode')
+        raise ValueError('Invalid shortcode')
 
 
 def shortcode_exists(shortcode, db=DB_PATH) -> bool:
@@ -157,7 +160,7 @@ def shortcode_exists(shortcode, db=DB_PATH) -> bool:
 
     Raises
     ------
-    Exception
+    ValueError
         Raised if the shortcode is invalid
     """
     conn = sq.connect(db)
@@ -168,7 +171,7 @@ def shortcode_exists(shortcode, db=DB_PATH) -> bool:
         ''', (shortcode.lower().strip(),))
         return any(cur.fetchall())
     else:
-        raise Exception('Invalid shortcode')
+        raise ValueError('Invalid shortcode')
 
 
 def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
@@ -191,7 +194,7 @@ def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
 
     Raises
     ------
-    Exception
+    ValueError
         Raised if the shortcode is invalid
     """
     conn = sq.connect(db)
@@ -209,7 +212,7 @@ def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
         print(valid)
         return bool(valid)
     else:
-        raise Exception('Invalid shortcode')
+        raise ValueError('Invalid shortcode')
 
 
 def change_valid(userid, valid: int, db=DB_PATH) -> bool:
@@ -232,7 +235,7 @@ def change_valid(userid, valid: int, db=DB_PATH) -> bool:
 
     Raises
     ------
-    Exception
+    KeyError
         Raised if the validity status is not 0 or 1
     """
     conn = sq.connect(db)
@@ -247,29 +250,36 @@ def change_valid(userid, valid: int, db=DB_PATH) -> bool:
         conn.commit()
         return True
     else:
-        raise Exception('Issue changing valid status')
+        raise KeyError('Issue changing valid status')
 
 
-def random_quote(author) -> None:
+def random_quote(author: str) -> None:
     """
     random_quote generates a random quote image for a given author
 
     Parameters
     ----------
-    author : String
+    author : str
         Author of the quote
     """
     images = os.listdir('/home/pi/code/icroboticsbot/background_images')
-    backgrounds = ['/home/pi/code/icroboticsbot/background_images/'+image for image in images if image.startswith(author.strip().lower())]
+    backgrounds = ['/home/pi/code/icroboticsbot/background_images/'+image
+                   for image in images if image.startswith(
+                       author.strip().lower())]
     background = random.choice(backgrounds)
     fonts = os.listdir('/home/pi/code/icroboticsbot/fonts')
     font = '/home/pi/code/icroboticsbot/fonts/'+random.choice(fonts)
-    with open('/home/pi/code/icroboticsbot/quotes.json', 'r') as f:
+    with open('/home/pi/code/icroboticsbot/quotes.json', 'r',
+              encoding="utf-8") as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]
-    choices = [quote for quote in quotes if quote['author'].lower() == author.strip().lower()]
-    choice = random.choice(choices)
-    generate(background, quote=choice['quote'], author=choice['author'], font=font)
+    choices: Dict[str, List[str]] = {
+        quote['author'].lower(): [] for quote in quotes}
+    for quote in quotes:
+        choices[quote['author'].lower()].append(quote['quote'])
+    choice = random.choice(choices[author.strip().lower()])
+    generate(background, quote=choice['quote'],
+             author=choice['author'], font=font)
 
 
 def download_files(files) -> None:
