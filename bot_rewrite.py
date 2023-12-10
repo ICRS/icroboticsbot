@@ -16,7 +16,7 @@ from icrs_bot import DiscordBot
 
 init_db()
 load_dotenv()
-settings = json.load(open("settings.json"))
+settings = json.load(open("settings.json", "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
