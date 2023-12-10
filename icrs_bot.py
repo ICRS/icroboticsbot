@@ -1,6 +1,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import json
 import asyncio
 import discord
 from discord.ext import commands
@@ -10,25 +11,48 @@ from utils import is_shortcode, is_member, shortcode_exists, valid_mapping  # no
 from utils import download_files, extension_list  # noqa
 from utils import add_mapping, change_valid, random_quote  # noqa
 
+settings = json.load(open("settings_template.json", "r", encoding="utf-8"))
+
+MAX_SIZE = 25000000
+PREFIX = settings['PREFIX']
+GUILD = settings['DISCORD_GUILD_ID']
+FILE_CHANNEL = settings['FILE_CHANNEL']
+ADMIN_ID = settings['ADMIN_ID']
+ALERT_CHANNEL = settings['ALERT_CHANNEL']
+ALERT_INTERVAL = settings['ALERT_INTERVAL']
+
+default_guild_info = {
+    'PREFIX': PREFIX,
+    'GUILD': GUILD,
+    'ADMIN_ID': ADMIN_ID,
+    'FILE_CHANNEL': FILE_CHANNEL,
+    'ALERT_CHANNEL': ALERT_CHANNEL,
+    'ALERT_INTERVAL': ALERT_INTERVAL,
+    'MAX_SIZE': MAX_SIZE
+}
+
 
 class DiscordBot(commands.Bot):
     def __init__(self, token, intents,
-                 bot_prefix, guild_info={
-                                'GUILD': '',
-                                'ADMIN_ID': 0}):
-        super().__init__(intents=intents, command_prefix=bot_prefix)
+                 guild_info=default_guild_info):
+        super().__init__(intents=intents,
+                         command_prefix=guild_info['PREFIX'],
+                         case_insensitive=True,
+                         help_command=self.help_command)
         self.token = token
-        self.bot_prefix = bot_prefix
         self.guild_info = guild_info
+        self.bot_prefix = guild_info["PREFIX"]
         self.add_commands()
+        print("Added commands")
 
     def add_commands(self):
-        @self.command(name="status", pass_context=True)
+        # @self.command(name="status", pass_context=True)
+        @self.command()
         async def status(ctx):
             print(ctx)
             await ctx.channel.send("Status!", ctx.author.name)
 
-        @self.command(name="register", pass_context=True)
+        @commands.command(name="register", pass_context=True)
         async def register(ctx):
             if ctx.message.guild:
                 await ctx.message.author.send('''
@@ -82,23 +106,31 @@ class DiscordBot(commands.Bot):
                 except Exception as e:
                     print("An exception occurred:", e)
 
-        @self.command(name="quote", pass_context=True)
+        @commands.command(name="quote", pass_context=True)
         async def quote(ctx):
             name = ctx.message.content.split('!quote')[-1]
             q, p = random_quote(name)
             await ctx.message.channel.send(file=p)
 
-        @self.command(name="alert", pass_context=True)
+        # @self.command(name="alert", pass_context=True)
+        @commands.command()
         async def alert(ctx):
             await ctx.message.channel.send('''
                 Alert! <:ALERT:1033044801714671727>
                 ''')
+        self.add_command(alert)
+
+    async def help_command(self, ctx):
+        embed = discord.Embed(title="Help", description="List of available commands:")
+        for command in self.commands:
+            embed.add_field(name=command.name, value=command.help, inline=False)
+        await ctx.send(embed=embed)
 
     async def on_message(self, message):
         pass
 
     async def on_ready(self):
-        guild = discord.utils.get(self.guilds, name=self.guild_info.GUILD)
+        guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
         print(f'Connected to {guild.name}, id: {guild.id}')
 
     async def on_member_join(self, member):
@@ -116,7 +148,7 @@ class DiscordBot(commands.Bot):
     def start_loop(self):
         @tasks.loop(minutes=self.guild_info['ALERT_INTERVAL'])
         async def alert_background_task():
-            print("send")
+            print("Sent alert")
             channel = self.get_channel(self.guild_info['ALERT_CHANNEL'])
             await channel.send("<:ALERT:1033044801714671727>")
 
