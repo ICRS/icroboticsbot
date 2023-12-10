@@ -5,11 +5,10 @@ This is the main file to start the bot.
 import os
 import json
 
-from dotenv import load_dotenv
-
-from utils import init_db
-
 import discord
+
+from dotenv import load_dotenv
+from utils import init_db
 
 from icrs_bot import DiscordBot
 
