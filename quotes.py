@@ -10,7 +10,7 @@ from Quote2Image import convert
 # Font Size Default to 32, Height and Width by default is 612
 def generate(IMAGE_PATH, author, quote,
 			 IMAGE_TEMP="/home/pi/code/icroboticsbot/temp.jpg", # noqa
-			 font="/home/pi/code/icroboticsbot/fonts/Precious.ttf"): # noqa
+			 font="/home/pi/code/icroboticsbot/fonts/Precious.ttf") -> str: # noqa
 	"""
 	generate a quote image from a given image and quote
 
@@ -24,6 +24,11 @@ def generate(IMAGE_PATH, author, quote,
 		Quote
 	IMAGE_TEMP : str, optional
 		Path to temp image, by default "/home/pi/code/icroboticsbot/temp.jpg"
+
+	Returns
+	-------
+	str
+		Path to the generated png image
 	"""
 	image = Image.open(IMAGE_PATH)
 	grayscale = image.convert("L")
@@ -43,5 +48,8 @@ def generate(IMAGE_PATH, author, quote,
 		width=400,
 		height=400)
 
+	PNG_PATH = "/home/pi/code/icroboticsbot/quote.png"
+
 	# Save The Image as a Png file
-	img.save("/home/pi/code/icroboticsbot/quote.png")
+	img.save(PNG_PATH)
+	return PNG_PATH
