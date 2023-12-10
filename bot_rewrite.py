@@ -1,8 +1,9 @@
 """
-This is the main file for the discord bot. It handles all the messages and commands sent to the bot.
+This is the main file to start the bot.
 """
 
 import os
+import json
 
 from dotenv import load_dotenv
 
@@ -15,14 +16,16 @@ from icrs_bot import DiscordBot
 
 init_db()
 load_dotenv()
+settings = json.load(open("settings.json"))
 
-
-FILE_CHANNEL = os.getenv('FILE_CHANNEL')
 MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
-ADMIN_ID = int(os.getenv('ADMIN_ID'))
-ALERT_CHANNEL = int(os.getenv('ALERT_CHANNEL'))
+FILE_CHANNEL = int(settings['FILE_CHANNEL'])
+ADMIN_ID = int(settings['ADMIN_ID'])
+ALERT_CHANNEL = int(settings['ALERT_CHANNEL'])
+ALERT_INTERVAL = int(settings['ALERT_INTERVAL'])
+
 intents = discord.Intents.all()
 intents.message_content = True
 
@@ -31,6 +34,7 @@ guild_info = {
     'ADMIN_ID': ADMIN_ID,
     'FILE_CHANNEL': FILE_CHANNEL,
     'ALERT_CHANNEL': ALERT_CHANNEL,
+    'ALERT_INTERVAL': ALERT_INTERVAL,
     'MAX_SIZE': MAX_SIZE
 }
 

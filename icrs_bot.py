@@ -1,5 +1,5 @@
 """
-Discord Bot class
+Discord Bot class. It handles all the commands and events.
 """
 import asyncio
 import discord
@@ -14,8 +14,8 @@ from utils import add_mapping, change_valid, random_quote  # noqa
 class DiscordBot(commands.Bot):
     def __init__(self, token, intents,
                  bot_prefix, guild_info={
-                                'GUILD': 'ICRS',
-                                'ADMIN_ID': 1039571159823429673}):
+                                'GUILD': '',
+                                'ADMIN_ID': 0}):
         super().__init__(intents=intents, command_prefix=bot_prefix)
         self.token = token
         self.bot_prefix = bot_prefix
@@ -114,7 +114,7 @@ class DiscordBot(commands.Bot):
             print(member.id+' did not have membership')
 
     def start_loop(self):
-        @tasks.loop(minutes=1200)
+        @tasks.loop(minutes=self.guild_info['ALERT_INTERVAL'])
         async def alert_background_task():
             print("send")
             channel = self.get_channel(self.guild_info['ALERT_CHANNEL'])
