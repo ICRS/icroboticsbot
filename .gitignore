@@ -8,6 +8,7 @@ database.py
 /files
 *.png
 db
+settings.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
