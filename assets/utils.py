@@ -10,6 +10,7 @@ import json
 from datetime import date
 import io
 import sqlite3 as sq
+import time
 from typing import Dict, List
 
 import requests  # type: ignore
@@ -69,6 +70,23 @@ SHORTCODE_REGEX = r'[a-z]{2,3}[0-9]{2,4}'
 # ===========================
 
 
+def print(*args, **kwargs) -> None:                     # noqa
+    """
+    print is a wrapper around the built-in print function
+
+    Parameters
+    ----------
+    args : list
+        List of arguments to pass to the print function
+    kwargs : dict
+        Dictionary of keyword arguments to pass to the print function
+    """
+    built_in_print = __builtins__['print']              # type: ignore
+    args = list(args)                                   # type: ignore
+    args.insert(0, f'{time.strftime("%H:%M:%S")} :')    # type: ignore
+    built_in_print(*args, **kwargs)
+
+
 def is_shortcode(message: str) -> bool:
     """
     is_shortcode checks if a given string contains a shortcode
@@ -105,7 +123,7 @@ def is_member(shortcode: str) -> bool:
         else:
             return False
     except Exception:
-        print("Error checking membership")
+        print("Error contacting Society API")
         return False
 
 
