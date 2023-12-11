@@ -27,7 +27,7 @@ from assets.quotes import generate
 __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
            "shortcode_exists", "valid_mapping", "change_valid",
            "random_quote", "download_files", "create_sshclient",
-           "extension_list"]
+           "extension_list", "print"]
 
 # ===== Constants =====
 load_dotenv()
@@ -70,7 +70,7 @@ SHORTCODE_REGEX = r'[a-z]{2,3}[0-9]{2,4}'
 # ===========================
 
 
-def print(*args, **kwargs) -> None:                     # noqa
+def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
     """
     print is a wrapper around the built-in print function
 
@@ -117,12 +117,12 @@ def is_member(shortcode: str) -> bool:
     """
     try:
         mems = [member['Login'] for member in
-                society_api.list_members()]
+                society_api.list_members()]  # pylint: disable=maybe-no-member
         if shortcode in mems:
             return True
         else:
             return False
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         print("Error contacting Society API")
         return False
 
@@ -326,11 +326,11 @@ def random_quote(author: str) -> tuple:
     quotes = [json.loads(quote) for quote in quotes]
     author = author.strip().lower()
     choices: Dict[str, List[str]] = {
-        quote['author'].lower(): [] for quote in quotes}
+        quote['author'].lower(): [] for quote in quotes}  # Mypy: ignore
     if not author:
         author = random.choice(list(choices.keys()))
     for quote in quotes:
-        choices[quote['author'].lower()].append(quote['quote'])
+        choices[quote['author'].lower()].append(quote['quote'])  # Mypy: ignore
     choice = random.choice(choices[author])
     png_path, img = generate(background, quote=choice,
                              author=author.capitalize(), font=font)
@@ -357,7 +357,7 @@ def download_files(files) -> None:
             file.write(r.content)
             file.seek(0)
             scp.putfo(file, TARGET_PATH+name)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         print("Error appending files")
 
 
