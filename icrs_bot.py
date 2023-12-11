@@ -38,7 +38,7 @@ class DiscordBot(commands.Bot):
         super().__init__(intents=intents,
                          command_prefix=guild_info['PREFIX'],
                          case_insensitive=True,
-                         help_command=self.help_command)
+                         help_command=None)
         self.token = token
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
@@ -46,23 +46,23 @@ class DiscordBot(commands.Bot):
         print("Added commands")
 
     def add_commands(self):
-        # @self.command(name="status", pass_context=True)
-        @self.command()
-        async def status(ctx):
-            print(ctx)
-            await ctx.channel.send("Status!", ctx.author.name)
-
-        @commands.command(name="register", pass_context=True)
-        async def register(ctx):
+        @self.command(name="register", pass_context=True)
+        async def register(ctx, shortcode=""):
             if ctx.message.guild:
-                await ctx.message.author.send('''
-                    To get the membership role please write a message in \
-                    format: \nregister yourShortcodeHere \ni.e register dc1021
-                    ''')
+                embed = discord.Embed(title="How-to register",                            # noqa
+                                    description=("To get the membership role"             # noqa
+                                               "please write a message in "               # noqa
+                                               f"format:\n```{self.bot_prefix}"           # noqa
+                                               "register yourShortcodeHere``` \n"         # noqa
+                                               f"Example:\n ```{self.bot_prefix}register" # noqa
+                                               " dc1021```"),                             # noqa
+                                    color=0xFF5733) # noqa
+                await ctx.message.author.send(embed=embed)
+
             else:
                 try:
                     print(ctx.message.content)
-                    shortcode = ctx.message.content.split('register')[-1].strip().lower()
+                    # shortcode = ctx.message.content.split('register')[-1].strip().lower()
                     if is_shortcode(shortcode):
                         if is_member(shortcode):
                             print(f'registering user {shortcode}')
@@ -106,28 +106,27 @@ class DiscordBot(commands.Bot):
                 except Exception as e:
                     print("An exception occurred:", e)
 
-        @commands.command(name="quote", pass_context=True)
+        @self.command(name="quote", pass_context=True)
         async def quote(ctx):
-            name = ctx.message.content.split('!quote')[-1]
+            name = ctx.message.content.split('!quote')[-1].strip().lower()
             q, p = random_quote(name)
             await ctx.message.channel.send(file=p)
 
-        # @self.command(name="alert", pass_context=True)
-        @commands.command()
+        @self.command(name="alert", pass_context=True)
         async def alert(ctx):
             await ctx.message.channel.send('''
                 Alert! <:ALERT:1033044801714671727>
                 ''')
-        self.add_command(alert)
 
-    async def help_command(self, ctx):
-        embed = discord.Embed(title="Help", description="List of available commands:")
-        for command in self.commands:
-            embed.add_field(name=command.name, value=command.help, inline=False)
-        await ctx.send(embed=embed)
+        @self.command(name="help", pass_context=True)
+        async def help(ctx):
+            embed = discord.Embed(title="Help", description="List of available commands:")
+            for command in self.commands:
+                embed.add_field(name=command.name, value=command.help, inline=False)
+            await ctx.send(embed=embed)
 
     async def on_message(self, message):
-        pass
+        await self.process_commands(message)
 
     async def on_ready(self):
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
