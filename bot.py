@@ -52,14 +52,6 @@ async def on_message(message):
     channel = str(message.channel)
     print(f'{username} said: "{user_message}" ({channel})')
 
-    if message.guild:
-        if message.content.startswith(bot_prefix):
-            if message.content.startswith(bot_prefix+'bot'):
-                print()
-
-    elif not message.guild:
-        print()
-
     if message.channel.id == FILE_CHANNEL and message.attachments:
         files = []
         print("file sent in files")
