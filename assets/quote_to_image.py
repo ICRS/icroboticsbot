@@ -85,7 +85,8 @@ def convert(quote, author, fg, image: PIL.Image, border_color,
                 fresh_sentence += letter
         incrementer += 1
 
-    x2 = max([font.getbbox(line) for line in fresh_sentence.split('\n')], key=lambda x: x[2] - x[0])[2]
+    x2 = max([font.getbbox(line) for line in fresh_sentence.split('\n')],
+             key=lambda x: x[2] - x[0])[2]
     fline = font.getbbox(fresh_sentence.split('\n')[0])
     y2 = (fline[3] - fline[1]) * len(fresh_sentence.split('\n'))
 
