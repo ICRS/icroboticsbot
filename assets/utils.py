@@ -37,7 +37,7 @@ __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
 # ===== Constants =====
 load_dotenv()
 # TARGET_PATH = '/home/member/Downloads/'
-TARGET_PATH = os.getenv('TARGET_PATH')
+TARGET_PATH = os.path.abspath(os.getenv('TARGET_PATH'))
 
 # ===== Get the current date =====
 date_now = date.today()
@@ -55,7 +55,7 @@ CSP_CODE = 625
 # ===== Get the API key =====
 api_key = os.getenv('API_KEY')
 society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
-DB_PATH = os.getenv('DB_PATH')
+DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 # =========================================
@@ -318,14 +318,14 @@ def random_quote(author: str) -> tuple:
     tuple
         A tuple containing the quote and the path to the generated image
     """
-    images = os.listdir('./assets/background_images')
-    backgrounds = ['./assets/background_images/'+image
+    images = os.listdir(os.path.abspath('assets/background_images'))
+    backgrounds = [os.path.abspath('assets/background_images/'+image)
                    for image in images if image.startswith(
                        author.strip().lower())]
     background = random.choice(backgrounds)
-    fonts = os.listdir('./assets/fonts')
-    font = './assets/fonts/'+random.choice(fonts)
-    with open('./assets/quotes.json', 'r',
+    fonts = os.listdir(os.path.abspath('assets/fonts'))
+    font = os.path.abspath('assets/fonts/'+random.choice(fonts))
+    with open(os.path.abspath('assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]

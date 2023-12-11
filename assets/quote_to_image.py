@@ -6,7 +6,7 @@
 """
 Converts a quote to an image
 """
-
+import os
 import PIL  # type: ignore
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
@@ -48,8 +48,8 @@ def convert(quote, author, fg, image: PIL.Image, border_color,
     sentence = f"{quote} - {author}"
 
     font = ImageFont.truetype(font_file if font_file
-                               else "assets/fonts/Coves Bold.otf", font_size
-                               if font_size else 32)
+                              else os.path.abspath("assets/fonts/Coves Bold.otf"), font_size  # noqa # pylint: disable=line-too-long
+                              if font_size else 32)
 
     img = Image.new("RGB", (x1, y1), color=(255, 255, 255))
 
