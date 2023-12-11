@@ -6,7 +6,6 @@ membermap.db
 server.sh
 database.py
 /files
-*.png
 db
 settings.json
 

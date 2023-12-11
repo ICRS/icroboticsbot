@@ -296,11 +296,13 @@ def random_quote(author: str) -> tuple:
     author = author.strip().lower()
     choices: Dict[str, List[str]] = {
         quote['author'].lower(): [] for quote in quotes}
+    if not author:
+        author = random.choice(list(choices.keys()))
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])
     choice = random.choice(choices[author])
     png_path, img = generate(background, quote=choice,
-                             author=author, font=font)
+                             author=author.capitalize(), font=font)
     return choice, png_path
 
 
