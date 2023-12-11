@@ -7,13 +7,14 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 
-from assets.bot_commands import register_on_guild  # noqa
-from assets.bot_commands import register_on_dm     # noqa
-from assets.bot_commands import quote_person       # noqa
-from assets.bot_commands import get_help           # noqa
-from assets.bot_commands import handle_upload      # noqa
+from assets.bot_commands import register_on_guild   # noqa
+from assets.bot_commands import register_on_dm      # noqa
+from assets.bot_commands import quote_person        # noqa
+from assets.bot_commands import get_help            # noqa
+from assets.bot_commands import handle_upload       # noqa
 
-from assets.utils import change_valid              # noqa
+from assets.utils import change_valid               # noqa
+from assets.utils import print                      # noqa
 
 settings = json.load(open("settings_template.json", "r", encoding="utf-8"))
 
@@ -50,24 +51,28 @@ class DiscordBot(commands.Bot):
         self.add_commands()
 
     def add_commands(self):
-        @self.command(name="register", pass_context=True)
+        @self.command(name="register", pass_context=True,
+                      help="Register to the server")
         async def register(ctx, shortcode=""):
             if ctx.message.guild:
                 await register_on_guild(self, ctx)
             else:
                 await register_on_dm(self, ctx, shortcode)
 
-        @self.command(name="quote", pass_context=True)
+        @self.command(name="quote", pass_context=True,
+                      help="Generate a quote image from the stored quotes")
         async def quote(ctx, *name):
             await quote_person(self, ctx, name)
 
-        @self.command(name="alert", pass_context=True)
+        @self.command(name="alert", pass_context=True,
+                      help="Alert the bot. Purely for testing purposes")
         async def alert(ctx):
             await ctx.message.channel.send('''
                 Alert! <:ALERT:1033044801714671727>
                 ''')
 
-        @self.command(name="help", pass_context=True)
+        @self.command(name="help", pass_context=True,
+                      help="Get the help message with all the commands")
         async def help(ctx):
             await get_help(self, ctx)
 
