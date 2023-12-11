@@ -7,13 +7,13 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 
-from bot_commands import register_on_guild  # noqa
-from bot_commands import register_on_dm     # noqa
-from bot_commands import quote_person       # noqa
-from bot_commands import get_help           # noqa
-from bot_commands import handle_upload      # noqa
+from assets.bot_commands import register_on_guild  # noqa
+from assets.bot_commands import register_on_dm     # noqa
+from assets.bot_commands import quote_person       # noqa
+from assets.bot_commands import get_help           # noqa
+from assets.bot_commands import handle_upload      # noqa
 
-from utils import change_valid              # noqa
+from assets.utils import change_valid              # noqa
 
 settings = json.load(open("settings_template.json", "r", encoding="utf-8"))
 

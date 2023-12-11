@@ -1,8 +1,8 @@
 import discord
 
-from utils import is_shortcode, is_member, shortcode_exists, valid_mapping  # noqa
-from utils import download_files, extension_list  # noqa
-from utils import add_mapping, change_valid, random_quote  # noqa
+from assets.utils import is_shortcode, is_member, shortcode_exists, valid_mapping  # noqa
+from assets.utils import download_files, extension_list  # noqa
+from assets.utils import add_mapping, change_valid, random_quote  # noqa
 
 
 async def register_on_guild(bot, ctx):
@@ -62,9 +62,9 @@ async def register_on_dm(bot, ctx, shortcode):
         print("An exception occurred:", e)
 
 
-async def quote_person(bot, ctx, *name):
-    q, p = random_quote(name)
-    await ctx.message.channel.send(file=p)
+async def quote_person(bot, ctx, name):
+    q, p = random_quote(" ".join(name))
+    await ctx.message.channel.send(file=discord.File(p))
 
 
 async def get_help(bot, ctx):

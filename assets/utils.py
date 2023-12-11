@@ -10,6 +10,7 @@ import json
 from datetime import date
 import io
 import sqlite3 as sq
+from typing import Dict, List
 
 import requests  # type: ignore
 import paramiko  # type: ignore
@@ -19,7 +20,7 @@ from scp import SCPClient  # type: ignore
 
 from dotenv import load_dotenv
 
-from quotes import generate
+from assets.quotes import generate
 
 
 __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
@@ -281,24 +282,25 @@ def random_quote(author: str) -> tuple:
     tuple
         A tuple containing the quote and the path to the generated image
     """
-    images = os.listdir('/home/pi/code/icroboticsbot/background_images')
-    backgrounds = ['/home/pi/code/icroboticsbot/background_images/'+image
+    images = os.listdir('./assets/background_images')
+    backgrounds = ['./assets/background_images/'+image
                    for image in images if image.startswith(
                        author.strip().lower())]
     background = random.choice(backgrounds)
-    fonts = os.listdir('/home/pi/code/icroboticsbot/fonts')
-    font = '/home/pi/code/icroboticsbot/fonts/'+random.choice(fonts)
-    with open('/home/pi/code/icroboticsbot/quotes.json', 'r',
+    fonts = os.listdir('./assets/fonts')
+    font = './assets/fonts/'+random.choice(fonts)
+    with open('./assets/quotes.json', 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]
+    author = author.strip().lower()
     choices: Dict[str, List[str]] = {
         quote['author'].lower(): [] for quote in quotes}
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])
-    choice = random.choice(choices[author.strip().lower()])
-    png_path = generate(background, quote=choice['quote'],
-             author=choice['author'], font=font)
+    choice = random.choice(choices[author])
+    png_path, img = generate(background, quote=choice,
+                             author=author, font=font)
     return choice, png_path
 
 
