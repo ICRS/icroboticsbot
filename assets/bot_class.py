@@ -14,7 +14,7 @@ from assets.bot_commands import get_help            # noqa
 from assets.bot_commands import handle_upload       # noqa
 
 from assets.utils import change_valid               # noqa
-from assets.utils import print                      # noqa
+from assets.utils import print                      # noqa  #pylint: disable=redefined-builtin
 
 settings = json.load(open("settings_template.json", "r", encoding="utf-8"))
 
@@ -38,6 +38,7 @@ default_guild_info = {
 
 
 class DiscordBot(commands.Bot):
+    # pylint: disable=dangerous-default-value
     def __init__(self, token, intents,
                  guild_info=default_guild_info):
         super().__init__(intents=intents,
@@ -73,10 +74,10 @@ class DiscordBot(commands.Bot):
 
         @self.command(name="help", pass_context=True,
                       help="Get the help message with all the commands")
-        async def help(ctx):
+        async def help(ctx):  # pylint: disable=redefined-builtin
             await get_help(self, ctx)
 
-    async def on_message(self, message):
+    async def on_message(self, message):  # pylint: disable=arguments-differ
         if message.author == self.user:
             return
 
