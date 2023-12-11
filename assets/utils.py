@@ -334,7 +334,7 @@ def random_quote(author: str) -> tuple:
     choice = random.choice(choices[author])
     png_path, img = generate(background, quote=choice,
                              author=author.capitalize(), font=font)
-    return choice, png_path
+    return (author.capitalize(), choice), png_path
 
 
 def download_files(files) -> None:
