@@ -98,7 +98,8 @@ async def quote_person(bot, ctx, name):
 
 
 async def get_help(bot, ctx):
-    embed = discord.Embed(title="Help", description="List of available commands:")
+    embed = discord.Embed(title="Help",
+                          description="List of available commands:")
     for command in bot.commands:
         embed.add_field(name=command.name, value=command.help, inline=False)
     await ctx.send(embed=embed)
@@ -108,8 +109,9 @@ async def handle_upload(bot, message):
     files = []
     print("file sent in files")
     for attachment in message.attachments:
-        if attachment.filename.split(".")[-1].lower() in extension_list and attachment.size < MAX_SIZE:
+        if ((attachment.filename.split(".")[-1].lower() in extension_list)
+                and (attachment.size < bot.guild_info.MAX_SIZE)):
             files.append({'url': attachment.url, 'name': attachment.filename})
 
     download_files(files)
-    await bot.bot_admin.send(f'{message.author} sent {len(files)} files with names {[file["name"] for file in files]}')
+    await bot.bot_admin.send(f'{message.author} sent {len(files)} files with names {[file["name"] for file in files]}')  # noqa
