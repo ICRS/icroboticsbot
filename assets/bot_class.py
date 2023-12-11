@@ -6,6 +6,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import os
 import json
 import asyncio
 import discord
@@ -21,7 +22,8 @@ from assets.bot_commands import handle_upload       # noqa
 from assets.utils import change_valid               # noqa
 from assets.utils import print                      # noqa  #pylint: disable=redefined-builtin
 
-settings = json.load(open("settings_template.json", "r", encoding="utf-8"))
+settings = json.load(open(os.path.abspath("settings_template.json"),
+                          "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000
 PREFIX = settings['PREFIX']

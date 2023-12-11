@@ -7,7 +7,7 @@
 """
 Generate a Quote Image from a given Image and Quote
 """
-
+import os
 from PIL import Image  # type: ignore
 
 from assets.quote_to_image import convert
@@ -15,8 +15,8 @@ from assets.quote_to_image import convert
 
 # Font Size Default to 32, Height and Width by default is 612
 def generate(IMAGE_PATH, author, quote,
-			 IMAGE_TEMP="./assets/generation/temp.jpg", # noqa
-			 font="./assets/fonts/Precious.ttf") -> tuple: # noqa
+			 IMAGE_TEMP=os.path.abspath("assets/generation/temp.jpg"), # noqa
+			 font=os.path.abspath("assets/fonts/Precious.ttf")) -> tuple: # noqa
 	"""
 	generate a quote image from a given image and quote
 
@@ -54,7 +54,7 @@ def generate(IMAGE_PATH, author, quote,
 		width=400,
 		height=400)
 
-	PNG_PATH = "./assets/generation/quote.png"
+	PNG_PATH = os.path.abspath("assets/generation/quote.png")
 
 	# Save The Image as a Png file
 	img.save(PNG_PATH)
