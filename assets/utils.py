@@ -91,9 +91,22 @@ def is_member(shortcode: str) -> bool:
     -------
     bool
         True if the shortcode belongs to a member, False otherwise
+
+    Raises
+    ------
+    KeyError
+        Raised if there is no contact with the API
     """
-    return shortcode in [member['Login'] for member in
-                         society_api.list_members()]  # noqa: E1101
+    try:
+        mems = [member['Login'] for member in
+                society_api.list_members()]
+        if shortcode in mems:
+            return True
+        else:
+            return False
+    except Exception:
+        print("Error checking membership")
+        return False
 
 
 def init_db(db=DB_PATH) -> bool:
