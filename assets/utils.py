@@ -52,10 +52,12 @@ else:
 
 CSP_CODE = 625
 
-# ===== Get the API key and file path =====
+# ===== Get the API key =====
 api_key = os.getenv('API_KEY')
 society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
-slicer_secret = os.getenv('SLICER_PW')
+DB_PATH = os.getenv('DB_PATH')
+SLICER_PW = os.getenv('SLICER_PW')
+SLICER_ADDR = os.getenv('SLICER_ADDR')
 # =========================================
 
 extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
@@ -69,7 +71,6 @@ CREATE TABLE mapping (
     active  INTEGER DEFAULT 1
 )
 '''
-DB_PATH = os.getenv('DB_PATH')
 SHORTCODE_REGEX = r'[a-z]{2,3}[0-9]{2,4}'
 # ===========================
 
@@ -351,7 +352,7 @@ def download_files(files) -> None:
         List of files to download
     """
     try:
-        ssh = create_sshclient('slicer.local', 22, 'member', slicer_secret)
+        ssh = create_sshclient(SLICER_ADDR, 22, 'member', SLICER_PW)
         scp = SCPClient(ssh.get_transport())
         for file in files:
             url = file['url']
