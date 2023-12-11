@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+
 """
 Utility functions used by the bot
 """
@@ -326,13 +331,13 @@ def random_quote(author: str) -> tuple:
     quotes = [json.loads(quote) for quote in quotes]
     author = author.strip().lower()
     choices: Dict[str, List[str]] = {
-        quote['author'].lower(): [] for quote in quotes}  # Mypy: ignore
+        quote['author'].lower(): [] for quote in quotes}
     if not author:
         author = random.choice(list(choices.keys()))
     for quote in quotes:
-        choices[quote['author'].lower()].append(quote['quote'])  # Mypy: ignore
+        choices[quote['author'].lower()].append(quote['quote'])     # noqa
     choice = random.choice(choices[author])
-    png_path, img = generate(background, quote=choice,
+    png_path, img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)
     return (author.capitalize(), choice), png_path
 

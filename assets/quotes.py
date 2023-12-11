@@ -1,10 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+# pylint: disable=bad-indentation
+
 """
 Generate a Quote Image from a given Image and Quote
 """
 
 from PIL import Image  # type: ignore
 
-from assets.Quote2Image import convert
+from assets.quote_to_image import convert
 
 
 # Font Size Default to 32, Height and Width by default is 612
@@ -29,7 +35,7 @@ def generate(IMAGE_PATH, author, quote,
 	-------
 	tuple
 		Path to the generated png image and PIL Image Object
-	"""
+	"""  # noqa ignore
 	image = Image.open(IMAGE_PATH)
 	grayscale = image.convert("L")
 	width, height = grayscale.size
