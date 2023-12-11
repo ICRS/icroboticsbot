@@ -7,9 +7,12 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 
-from utils import is_shortcode, is_member, shortcode_exists, valid_mapping  # noqa
-from utils import download_files, extension_list  # noqa
-from utils import add_mapping, change_valid, random_quote  # noqa
+from bot_commands import register_on_guild  # noqa
+from bot_commands import register_on_dm     # noqa
+from bot_commands import quote_person       # noqa
+from bot_commands import get_help           # noqa
+
+from utils import change_valid              # noqa
 
 settings = json.load(open("settings_template.json", "r", encoding="utf-8"))
 
@@ -49,68 +52,13 @@ class DiscordBot(commands.Bot):
         @self.command(name="register", pass_context=True)
         async def register(ctx, shortcode=""):
             if ctx.message.guild:
-                embed = discord.Embed(title="How-to register",                            # noqa
-                                    description=("To get the membership role"             # noqa
-                                               "please write a message in "               # noqa
-                                               f"format:\n```{self.bot_prefix}"           # noqa
-                                               "register yourShortcodeHere``` \n"         # noqa
-                                               f"Example:\n ```{self.bot_prefix}register" # noqa
-                                               " dc1021```"),                             # noqa
-                                    color=0xFF5733) # noqa
-                await ctx.message.author.send(embed=embed)
-
+                await register_on_guild(self, ctx)
             else:
-                try:
-                    print(ctx.message.content)
-                    # shortcode = ctx.message.content.split('register')[-1].strip().lower()
-                    if is_shortcode(shortcode):
-                        if is_member(shortcode):
-                            print(f'registering user {shortcode}')
-                            server = discord.utils.get(ctx.client.guilds,
-                                                       name=self.guild_info.GUILD)
-                            member = server.get_member(ctx.message.author.id)
-                            if member:
-                                if not shortcode_exists(shortcode):
-                                    # this is absolutely horrifying
-                                    role = discord.utils.get(server.roles, name='ICRS Member')
-                                    await member.add_roles(role, reason="Membership verified by roboticsbotbot")
-                                    print('added role')
-                                    add_mapping(shortcode, member.id)
-                                    await ctx.message.channel.send("Membership verified \nEnjoy!")
-                                    await ctx.admin.send("Bot responded: Membership verified \nEnjoy!")
-
-                                else:
-                                    valid = valid_mapping(shortcode, member.id)
-                                    if valid:
-                                        await ctx.message.channel.send("Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
-                                        await ctx.admin.send("Bot responded: Someone has already verified using this shortcode. \nIf this is not you, message a committee member")
-                                    else:
-                                        #   flip valid
-                                        change_valid(member.id, 1)
-                                        await ctx.message.channel.send("Membership reverified \nWelcome back!")
-                                        await ctx.admin.send("Bot responded: Membership reverified \nWelcome back!")
-                                        pass
-                            else:
-                                await ctx.message.channel.send("Maybe try joining the ICRS discord server first?")
-                        else:
-                            await ctx.message.channel.send('''
-                            Could not find your membership, it's available to buy here: https://www.imperialcollegeunion.org/activities/a-to-z/robotics\nIf you have already bought the membership try again later or contact any committee member
-                            ''')
-                            await ctx.admin.send('''
-                            Bot responded: Could not find your membership, it's available to buy here: https://www.imperialcollegeunion.org/activities/a-to-z/robotics\nIf you have already bought the membership try again later or contact any committee member
-                            ''')
-                    else:
-                        await ctx.message.channel.send("Invalid shortcode, try again.")
-                        await ctx.admin.send("Bot responded: Invalid shortcode, try again.")
-
-                except Exception as e:
-                    print("An exception occurred:", e)
+                await register_on_dm(self, ctx, shortcode)
 
         @self.command(name="quote", pass_context=True)
-        async def quote(ctx):
-            name = ctx.message.content.split('!quote')[-1].strip().lower()
-            q, p = random_quote(name)
-            await ctx.message.channel.send(file=p)
+        async def quote(ctx, *name):
+            await quote_person(self, ctx, name)
 
         @self.command(name="alert", pass_context=True)
         async def alert(ctx):
@@ -120,10 +68,7 @@ class DiscordBot(commands.Bot):
 
         @self.command(name="help", pass_context=True)
         async def help(ctx):
-            embed = discord.Embed(title="Help", description="List of available commands:")
-            for command in self.commands:
-                embed.add_field(name=command.name, value=command.help, inline=False)
-            await ctx.send(embed=embed)
+            await get_help(self, ctx)
 
     async def on_message(self, message):
         await self.process_commands(message)
