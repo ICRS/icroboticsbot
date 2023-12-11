@@ -11,6 +11,7 @@ from bot_commands import register_on_guild  # noqa
 from bot_commands import register_on_dm     # noqa
 from bot_commands import quote_person       # noqa
 from bot_commands import get_help           # noqa
+from bot_commands import handle_upload      # noqa
 
 from utils import change_valid              # noqa
 
@@ -45,8 +46,8 @@ class DiscordBot(commands.Bot):
         self.token = token
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
+        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
-        print("Added commands")
 
     def add_commands(self):
         @self.command(name="register", pass_context=True)
@@ -71,6 +72,12 @@ class DiscordBot(commands.Bot):
             await get_help(self, ctx)
 
     async def on_message(self, message):
+        if message.author == self.user:
+            return
+
+        if message.channel.id == self.guild_info['FILE_CHANNEL']:
+            await handle_upload(self, message)
+
         await self.process_commands(message)
 
     async def on_ready(self):
