@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+
+"""
+Discord Bot helper functions
+"""
 import discord
 
 from assets.utils import is_shortcode, is_member, shortcode_exists, valid_mapping   # noqa

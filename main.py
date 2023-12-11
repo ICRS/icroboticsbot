@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+
 """
 This is the main file to start the bot.
 """
