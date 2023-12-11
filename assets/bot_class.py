@@ -118,10 +118,13 @@ class DiscordBot(commands.Bot):
         member : discord.Member
             The member that joined the server
         """
-        await member.send(f"Welcome {member.name} to the ICRS server \n \
-                          Remember to verify using {self.bot_prefix}register\
-                            in the bot channel to gain full access \
-                                to the server")
+        embed = discord.Embed(title=f"Welcome {member.name} to the ICRS server!",                           # noqa  # pylint: disable
+                              description=(f"Remember to verify using {self.bot_prefix}register"            # noqa  # pylint: disable
+                                           " in the bot channel to gain full access"                        # noqa  # pylint: disable
+                                           " to the server"),                                               # noqa  # pylint: disable
+                              color=0x3a88fe)                                                               # noqa  # pylint: disable
+        embed.set_footer(text="Go back to the server: https://discord.gg/3YKPjgskS3")                       # noqa  # pylint: disable
+        await member.send(embed=embed)
 
     async def on_member_remove(self, member):
         """
