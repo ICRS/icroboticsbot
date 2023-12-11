@@ -10,7 +10,7 @@ import discord
 from dotenv import load_dotenv
 from utils import init_db
 
-from icrs_bot import DiscordBot
+from bot_class import DiscordBot
 
 
 init_db()
