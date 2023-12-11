@@ -9,8 +9,8 @@ from assets.Quote2Image import convert
 
 # Font Size Default to 32, Height and Width by default is 612
 def generate(IMAGE_PATH, author, quote,
-			 IMAGE_TEMP="./temp.jpg", # noqa
-			 font="/home/pi/code/icroboticsbot/assets/fonts/Precious.ttf") -> tuple: # noqa
+			 IMAGE_TEMP="./assets/generation/temp.jpg", # noqa
+			 font="./assets/fonts/Precious.ttf") -> tuple: # noqa
 	"""
 	generate a quote image from a given image and quote
 
@@ -23,7 +23,7 @@ def generate(IMAGE_PATH, author, quote,
 	quote : String
 		Quote
 	IMAGE_TEMP : str, optional
-		Path to temp image, by default "./temp.jpg"
+		Path to temp image, by default "./assets/generation/temp.jpg"
 
 	Returns
 	-------
@@ -48,7 +48,7 @@ def generate(IMAGE_PATH, author, quote,
 		width=400,
 		height=400)
 
-	PNG_PATH = "./quote.png"
+	PNG_PATH = "./assets/generation/quote.png"
 
 	# Save The Image as a Png file
 	img.save(PNG_PATH)
