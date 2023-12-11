@@ -87,7 +87,7 @@ async def register_on_dm(bot, ctx, shortcode):
         print("An exception occurred:", e.with_traceback())
 
 
-async def quote_person(bot, ctx, name):
+async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
     q, p = random_quote(" ".join(name))
     file = discord.File(p)
     embed = discord.Embed(title=q[0],
