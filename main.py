@@ -8,9 +8,9 @@ import json
 import discord
 
 from dotenv import load_dotenv
-from utils import init_db
+from assets.utils import init_db
 
-from bot_class import DiscordBot
+from assets.bot_class import DiscordBot
 
 
 init_db()
