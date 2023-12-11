@@ -54,7 +54,6 @@ CSP_CODE = 625
 
 # ===== Get the API key and file path =====
 api_key = os.getenv('API_KEY')
-file_path = os.getenv('FILE_PATH')
 society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
 slicer_secret = os.getenv('SLICER_PW')
 # =========================================
