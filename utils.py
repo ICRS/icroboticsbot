@@ -296,8 +296,8 @@ def random_quote(author: str) -> tuple:
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])
     choice = random.choice(choices[author.strip().lower()])
-    png_path = generate(background, quote=choice['quote'],
-             author=choice['author'], font=font)
+    png_path = generate(background, 
+             author=author.lower(), quote=choice, font=font)
     return choice, png_path
 
 

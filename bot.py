@@ -21,6 +21,7 @@ load_dotenv()
 
 
 FILE_CHANNEL = os.getenv('FILE_CHANNEL')
+# FILE_CHANNEL = int(os.getenv('FILE_CHANNEL'))
 MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
