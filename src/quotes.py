@@ -10,7 +10,7 @@ Generate a Quote Image from a given Image and Quote
 import os
 from PIL import Image  # type: ignore
 
-from assets.quote_to_image import convert
+from src.quote_to_image import convert
 
 
 # Font Size Default to 32, Height and Width by default is 612

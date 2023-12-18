@@ -13,9 +13,9 @@ import json
 import discord
 
 from dotenv import load_dotenv
-from assets.utils import init_db
+from src.utils import init_db
 
-from assets.bot_class import DiscordBot
+from src.bot_class import DiscordBot
 
 
 init_db()

@@ -11,6 +11,9 @@ import PIL  # type: ignore
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 
+__all__ = ["convert"]
+
+
 def convert(quote, author, fg, image: PIL.Image, border_color,
             font_file=None, font_size=None, width=None, height=None):
     """

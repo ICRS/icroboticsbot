@@ -13,14 +13,16 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 
-from assets.bot_commands import register_on_guild   # noqa
-from assets.bot_commands import register_on_dm      # noqa
-from assets.bot_commands import quote_person        # noqa
-from assets.bot_commands import get_help            # noqa
-from assets.bot_commands import handle_upload       # noqa
+from src.bot_commands import register_on_guild   # noqa
+from src.bot_commands import register_on_dm      # noqa
+from src.bot_commands import quote_person        # noqa
+from src.bot_commands import get_help            # noqa
+from src.bot_commands import handle_upload       # noqa
 
-from assets.utils import change_valid               # noqa
-from assets.utils import print                      # noqa  #pylint: disable=redefined-builtin
+from src.utils import change_valid               # noqa
+from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
+
+__all__ = ["DiscordBot"]
 
 settings = json.load(open(os.path.abspath("settings_template.json"),
                           "r", encoding="utf-8"))
