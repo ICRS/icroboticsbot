@@ -26,7 +26,7 @@ from scp import SCPClient  # type: ignore
 
 from dotenv import load_dotenv
 
-from assets.quotes import generate
+from src.quotes import generate
 
 
 __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
