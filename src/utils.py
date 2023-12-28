@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+
 """
 Utility functions used by the bot
 """
@@ -10,6 +15,8 @@ import json
 from datetime import date
 import io
 import sqlite3 as sq
+import time
+from typing import Dict, List
 
 import requests  # type: ignore
 import paramiko  # type: ignore
@@ -19,19 +26,20 @@ from scp import SCPClient  # type: ignore
 
 from dotenv import load_dotenv
 
-from quotes import generate
+from src.quotes import generate
 
 
 __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
            "shortcode_exists", "valid_mapping", "change_valid",
            "random_quote", "download_files", "create_sshclient",
-           "extension_list"]
+           "extension_list", "print"]
 
 # ===== Constants =====
-TARGET_PATH = '/home/member/Downloads/'
 load_dotenv()
+# TARGET_PATH = '/home/member/Downloads/'
+TARGET_PATH = os.path.abspath(os.getenv('TARGET_PATH'))
 
-# ===== Get the current year =====
+# ===== Get the current date =====
 date_now = date.today()
 month_now = date_now.month
 year_now = str(date_now.year)
@@ -44,11 +52,12 @@ else:
 
 CSP_CODE = 625
 
-# ===== Get the API key and file path =====
+# ===== Get the API key =====
 api_key = os.getenv('API_KEY')
-file_path = os.getenv('FILE_PATH')
 society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
-slicer_secret = os.getenv('SLICER_PW')
+DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
+SLICER_PW = os.getenv('SLICER_PW')
+SLICER_ADDR = os.getenv('SLICER_ADDR')
 # =========================================
 
 extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
@@ -62,9 +71,25 @@ CREATE TABLE mapping (
     active  INTEGER DEFAULT 1
 )
 '''
-DB_PATH = os.getenv('DB_PATH')
 SHORTCODE_REGEX = r'[a-z]{2,3}[0-9]{2,4}'
 # ===========================
+
+
+def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
+    """
+    print is a wrapper around the built-in print function
+
+    Parameters
+    ----------
+    args : list
+        List of arguments to pass to the print function
+    kwargs : dict
+        Dictionary of keyword arguments to pass to the print function
+    """
+    built_in_print = __builtins__['print']              # type: ignore
+    args = list(args)                                   # type: ignore
+    args.insert(0, f'{time.strftime("%H:%M:%S")} :')    # type: ignore
+    built_in_print(*args, **kwargs)
 
 
 def is_shortcode(message: str) -> bool:
@@ -89,9 +114,22 @@ def is_member(shortcode: str) -> bool:
     -------
     bool
         True if the shortcode belongs to a member, False otherwise
+
+    Raises
+    ------
+    KeyError
+        Raised if there is no contact with the API
     """
-    return shortcode in [member['Login'] for member in
-                         society_api.list_members()]  # noqa: E1101
+    try:
+        mems = [member['Login'] for member in
+                society_api.list_members()]  # pylint: disable=maybe-no-member
+        if shortcode in mems:
+            return True
+        else:
+            return False
+    except Exception:  # pylint: disable=broad-except
+        print("Error contacting Society API")
+        return False
 
 
 def init_db(db=DB_PATH) -> bool:
@@ -215,9 +253,9 @@ def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
     if is_shortcode(shortcode):
         cur.execute('''
         SELECT active FROM mapping WHERE shortcode = ? AND user_id = ?
-        ''', (shortcode.lower().strip(),str(userid))
+        ''', (shortcode.lower().strip(), str(userid))
         )
-        val = cur.fetchall()#
+        val = cur.fetchall()
         if any(val):
             valid = val[0][0]
         else:
@@ -280,25 +318,28 @@ def random_quote(author: str) -> tuple:
     tuple
         A tuple containing the quote and the path to the generated image
     """
-    images = os.listdir('/home/pi/code/icroboticsbot/background_images')
-    backgrounds = ['/home/pi/code/icroboticsbot/background_images/'+image
+    images = os.listdir(os.path.abspath('assets/background_images'))
+    backgrounds = [os.path.abspath('assets/background_images/'+image)
                    for image in images if image.startswith(
                        author.strip().lower())]
     background = random.choice(backgrounds)
-    fonts = os.listdir('/home/pi/code/icroboticsbot/fonts')
-    font = '/home/pi/code/icroboticsbot/fonts/'+random.choice(fonts)
-    with open('/home/pi/code/icroboticsbot/quotes.json', 'r',
+    fonts = os.listdir(os.path.abspath('assets/fonts'))
+    font = os.path.abspath('assets/fonts/'+random.choice(fonts))
+    with open(os.path.abspath('assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]
+    author = author.strip().lower()
     choices: Dict[str, List[str]] = {
         quote['author'].lower(): [] for quote in quotes}
+    if not author:
+        author = random.choice(list(choices.keys()))
     for quote in quotes:
-        choices[quote['author'].lower()].append(quote['quote'])
-    choice = random.choice(choices[author.strip().lower()])
-    png_path = generate(background, 
-             author=author.lower(), quote=choice, font=font)
-    return choice, png_path
+        choices[quote['author'].lower()].append(quote['quote'])     # noqa
+    choice = random.choice(choices[author])
+    png_path, img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
+                             author=author.capitalize(), font=font)
+    return (author.capitalize(), choice), png_path
 
 
 def download_files(files) -> None:
@@ -311,7 +352,7 @@ def download_files(files) -> None:
         List of files to download
     """
     try:
-        ssh = create_sshclient('slicer.local', 22, 'member', slicer_secret)
+        ssh = create_sshclient(SLICER_ADDR, 22, 'member', SLICER_PW)
         scp = SCPClient(ssh.get_transport())
         for file in files:
             url = file['url']
@@ -321,7 +362,7 @@ def download_files(files) -> None:
             file.write(r.content)
             file.seek(0)
             scp.putfo(file, TARGET_PATH+name)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         print("Error appending files")
 
 
