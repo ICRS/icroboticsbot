@@ -1,16 +1,22 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+# pylint: disable=bad-indentation
+
 """
 Generate a Quote Image from a given Image and Quote
 """
-
+import os
 from PIL import Image  # type: ignore
 
-from Quote2Image import convert
+from src.quote_to_image import convert
 
 
 # Font Size Default to 32, Height and Width by default is 612
 def generate(IMAGE_PATH, author, quote,
-			 IMAGE_TEMP="/home/pi/code/icroboticsbot/temp.jpg", # noqa
-			 font="/home/pi/code/icroboticsbot/fonts/Precious.ttf") -> str: # noqa
+			 IMAGE_TEMP=os.path.abspath("assets/generation/temp.jpg"), # noqa
+			 font=os.path.abspath("assets/fonts/Precious.ttf")) -> tuple: # noqa
 	"""
 	generate a quote image from a given image and quote
 
@@ -23,13 +29,13 @@ def generate(IMAGE_PATH, author, quote,
 	quote : String
 		Quote
 	IMAGE_TEMP : str, optional
-		Path to temp image, by default "/home/pi/code/icroboticsbot/temp.jpg"
+		Path to temp image, by default "./assets/generation/temp.jpg"
 
 	Returns
 	-------
-	str
-		Path to the generated png image
-	"""
+	tuple
+		Path to the generated png image and PIL Image Object
+	"""  # noqa ignore
 	image = Image.open(IMAGE_PATH)
 	grayscale = image.convert("L")
 	width, height = grayscale.size
@@ -48,8 +54,8 @@ def generate(IMAGE_PATH, author, quote,
 		width=400,
 		height=400)
 
-	PNG_PATH = "/home/pi/code/icroboticsbot/quote.png"
+	PNG_PATH = os.path.abspath("assets/generation/quote.png")
 
 	# Save The Image as a Png file
 	img.save(PNG_PATH)
-	return PNG_PATH
+	return PNG_PATH, img

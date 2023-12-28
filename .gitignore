@@ -6,7 +6,10 @@ membermap.db
 server.sh
 database.py
 /files
-*.png
+db
+db.sql
+settings.json
+/downloads
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
