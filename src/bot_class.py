@@ -18,6 +18,7 @@ from src.bot_commands import register_on_dm      # noqa
 from src.bot_commands import quote_person        # noqa
 from src.bot_commands import get_help            # noqa
 from src.bot_commands import handle_upload       # noqa
+from src.bot_commands import stats_card          # noqa
 
 from src.utils import change_valid               # noqa
 from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
@@ -89,6 +90,11 @@ class DiscordBot(commands.Bot):
         async def help(ctx):  # pylint: disable=redefined-builtin
             await get_help(self, ctx)
 
+        @self.command(name="stats", pass_context=True,
+                      help="Get your 3D printing stats")
+        async def stats(ctx):
+            await stats_card(self,ctx)
+
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
         on_message is called when a message is sent in the server
@@ -101,7 +107,7 @@ class DiscordBot(commands.Bot):
         if message.author == self.user:
             return
 
-        if message.channel.id == self.guild_info['FILE_CHANNEL']:
+        if message.channel.id == self.guild_info['FILE_CHANNEL'] and message.attachments:
             await handle_upload(self, message)
 
         await self.process_commands(message)

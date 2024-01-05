@@ -11,7 +11,7 @@ import discord
 from src.utils import is_shortcode, is_member, shortcode_exists, valid_mapping   # noqa
 from src.utils import download_files, extension_list                             # noqa
 from src.utils import add_mapping, change_valid, random_quote, print             # noqa  # pylint: disable=redefined-builtin
-
+from src.utils import generate_stat_card
 DEBUG = False
 
 __all__ = ["register_on_guild", "register_on_dm", "quote_person", "get_help", "handle_upload"]  # noqa
@@ -179,3 +179,21 @@ async def handle_upload(bot, message):
 
     download_files(files)
     await bot.bot_admin.send(f'{message.author} sent {len(files)} files with names {[file["name"] for file in files]}')  # noqa
+
+async def stats_card(bot, ctx):
+    """
+    stats_card generates a card with 3d printer usage stats for that user
+
+    Parameters
+    ----------
+    bot : DiscordBot
+        Discord bot instance
+    ctx : Discord.Context
+        Discord context
+    """
+    user = ctx.author
+    embed = discord.Embed(title=f"3D Printing Stats for {user.name}")
+    generate_stat_card(user)
+    file = discord.File("card.png", filename="image.png")
+    embed.set_image(url="attachment://image.png")
+    await ctx.send(file=file,embed=embed)
