@@ -10,7 +10,8 @@ db
 db.sql
 settings.json
 /downloads
-
+*.ipynb
+*.png
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
