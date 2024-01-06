@@ -398,7 +398,7 @@ def create_sshclient(server, port, user, password) -> paramiko.SSHClient:
 
 def generate_stat_card(user):
     def generate_card(key,value,accent_colour,key_size=22,value_size=25):
-        window = Image.new('RGB',(175,100))
+        window = Image.new('RGBA',(175,100))
         a = ImageDraw.Draw(window)
         a.rectangle([(0,0),(175,100)],fill=(47,49,54))
         a.rectangle([(0,0),(7,100)],fill=accent_colour)
@@ -439,6 +439,9 @@ def generate_stat_card(user):
     data = json.loads(res.text)['prints']
     username = user.name
     avatar = user.avatar
+    if not avatar:
+        avatar = "https://assets-global.website-files.com/5f9072399b2640f14d6a2bf4/619442eb8b3fab3eda4c29eb_Author-Wumpus-Webflow.png"
+    print(f"generating stats card for {user.name} shortcode {shortcode}")
     if data:
         total_filament = sum([i[3] for i in data])
         total_time = sum([i[2] for i in data])
@@ -460,17 +463,17 @@ def generate_stat_card(user):
         fav_no = 0
         print_no = 1
         display_no = 0
-
+    print(avatar)
     r = requests.get(avatar, timeout=60)
     with open(f"avatar.png","wb") as f:
         f.write(r.content)
     
     pic = ColorThief("avatar.png")
     accent_colour=pic.get_color(quality=1)
-    pic = Image.open("avatar.png")
+    pic = Image.open("avatar.png").convert("RGBA")
     pic = pic.resize((60,60))
 
-    card = Image.new('RGB', (825, 350))
+    card = Image.new('RGBA', (825, 350))
     d=ImageDraw.Draw(card)
     d.rectangle([(0,0),(825,350)],fill=(30,31,35))
     d.rectangle([(7,7),(818,107)],fill=(47,49,54))
