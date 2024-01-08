@@ -62,8 +62,8 @@ DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 SERVER_IP = os.getenv('SERVER_IP')
-CARD_PATH = os.path.abspath('card.png')
-AVATAR_PATH = os.path.abspath('avatar.png')
+CARD_PATH = os.path.abspath(os.getenv("CARD_PATH"))
+AVATAR_PATH = os.path.abspath(os.getenv("AVATAR_PATH"))
 # =========================================
 
 extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
