@@ -25,7 +25,7 @@ from src.utils import print                      # noqa  #pylint: disable=redefi
 
 __all__ = ["DiscordBot"]
 
-settings = json.load(open(os.path.abspath("settings_template.json"),
+settings = json.load(open(os.path.abspath("/home/pi/code/icroboticsbot/settings.json"),
                           "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000

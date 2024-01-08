@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # mypy: ignore-errors
@@ -20,7 +19,7 @@ from src.bot_class import DiscordBot
 
 init_db()
 load_dotenv()
-settings = json.load(open(os.path.abspath("settings.json"),
+settings = json.load(open(os.path.abspath("/home/pi/code/icroboticsbot/settings.json"),
                           "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000

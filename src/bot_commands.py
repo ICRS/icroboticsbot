@@ -193,7 +193,10 @@ async def stats_card(bot, ctx):
     """
     user = ctx.author
     embed = discord.Embed(title=f"3D Printing Stats for {user.name}")
-    generate_stat_card(user)
+    try:
+        generate_stat_card(user)
+    except Exception as e:
+        print(f"Could not generate stats {e}")
     file = discord.File(CARD_PATH, filename="image.png")
     embed.set_image(url="attachment://image.png")
     await ctx.send(file=file,embed=embed)
