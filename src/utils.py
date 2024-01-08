@@ -450,7 +450,7 @@ def generate_stat_card(user):
         for name in names:
             printers[name] = sum([1 for i in data if i[-1]==name])
         printers = dict(sorted(printers.items(), key=lambda item: item[1]))
-        fav = [i for i in printers.keys()][0]
+        fav = [i for i in printers.keys()][-1]
         fav_no = printers[fav]
         print_no = len(data)
         display_no = print_no
