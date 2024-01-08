@@ -11,7 +11,7 @@ import discord
 from src.utils import is_shortcode, is_member, shortcode_exists, valid_mapping   # noqa
 from src.utils import download_files, extension_list                             # noqa
 from src.utils import add_mapping, change_valid, random_quote, print             # noqa  # pylint: disable=redefined-builtin
-from src.utils import generate_stat_card, CARD_PATH
+from src.utils import generate_stat_card, BASE_PATH
 DEBUG = False
 
 __all__ = ["register_on_guild", "register_on_dm", "quote_person", "get_help", "handle_upload"]  # noqa
@@ -197,6 +197,6 @@ async def stats_card(bot, ctx):
         generate_stat_card(user)
     except Exception as e:
         print(f"Could not generate stats {e}")
-    file = discord.File(CARD_PATH, filename="image.png")
+    file = discord.File(BASE_PATH+"card.png", filename="image.png")
     embed.set_image(url="attachment://image.png")
     await ctx.send(file=file,embed=embed)
