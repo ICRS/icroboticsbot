@@ -39,8 +39,8 @@ __all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
 
 # ===== Constants =====
 load_dotenv()
-# TARGET_PATH = '/home/member/Downloads/'
-TARGET_PATH = os.path.abspath(os.getenv('TARGET_PATH'))
+TARGET_PATH = '/home/member/Downloads/'
+#TARGET_PATH = os.path.abspath(os.getenv('TARGET_PATH'))
 
 # ===== Get the current date =====
 date_now = date.today()
@@ -62,6 +62,7 @@ DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 SERVER_IP = os.getenv('SERVER_IP')
+CARD_PATH = os.path.abspath('card.png')
 # =========================================
 
 extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
@@ -512,7 +513,7 @@ def generate_stat_card(user):
         a.text((12,40+idx*35),f"{idx+1}.",font=item_font,fill=(255,255,255))
         a.text((40,40+idx*35),f"{i[3]}g",font=item_font,fill=accent_colour)
     card.paste(window,(586,125))
-    card.save("card.png")    
+    card.save(CARD_PATH)    
 
    
     
