@@ -22,10 +22,10 @@ from src.bot_commands import stats_card          # noqa
 
 from src.utils import change_valid               # noqa
 from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
-
+from src.utils import BASE_PATH
 __all__ = ["DiscordBot"]
 
-settings = json.load(open(os.path.abspath("/home/pi/code/icroboticsbot/settings.json"),
+settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
                           "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000
