@@ -469,9 +469,9 @@ def generate_stat_card(user):
     with open(BASE_PATH+"avatar.png","wb") as f:
         f.write(r.content)
     
-    pic = ColorThief("avatar.png")
+    pic = ColorThief(BASE_PATH+"avatar.png")
     accent_colour=pic.get_color(quality=1)
-    pic = Image.open("avatar.png").convert("RGBA")
+    pic = Image.open(BASE_PATH+"avatar.png").convert("RGBA")
     pic = pic.resize((60,60))
 
     card = Image.new('RGBA', (825, 350))
