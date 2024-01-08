@@ -62,8 +62,7 @@ DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 SERVER_IP = os.getenv('SERVER_IP')
-CARD_PATH = os.path.abspath(os.getenv("CARD_PATH"))
-AVATAR_PATH = os.path.abspath(os.getenv("AVATAR_PATH"))
+BASE_PATH = os.path.abspath(os.getenv("BASE_PATH"))
 # =========================================
 
 extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
@@ -324,14 +323,14 @@ def random_quote(author: str) -> tuple:
     tuple
         A tuple containing the quote and the path to the generated image
     """
-    images = os.listdir(os.path.abspath('assets/background_images'))
-    backgrounds = [os.path.abspath('assets/background_images/'+image)
+    images = os.listdir(os.path.abspath(BASE_PATH+'assets/background_images'))
+    backgrounds = [os.path.abspath(BASE_PATH+'assets/background_images/'+image)
                    for image in images if image.startswith(
                        author.strip().lower())]
     background = random.choice(backgrounds)
-    fonts = os.listdir(os.path.abspath('assets/fonts'))
-    font = os.path.abspath('assets/fonts/'+random.choice(fonts))
-    with open(os.path.abspath('assets/quotes.json'), 'r',
+    fonts = os.listdir(os.path.abspath(BASE_PATH+'assets/fonts'))
+    font = os.path.abspath(BASE_PATH+'assets/fonts/'+random.choice(fonts))
+    with open(os.path.abspath(BASE_PATH+'assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]
@@ -467,7 +466,7 @@ def generate_stat_card(user):
         display_no = 0
     print(avatar)
     r = requests.get(avatar, timeout=60)
-    with open(AVATAR_PATH,"wb") as f:
+    with open(BASE_PATH+"avatar.png","wb") as f:
         f.write(r.content)
     
     pic = ColorThief("avatar.png")
@@ -514,7 +513,7 @@ def generate_stat_card(user):
         a.text((12,40+idx*35),f"{idx+1}.",font=item_font,fill=(255,255,255))
         a.text((40,40+idx*35),f"{i[3]}g",font=item_font,fill=accent_colour)
     card.paste(window,(586,125))
-    card.save(CARD_PATH)    
+    card.save(BASE_PATH+"card.png")    
 
    
     
