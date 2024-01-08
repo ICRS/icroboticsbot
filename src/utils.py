@@ -63,6 +63,7 @@ SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 SERVER_IP = os.getenv('SERVER_IP')
 CARD_PATH = os.path.abspath('card.png')
+AVATAR_PATH = os.path.abspath('avatar.png')
 # =========================================
 
 extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
@@ -466,7 +467,7 @@ def generate_stat_card(user):
         display_no = 0
     print(avatar)
     r = requests.get(avatar, timeout=60)
-    with open(f"avatar.png","wb") as f:
+    with open(AVATAR_PATH,"wb") as f:
         f.write(r.content)
     
     pic = ColorThief("avatar.png")
