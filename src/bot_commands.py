@@ -174,7 +174,7 @@ async def handle_upload(bot, message):
     print("file sent in files")
     for attachment in message.attachments:
         if ((attachment.filename.split(".")[-1].lower() in extension_list)
-                and (attachment.size < bot.guild_info.MAX_SIZE)):
+                and (attachment.size < bot.guild_info["MAX_SIZE"])):
             files.append({'url': attachment.url, 'name': attachment.filename})
 
     download_files(files)
