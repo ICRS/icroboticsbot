@@ -330,6 +330,7 @@ def random_quote(author: str) -> tuple:
     background = random.choice(backgrounds)
     fonts = os.listdir(os.path.abspath(BASE_PATH+'assets/fonts'))
     font = os.path.abspath(BASE_PATH+'assets/fonts/'+random.choice(fonts))
+    print(background, font)
     with open(os.path.abspath(BASE_PATH+'assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
@@ -342,8 +343,9 @@ def random_quote(author: str) -> tuple:
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])     # noqa
     choice = random.choice(choices[author])
+    print(choice, background)
     png_path, img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
-                             author=author.capitalize(), font=font)
+                             author=author.capitalize(), font=font, BASE_PATH=BASE_PATH)
     return (author.capitalize(), choice), png_path
 
 

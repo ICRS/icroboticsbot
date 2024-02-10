@@ -132,6 +132,7 @@ async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
     name : str
         Name of the person to quote
     """
+    print("quote")
     q, p = random_quote(" ".join(name))
     file = discord.File(p)
     embed = discord.Embed(title=q[0],
@@ -174,7 +175,7 @@ async def handle_upload(bot, message):
     print("file sent in files")
     for attachment in message.attachments:
         if ((attachment.filename.split(".")[-1].lower() in extension_list)
-                and (attachment.size < bot.guild_info.MAX_SIZE)):
+                and (attachment.size < bot.guild_info["MAX_SIZE"])):
             files.append({'url': attachment.url, 'name': attachment.filename})
 
     download_files(files)
