@@ -51,7 +51,7 @@ def convert(quote, author, fg, image: PIL.Image, border_color,
     sentence = f"{quote} - {author}"
 
     font = ImageFont.truetype(font_file if font_file
-                              else os.path.abspath("assets/fonts/Coves Bold.otf"), font_size  # noqa # pylint: disable=line-too-long
+                              else os.path.relpath("assets/fonts/Coves Bold.otf"), font_size  # noqa # pylint: disable=line-too-long
                               if font_size else 32)
 
     img = Image.new("RGB", (x1, y1), color=(255, 255, 255))

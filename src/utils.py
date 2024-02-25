@@ -32,8 +32,7 @@ from dotenv import load_dotenv
 from src.quotes import generate
 
 
-__all__ = ["is_shortcode", "is_member", "init_db", "add_mapping",
-           "shortcode_exists", "valid_mapping", "change_valid",
+__all__ = ["is_shortcode", "is_member", 
            "random_quote", "download_files", "create_sshclient",
            "extension_list", "print"]
 
@@ -58,7 +57,7 @@ CSP_CODE = 625
 # ===== Get the API key =====
 api_key = os.getenv('API_KEY')
 society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
-DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
+#DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 SERVER_IP = os.getenv('SERVER_IP')
@@ -136,179 +135,6 @@ def is_member(shortcode: str) -> bool:
         print("Error contacting Society API")
         return False
 
-
-def init_db(db=DB_PATH) -> bool:
-    """
-    init_db creates the database if it does not exist
-
-    Parameters
-    ----------
-    db : String, optional
-        Path for database file, by default DB_PATH
-
-    Returns
-    -------
-    bool
-        True if the database already exists, False otherwise
-    """
-    if path.exists(db):
-        return True
-    conn = sq.connect(db)
-    cur = conn.cursor()
-    cur.execute(INIT_SCHEMA)
-    conn.commit()
-    return False
-
-
-def add_mapping(shortcode, userid, db=DB_PATH) -> bool:
-    """
-    add_mapping adds a mapping between a shortcode and a user id
-
-    Parameters
-    ----------
-    shortcode : String
-        Member shortcode
-    userid : String
-        Discord user id
-    db : String, optional
-        Path to database file, by default DB_PATH
-
-    Returns
-    -------
-    bool
-        True if the mapping was added, False otherwise
-
-    Raises
-    ------
-    ValueError
-        Raised if the shortcode is invalid
-    """
-    userid = str(userid)
-    conn = sq.connect(db)
-    cur = conn.cursor()
-    if is_shortcode(shortcode):
-        cur.execute('''
-            INSERT INTO mapping
-            VALUES (?,?,?)
-        ''', (userid.lower().strip(), shortcode.lower().strip(), 1)
-        )
-        conn.commit()
-        return True
-    else:
-        raise ValueError('Invalid shortcode')
-
-
-def shortcode_exists(shortcode, db=DB_PATH) -> bool:
-    """
-    shortcode_exists checks if a shortcode exists in the database
-
-    Parameters
-    ----------
-    shortcode : String
-        Member shortcode
-    db : String, optional
-        Path of database file, by default DB_PATH
-
-    Returns
-    -------
-    bool
-        True if the shortcode exists, False otherwise
-
-    Raises
-    ------
-    ValueError
-        Raised if the shortcode is invalid
-    """
-    conn = sq.connect(db)
-    cur = conn.cursor()
-    if is_shortcode(shortcode):
-        cur.execute('''
-        SELECT * FROM mapping WHERE shortcode = ?
-        ''', (shortcode.lower().strip(),))
-        return any(cur.fetchall())
-    else:
-        raise ValueError('Invalid shortcode')
-
-
-def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
-    """
-    valid_mapping checks if a shortcode is valid for a given user id
-
-    Parameters
-    ----------
-    shortcode : String
-        Member shortcode
-    userid : String
-        Discord user id
-    db : String, optional
-        Path of database file, by default DB_PATH
-
-    Returns
-    -------
-    bool
-        True if the shortcode is valid for the user id, False otherwise
-
-    Raises
-    ------
-    ValueError
-        Raised if the shortcode is invalid
-    """
-    conn = sq.connect(db)
-    cur = conn.cursor()
-    if is_shortcode(shortcode):
-        cur.execute('''
-        SELECT active FROM mapping WHERE shortcode = ? AND user_id = ?
-        ''', (shortcode.lower().strip(), str(userid))
-        )
-        val = cur.fetchall()
-        if any(val):
-            valid = val[0][0]
-        else:
-            valid = 1
-        print(valid)
-        return bool(valid)
-    else:
-        raise ValueError('Invalid shortcode')
-
-
-def change_valid(userid, valid: int, db=DB_PATH) -> bool:
-    """
-    change_valid changes the validity of a shortcode for a given user id
-
-    Parameters
-    ----------
-    userid : String
-        Discord user id
-    valid : int
-        Validity status, 0 for invalid, 1 for valid
-    db : String, optional
-        Path of database file, by default DB_PATH
-
-    Returns
-    -------
-    bool
-        True if the validity status was changed, False otherwise
-
-    Raises
-    ------
-    KeyError
-        Raised if the validity status is not 0 or 1
-    """
-    conn = sq.connect(db)
-    cur = conn.cursor()
-    if (valid in {0, 1}):
-        cur.execute('''
-        UPDATE mapping
-        SET active = ?
-        WHERE user_id = ?
-        ''', (valid, str(userid))
-        )
-        conn.commit()
-        return True
-    else:
-        raise KeyError('Issue changing valid status')
-
-
 def random_quote(author: str) -> tuple:
     """
     random_quote generates a random quote image for a given author
@@ -323,15 +149,17 @@ def random_quote(author: str) -> tuple:
     tuple
         A tuple containing the quote and the path to the generated image
     """
-    images = os.listdir(os.path.abspath(BASE_PATH+'assets/background_images'))
-    backgrounds = [os.path.abspath(BASE_PATH+'assets/background_images/'+image)
+    images = os.listdir(os.path.relpath('assets/background_images'))
+    print(images)
+    backgrounds = [os.path.relpath('assets/background_images/'+image)
                    for image in images if image.startswith(
                        author.strip().lower())]
+    print(backgrounds)
     background = random.choice(backgrounds)
-    fonts = os.listdir(os.path.abspath(BASE_PATH+'assets/fonts'))
-    font = os.path.abspath(BASE_PATH+'assets/fonts/'+random.choice(fonts))
+    fonts = os.listdir(os.path.relpath('assets/fonts'))
+    font = os.path.relpath('assets/fonts/'+random.choice(fonts))
     print(background, font)
-    with open(os.path.abspath(BASE_PATH+'assets/quotes.json'), 'r',
+    with open(os.path.relpath('assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
     quotes = [json.loads(quote) for quote in quotes]
@@ -345,7 +173,8 @@ def random_quote(author: str) -> tuple:
     choice = random.choice(choices[author])
     print(choice, background)
     png_path, img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
-                             author=author.capitalize(), font=font, BASE_PATH=BASE_PATH)
+                             author=author.capitalize(), font=font)
+    print(author, png_path, img)
     return (author.capitalize(), choice), png_path
 
 
