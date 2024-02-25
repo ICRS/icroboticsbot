@@ -12,14 +12,11 @@ import json
 import discord
 
 from dotenv import load_dotenv
-from src.utils import init_db,BASE_PATH
 
 from src.bot_class import DiscordBot
 
-
-init_db()
 load_dotenv()
-settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
+settings = json.load(open("settings.json",
                           "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000
