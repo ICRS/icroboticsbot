@@ -20,11 +20,13 @@ settings = json.load(open("settings.json",
                           "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000
+PREFIX = settings['PREFIX']
 GUILD = settings['DISCORD_GUILD_ID']
 FILE_CHANNEL = settings['FILE_CHANNEL']
 ADMIN_ID = settings['ADMIN_ID']
 
 default_guild_info = {
+    'PREFIX': PREFIX,
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
     'FILE_CHANNEL': FILE_CHANNEL,
