@@ -6,16 +6,12 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
-import os
 import json
 import asyncio
 import discord
 from discord.ext import commands
-from discord.ext import tasks
 
-from src.bot_commands import get_help            # noqa
 from src.bot_commands import handle_upload       # noqa
-from src.bot_commands import quote_person       # noqa
 
 from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
 __all__ = ["DiscordBot"]
@@ -24,20 +20,14 @@ settings = json.load(open("settings.json",
                           "r", encoding="utf-8"))
 
 MAX_SIZE = 25000000
-PREFIX = settings['PREFIX']
 GUILD = settings['DISCORD_GUILD_ID']
 FILE_CHANNEL = settings['FILE_CHANNEL']
 ADMIN_ID = settings['ADMIN_ID']
-ALERT_CHANNEL = settings['ALERT_CHANNEL']
-ALERT_INTERVAL = settings['ALERT_INTERVAL']
 
 default_guild_info = {
-    'PREFIX': PREFIX,
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
     'FILE_CHANNEL': FILE_CHANNEL,
-    'ALERT_CHANNEL': ALERT_CHANNEL,
-    'ALERT_INTERVAL': ALERT_INTERVAL,
     'MAX_SIZE': MAX_SIZE
 }
 
@@ -52,7 +42,6 @@ class DiscordBot(commands.Bot):
                          help_command=None)
         self.token = token
         self.guild_info = guild_info
-        self.bot_prefix = guild_info["PREFIX"]
         self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
