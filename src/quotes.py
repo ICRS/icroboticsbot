@@ -7,6 +7,7 @@
 """
 Generate a Quote Image from a given Image and Quote
 """
+import io
 import os
 from PIL import Image  # type: ignore
 
@@ -35,6 +36,8 @@ def generate(IMAGE_PATH, author, quote,
     tuple
         Path to the generated png image and PIL Image Object
     """  # noqa ignore
+    
+    
     print(IMAGE_PATH, author, quote, IMAGE_TEMP, font, BASE_PATH)
     image = Image.open(os.path.relpath(IMAGE_PATH))
     print(image)
@@ -43,7 +46,9 @@ def generate(IMAGE_PATH, author, quote,
     ratio = 400/width
     grayscale = grayscale.resize((int(width*ratio), int(height*ratio)))
     print("Image Temp", os.path.abspath(IMAGE_TEMP))
-    grayscale.save(IMAGE_TEMP)
+    temp = io.BytesIO()
+
+    grayscale.save(temp, format="PNG")
 
     print("IMAGE TEMP SAVED")
 
@@ -51,7 +56,7 @@ def generate(IMAGE_PATH, author, quote,
             quote=quote,
             author=author,
             fg="white",
-            image=IMAGE_TEMP,
+            image=temp,
             border_color="black",
             font_size=40,
             font_file=font,
@@ -62,5 +67,5 @@ def generate(IMAGE_PATH, author, quote,
     print(PNG_PATH)
 
     # Save The Image as a Png file
-    img.save(PNG_PATH)
+    # img.save(temp, format="PNG")
     return PNG_PATH, img

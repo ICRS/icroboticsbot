@@ -174,8 +174,8 @@ def random_quote(author: str) -> tuple:
     print(choice, background)
     png_path, img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)
-    print(author, png_path, img)
-    return (author.capitalize(), choice), png_path
+    # print(author, png_path, img)
+    return (author.capitalize(), choice), img
 
 
 def download_files(files) -> None:
