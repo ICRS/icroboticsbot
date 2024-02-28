@@ -22,6 +22,7 @@ settings = json.load(open("settings.json",
 
 MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
+PREFIX = settings['PREFIX']
 GUILD = int(settings['DISCORD_GUILD_ID'])
 FILE_CHANNEL = int(settings['FILE_CHANNEL'])
 ADMIN_ID = int(settings['ADMIN_ID'])
@@ -31,6 +32,7 @@ intents.members = True
 intents.message_content = True
 
 guild_info = {
+    'PREFIX': PREFIX,
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
     'FILE_CHANNEL': FILE_CHANNEL,
