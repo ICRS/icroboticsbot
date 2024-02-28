@@ -10,6 +10,7 @@ import discord
 
 from src.utils import download_files, extension_list                             # noqa
 from src.utils import random_quote, print             # noqa  # pylint: disable=redefined-builtin
+import io
 DEBUG = False
 
 __all__ = ["quote_person", "get_help", "handle_upload"]  # noqa
@@ -30,13 +31,18 @@ async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
         Name of the person to quote
     """
     print("quote")
-    q, p = random_quote(" ".join(name))
-    print("quote", q, p)
-    file = discord.File(p)
+    temp = io.BytesIO()
+    q, img = random_quote(" ".join(name))
+    img.save(temp, format="PNG")
+    temp.seek(0)
+    # print("quote", q, img)
+    
+    file = discord.File(temp)
+    
     embed = discord.Embed(title=q[0],
                           description=q[1],
                           color=0x3a88fe)
-    embed.set_image(url=f"attachment://{p}")
+    embed.set_image(url=f"attachment://{hash(img)}")
     await ctx.message.channel.send(embed=embed, file=file)
 
 
