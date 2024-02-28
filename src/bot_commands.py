@@ -36,14 +36,15 @@ async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
     q, img = random_quote(" ".join(name))
     img.save(temp, format="PNG")
     temp.seek(0)
-    # print("quote", q, img)
     
-    file = discord.File(temp)
-    
+    file = discord.File(temp, filename="quote.png")
+
     embed = discord.Embed(title=q[0],
                           description=q[1],
                           color=0x3a88fe)
-    embed.set_image(url=f"attachment://{hash(img)}")
+
+    embed.set_image(url=f"attachment://{file.filename}.png")
+
     await ctx.message.channel.send(embed=embed, file=file)
 
 

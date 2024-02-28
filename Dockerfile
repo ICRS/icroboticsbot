@@ -41,7 +41,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 #RUN mkdir -p /app/assets/generation && chmod -R 777 /app/assets/generation && chown -R appuser: /app/assets/generation 
 
 # Switch to the non-privileged user to run the application.
-#USER appuser
+USER appuser
 
 
 # Copy the source code into the container.
