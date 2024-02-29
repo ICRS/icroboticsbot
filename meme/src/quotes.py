@@ -16,7 +16,7 @@ from src.quote_to_image import convert
 # Font Size Default to 32, Height and Width by default is 612
 def generate(IMAGE_PATH, author, quote,
         IMAGE_TEMP=os.path.relpath("assets/generation/temp.jpg"), # noqa
-        font=("assets/fonts/Precious.ttf"), BASE_PATH="/") -> tuple: # noqa
+        font=("assets/fonts/Precious.ttf"), BASE_PATH="/") -> Image: # noqa
     """
     generate a quote image from a given image and quote
 
@@ -63,9 +63,4 @@ def generate(IMAGE_PATH, author, quote,
             width=400,
             height=400)
 
-    PNG_PATH = os.path.relpath("assets/generation/quote.png")
-    print(PNG_PATH)
-
-    # Save The Image as a Png file
-    # img.save(temp, format="PNG")
-    return PNG_PATH, img
+    return img
