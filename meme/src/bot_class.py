@@ -6,15 +6,12 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
-import os
 import json
 import asyncio
 import discord
 from discord.ext import commands
-from discord.ext import tasks
 
 from src.bot_commands import get_help            # noqa
-from src.bot_commands import handle_upload       # noqa
 from src.bot_commands import quote_person       # noqa
 
 from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
@@ -28,19 +25,14 @@ PREFIX = settings['PREFIX']
 GUILD = settings['DISCORD_GUILD_ID']
 FILE_CHANNEL = settings['FILE_CHANNEL']
 ADMIN_ID = settings['ADMIN_ID']
-ALERT_CHANNEL = settings['ALERT_CHANNEL']
-ALERT_INTERVAL = settings['ALERT_INTERVAL']
 
 default_guild_info = {
     'PREFIX': PREFIX,
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
     'FILE_CHANNEL': FILE_CHANNEL,
-    'ALERT_CHANNEL': ALERT_CHANNEL,
-    'ALERT_INTERVAL': ALERT_INTERVAL,
     'MAX_SIZE': MAX_SIZE
 }
-
 
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
@@ -76,6 +68,17 @@ class DiscordBot(commands.Bot):
                       help="Get the help message with all the commands")
         async def help(ctx):  # pylint: disable=redefined-builtin
             await get_help(self, ctx)
+            
+                
+        @self.command(name="register", pass_context=True,
+                      help="Register to the server")        
+        async def register(ctx, shortcode=""):
+            pass
+        
+        @self.command(name="stats", pass_context=True,
+                      help="Get your 3D printing stats")
+        async def stats(ctx):
+            pass
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

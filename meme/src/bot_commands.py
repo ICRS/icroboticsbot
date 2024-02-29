@@ -14,8 +14,7 @@ from src.utils import generate_stat_card, CARD_PATH
 import io
 DEBUG = False
 
-__all__ = ["quote_person", "get_help", "handle_upload"]  # noqa
-
+__all__ = ["quote_person", "get_help"]  # noqa
 
 
 async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
@@ -65,6 +64,7 @@ async def get_help(bot, ctx):
         embed.add_field(name=command.name, value=command.help, inline=False)
     await ctx.send(embed=embed)
 
+<<<<<<< HEAD
 
 async def handle_upload(bot, message):
     """
@@ -107,3 +107,5 @@ async def stats_card(bot, ctx):
     file = discord.File(CARD_PATH, filename="image.png")
     embed.set_image(url="attachment://image.png")
     await ctx.send(file=file,embed=embed)
+=======
+>>>>>>> a337c8a (removed more stuff)
