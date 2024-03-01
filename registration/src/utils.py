@@ -13,6 +13,9 @@ from datetime import date
 # import sqlite3 as sq
 import time
 
+import psycopg2 as pg
+import configparser
+
 from icu_ea_api import ICUEActivitiesAPI  # type: ignore
 
 from dotenv import load_dotenv
@@ -25,8 +28,18 @@ __all__ = ["is_shortcode", "is_member", "add_mapping",
 
 # ===== Constants =====
 load_dotenv()
-TARGET_PATH = '/home/member/Downloads/'
-#TARGET_PATH = os.path.abspath(os.getenv('TARGET_PATH'))
+
+
+config = configparser.ConfigParser()
+config.read('postgres.ini')
+
+db_config = {
+    'database': config['database']['database'],
+    'user': config['database']['user'],
+    'password': config['database']['password'],
+    'host': config['database']['host'],
+    'port': config['database']['port']
+}
 
 # ===== Get the current date =====
 date_now = date.today()
@@ -44,7 +57,6 @@ CSP_CODE = 625
 # ===== Get the API key =====
 api_key = os.getenv('API_KEY')
 society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
-DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 SERVER_IP = os.getenv('SERVER_IP')
@@ -63,6 +75,7 @@ CREATE TABLE mapping (
 '''
 SHORTCODE_REGEX = r'[a-z]{2,3}[0-9]{2,4}'
 # ===========================
+
 
 
 def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
@@ -122,7 +135,7 @@ def is_member(shortcode: str) -> bool:
         return False
 
 
-def add_mapping(shortcode, userid, db=DB_PATH) -> bool:
+def add_mapping(shortcode, userid) -> bool:
     """
     add_mapping adds a mapping between a shortcode and a user id
 
@@ -146,21 +159,21 @@ def add_mapping(shortcode, userid, db=DB_PATH) -> bool:
         Raised if the shortcode is invalid
     """
     userid = str(userid)
-    conn = sq.connect(db)
-    cur = conn.cursor()
     if is_shortcode(shortcode):
-        cur.execute('''
-            INSERT INTO mapping
-            VALUES (?,?,?)
-        ''', (userid.lower().strip(), shortcode.lower().strip(), 1)
-        )
-        conn.commit()
+        with pg.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('''
+                    INSERT INTO mapping
+                    VALUES (%s,%s,%s)
+                ''', (userid.lower().strip(), shortcode.lower().strip(), 1)
+                )
+                conn.commit()
         return True
     else:
-        raise ValueError('Invalid shortcode')
+        raise ValueError('Invalid shortcode')            
 
 
-def shortcode_exists(shortcode, db=DB_PATH) -> bool:
+def shortcode_exists(shortcode) -> bool:
     """
     shortcode_exists checks if a shortcode exists in the database
 
@@ -181,18 +194,18 @@ def shortcode_exists(shortcode, db=DB_PATH) -> bool:
     ValueError
         Raised if the shortcode is invalid
     """
-    conn = sq.connect(db)
-    cur = conn.cursor()
     if is_shortcode(shortcode):
-        cur.execute('''
-        SELECT * FROM mapping WHERE shortcode = ?
-        ''', (shortcode.lower().strip(),))
-        return any(cur.fetchall())
+        with pg.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('''
+                SELECT * FROM mapping WHERE shortcode = %s
+                ''', (shortcode.lower().strip(),))
+                return any(cursor.fetchall())
     else:
         raise ValueError('Invalid shortcode')
 
 
-def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
+def valid_mapping(shortcode, userid) -> bool:
     """
     valid_mapping checks if a shortcode is valid for a given user id
 
@@ -215,25 +228,25 @@ def valid_mapping(shortcode, userid, db=DB_PATH) -> bool:
     ValueError
         Raised if the shortcode is invalid
     """
-    conn = sq.connect(db)
-    cur = conn.cursor()
     if is_shortcode(shortcode):
-        cur.execute('''
-        SELECT active FROM mapping WHERE shortcode = ? AND user_id = ?
-        ''', (shortcode.lower().strip(), str(userid))
-        )
-        val = cur.fetchall()
-        if any(val):
-            valid = val[0][0]
-        else:
-            valid = 1
-        print(valid)
+        with pg.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('''
+                SELECT active FROM mapping WHERE shortcode = %s AND user_id = %s
+                ''', (shortcode.lower().strip(), str(userid))
+                )
+                val = cursor.fetchall()
+                if any(val):
+                    valid = val[0][0]
+                else:
+                    valid = 1
+                print(valid)
         return bool(valid)
     else:
         raise ValueError('Invalid shortcode')
 
 
-def change_valid(userid, valid: int, db=DB_PATH) -> bool:
+def change_valid(userid, valid: int) -> bool:
     """
     change_valid changes the validity of a shortcode for a given user id
 
@@ -256,16 +269,16 @@ def change_valid(userid, valid: int, db=DB_PATH) -> bool:
     KeyError
         Raised if the validity status is not 0 or 1
     """
-    conn = sq.connect(db)
-    cur = conn.cursor()
     if (valid in {0, 1}):
-        cur.execute('''
-        UPDATE mapping
-        SET active = ?
-        WHERE user_id = ?
-        ''', (valid, str(userid))
-        )
-        conn.commit()
+        with pg.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('''
+                UPDATE mapping
+                SET active = ?
+                WHERE user_id = ?
+                ''', (valid, str(userid))
+                )
+            conn.commit()
         return True
     else:
         raise KeyError('Issue changing valid status')
