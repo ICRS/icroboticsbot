@@ -17,7 +17,7 @@ from src.bot_commands import register_on_dm      # noqa
 
 from src.utils import change_valid               # noqa
 from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
-from src.utils import BASE_PATH
+
 __all__ = ["DiscordBot"]
 
 settings = json.load(open(os.path.relpath("settings.json"),
