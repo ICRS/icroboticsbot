@@ -34,11 +34,11 @@ config = configparser.ConfigParser()
 config.read('postgres.ini')
 
 db_config = {
-    'database': config['database']['database'],
-    'user': config['database']['user'],
-    'password': config['database']['password'],
-    'host': config['database']['host'],
-    'port': config['database']['port']
+    'database': config['postgres']['database'],
+    'user': config['postgres']['user'],
+    'password': config['postgres']['password'],
+    'host': config['postgres']['host'],
+    'port': config['postgres']['port']
 }
 
 # ===== Get the current date =====
@@ -57,10 +57,6 @@ CSP_CODE = 625
 # ===== Get the API key =====
 api_key = os.getenv('API_KEY')
 society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
-SLICER_PW = os.getenv('SLICER_PW')
-SLICER_ADDR = os.getenv('SLICER_ADDR')
-SERVER_IP = os.getenv('SERVER_IP')
-BASE_PATH = os.path.abspath(os.getenv("BASE_PATH"))+"/"
 # =========================================
 
 
@@ -163,7 +159,7 @@ def add_mapping(shortcode, userid) -> bool:
         with pg.connect(**db_config) as conn:
             with conn.cursor() as cursor:
                 cursor.execute('''
-                    INSERT INTO mapping
+                    INSERT INTO public.mapping
                     VALUES (%s,%s,%s)
                 ''', (userid.lower().strip(), shortcode.lower().strip(), 1)
                 )
@@ -198,7 +194,7 @@ def shortcode_exists(shortcode) -> bool:
         with pg.connect(**db_config) as conn:
             with conn.cursor() as cursor:
                 cursor.execute('''
-                SELECT * FROM mapping WHERE shortcode = %s
+                SELECT * FROM public.mapping WHERE shortcode = %s
                 ''', (shortcode.lower().strip(),))
                 return any(cursor.fetchall())
     else:
@@ -232,7 +228,7 @@ def valid_mapping(shortcode, userid) -> bool:
         with pg.connect(**db_config) as conn:
             with conn.cursor() as cursor:
                 cursor.execute('''
-                SELECT active FROM mapping WHERE shortcode = %s AND user_id = %s
+                SELECT active FROM public.mapping WHERE shortcode = %s AND user_id = %s
                 ''', (shortcode.lower().strip(), str(userid))
                 )
                 val = cursor.fetchall()
@@ -273,7 +269,7 @@ def change_valid(userid, valid: int) -> bool:
         with pg.connect(**db_config) as conn:
             with conn.cursor() as cursor:
                 cursor.execute('''
-                UPDATE mapping
+                UPDATE public.mapping
                 SET active = ?
                 WHERE user_id = ?
                 ''', (valid, str(userid))
