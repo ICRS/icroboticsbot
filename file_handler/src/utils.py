@@ -49,8 +49,6 @@ society_api = ICUEActivitiesAPI(CSP_CODE, api_key, year_string)
 #DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 SLICER_PW = os.getenv('SLICER_PW')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
-SERVER_IP = os.getenv('SERVER_IP')
-BASE_PATH = os.path.abspath(os.getenv("BASE_PATH"))+"/"
 # =========================================
 
 extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
