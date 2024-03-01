@@ -29,7 +29,6 @@ __all__ = ["download_files", "create_sshclient",
 # ===== Constants =====
 load_dotenv()
 TARGET_PATH = '/home/member/Downloads/'
-#TARGET_PATH = os.path.abspath(os.getenv('TARGET_PATH'))
 
 # ===== Get the current date =====
 date_now = date.today()
