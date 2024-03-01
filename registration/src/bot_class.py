@@ -20,7 +20,7 @@ from src.utils import print                      # noqa  #pylint: disable=redefi
 
 __all__ = ["DiscordBot"]
 
-settings = json.load(open(os.path.relpath("settings.json"),
+settings = json.load(open("settings.json",
                           "r", encoding="utf-8"))
 
 GUILD = settings['DISCORD_GUILD_ID']
