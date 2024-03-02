@@ -23,9 +23,9 @@ __all__ = ["DiscordBot"]
 settings = json.load(open("settings.json",
                           "r", encoding="utf-8"))
 
+PREFIX = settings['PREFIX']
 GUILD = settings['DISCORD_GUILD_ID']
 ADMIN_ID = settings['ADMIN_ID']
-PREFIX = settings['PREFIX']
 
 default_guild_info = {
     'PREFIX': PREFIX,
