@@ -6,7 +6,7 @@
 """
 Utility functions used by the bot
 """
-
+import io
 import os
 import json
 import psycopg2 as pg
@@ -28,9 +28,8 @@ __all__ = ["print", "generate_stat_card"]
 load_dotenv()
 
 # ===== Get the API key =====
-DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
 BASE_PATH = "./"
-SERVER_IP = "SERVER_IP"
+SERVER_IP = os.getenv("SERVER_IP")
 # =========================================
 
 # ===== DB Config =====
@@ -99,12 +98,15 @@ def generate_stat_card(user):
     with pg.connect(**db_config) as conn:
         with conn.cursor() as cursor:
     # cur = con.cursor()
-            cursor.execute("SELECT shortcode From mapping WHERE user_id=?",(user.id,))
+            cursor.execute("SELECT shortcode From public.mapping WHERE user_id=%s",(str(user.id),))
             shortcode = cursor.fetchone()
     if not shortcode:
         return False
-    res = requests.post(url=SERVER_IP+"/getMetrics",json={"shortcode":shortcode[0]})
-    data = json.loads(res.text)['prints']
+    res = requests.post(url="http://" + SERVER_IP+"/getMetrics",json={"shortcode":shortcode[0]})
+    print(res)
+    print(res.text)
+    data = json.loads(res.text)
+    print(data)
     username = user.name
     avatar = user.avatar
     if not avatar:
@@ -133,27 +135,35 @@ def generate_stat_card(user):
         display_no = 0
     print(avatar)
     r = requests.get(avatar, timeout=60)
-    with open(BASE_PATH+"avatar.png","wb") as f:
-        f.write(r.content)
+
+    temp = io.BytesIO()
+    temp.write(r.content)
+    #with (temp := io.BytesIO()) as f:
+    #    f.write(r.content)
     
-    pic = ColorThief(BASE_PATH+"avatar.png")
+    
+    temp.seek(0)
+    pic = ColorThief(temp)
     accent_colour=pic.get_color(quality=1)
-    pic = Image.open(BASE_PATH+"avatar.png").convert("RGBA")
+    print("ColorThief")
+    pic = Image.open(temp).convert("RGBA")
     pic = pic.resize((60,60))
 
+    print("CREATE CARD")
     card = Image.new('RGBA', (825, 350))
     d=ImageDraw.Draw(card)
     d.rectangle([(0,0),(825,350)],fill=(30,31,35))
     d.rectangle([(7,7),(818,107)],fill=(47,49,54))
     d.rectangle([(7,7),(14,107)],fill=accent_colour)
     card.paste(pic,(35,28),pic)
-    name_font = ImageFont.truetype(BASE_PATH+"assets/fonts/Bold.ttf",32)
-    sub_font = ImageFont.truetype(BASE_PATH+"assets/fonts/Medium.ttf",25)
+    name_font = ImageFont.truetype("assets/fonts/Bold.ttf",32)
+    sub_font = ImageFont.truetype("assets/fonts/Medium.ttf",25)
     d.text((130,52),username,font=name_font,fill=(255,255,255))
     d.text((130,28),"User",font=sub_font,fill=(181,181,181))
     d.text((795,52),str(display_no),font=name_font,fill=(255,255,255),anchor='ra')
     d.text((649,28),"Total Prints",font=sub_font,fill=(181,181,181))
 
+    print("ADD Metrics")
     
 
     window = generate_card("Filament Used","{:,}".format(total_filament)+"g",accent_colour=accent_colour)
