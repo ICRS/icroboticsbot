@@ -9,7 +9,8 @@ Utility functions used by the bot
 
 import os
 import json
-import sqlite3 as sq
+import psycopg2 as pg
+import configparser
 import time
 
 from PIL import Image, ImageDraw, ImageFont
@@ -32,6 +33,18 @@ BASE_PATH = "./"
 SERVER_IP = "SERVER_IP"
 # =========================================
 
+# ===== DB Config =====
+config = configparser.ConfigParser()
+config.read('postgres.ini')
+
+db_config = {
+    'database': config['postgres']['database'],
+    'user': config['postgres']['user'],
+    'password': config['postgres']['password'],
+    'host': config['postgres']['host'],
+    'port': config['postgres']['port']
+}
+# =====================
 
 def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
     """
@@ -83,10 +96,11 @@ def generate_stat_card(user):
             
         return res
     
-    with sq.connect(DB_PATH) as con:
-        cur = con.cursor()
-        cur.execute("SELECT shortcode From mapping WHERE user_id=?",(user.id,))
-        shortcode = cur.fetchone()
+    with pg.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+    # cur = con.cursor()
+            cursor.execute("SELECT shortcode From mapping WHERE user_id=?",(user.id,))
+            shortcode = cursor.fetchone()
     if not shortcode:
         return False
     res = requests.post(url=SERVER_IP+"/getMetrics",json={"shortcode":shortcode[0]})
@@ -166,9 +180,9 @@ def generate_stat_card(user):
         a.text((12,40+idx*35),f"{idx+1}.",font=item_font,fill=(255,255,255))
         a.text((40,40+idx*35),f"{i[3]}g",font=item_font,fill=accent_colour)
     card.paste(window,(586,125))
-    card.save(BASE_PATH+"card.png")    
+    # card.save(BASE_PATH+"card.png")    
 
-
+    return card
 
 if __name__ == '__main__':
     pass
