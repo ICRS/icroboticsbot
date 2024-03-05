@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: icrsbot-stats-handler-deployment
+spec:
+  replicas: 1  # Number of replicas you want to run
+  selector:
+    matchLabels:
+      app: icrsbot-stats-handler
+  template:
+    metadata:
+      labels:
+        app: icrsbot-stats-handler
+    spec:
+      containers:
+      - name: icrsbot-stats-handler
+        image: localhost:32000/icrsbot-stats-handler  # Replace with your Python Docker image and tag
+        ports:
+        - containerPort: 5000  # Port your Python application is listening on
+        imagePullPolicy: "Always"
+
+
