@@ -270,8 +270,8 @@ def change_valid(userid, valid: int) -> bool:
             with conn.cursor() as cursor:
                 cursor.execute('''
                 UPDATE public.mapping
-                SET active = ?
-                WHERE user_id = ?
+                SET active = %s
+                WHERE user_id = %s
                 ''', (valid, str(userid))
                 )
             conn.commit()
