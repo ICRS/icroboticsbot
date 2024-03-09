@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: icrsbot-registration-deployment
+spec:
+  replicas: 1  # Number of replicas you want to run
+  selector:
+    matchLabels:
+      app: icrsbot-registration
+  template:
+    metadata:
+      labels:
+        app: icrsbot-registration
+    spec:
+      containers:
+      - name: icrsbot-registration
+        image: localhost:32000/icrsbot-registration  # Replace with your Python Docker image and tag
+        ports:
+        - containerPort: 5000  # Port your Python application is listening on
+        imagePullPolicy: "Always"
+
+

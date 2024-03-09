@@ -7,6 +7,7 @@
 """
 Generate a Quote Image from a given Image and Quote
 """
+import io
 import os
 from PIL import Image  # type: ignore
 
@@ -14,8 +15,8 @@ from src.quote_to_image import convert
 
 # Font Size Default to 32, Height and Width by default is 612
 def generate(IMAGE_PATH, author, quote,
-        IMAGE_TEMP=("assets/generation/temp.jpg"), # noqa
-        font=("assets/fonts/Precious.ttf"), BASE_PATH="/") -> tuple: # noqa
+        IMAGE_TEMP=os.path.relpath("assets/generation/temp.jpg"), # noqa
+        font=("assets/fonts/Precious.ttf"), BASE_PATH="/") -> Image: # noqa
     """
     generate a quote image from a given image and quote
 
@@ -35,29 +36,31 @@ def generate(IMAGE_PATH, author, quote,
     tuple
         Path to the generated png image and PIL Image Object
     """  # noqa ignore
-    IMAGE_TEMP = BASE_PATH + IMAGE_TEMP
+    
+    
     print(IMAGE_PATH, author, quote, IMAGE_TEMP, font, BASE_PATH)
-    image = Image.open(IMAGE_PATH)
+    image = Image.open(os.path.relpath(IMAGE_PATH))
+    print(image)
     grayscale = image.convert("L")
     width, height = grayscale.size
     ratio = 400/width
     grayscale = grayscale.resize((int(width*ratio), int(height*ratio)))
-    grayscale.save(IMAGE_TEMP)
+    print("Image Temp", os.path.abspath(IMAGE_TEMP))
+    temp = io.BytesIO()
+
+    grayscale.save(temp, format="PNG")
+
+    print("IMAGE TEMP SAVED")
 
     img = convert(
             quote=quote,
             author=author,
             fg="white",
-            image=IMAGE_TEMP,
+            image=temp,
             border_color="black",
             font_size=40,
             font_file=font,
             width=400,
             height=400)
 
-    PNG_PATH = os.path.abspath(BASE_PATH + "assets/generation/quote.png")
-    print(PNG_PATH)
-
-    # Save The Image as a Png file
-    img.save(PNG_PATH)
-    return PNG_PATH, img
+    return img

@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 # mypy: ignore-errors
@@ -12,37 +13,26 @@ import json
 import discord
 
 from dotenv import load_dotenv
-from src.utils import init_db,BASE_PATH
 
 from src.bot_class import DiscordBot
 
-
-init_db()
 load_dotenv()
-settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
+settings = json.load(open("settings.json",
                           "r", encoding="utf-8"))
 
-MAX_SIZE = 25000000
 TOKEN = os.getenv('DISCORD_TOKEN')
-PREFIX = settings['PREFIX']
 GUILD = int(settings['DISCORD_GUILD_ID'])
-FILE_CHANNEL = int(settings['FILE_CHANNEL'])
 ADMIN_ID = int(settings['ADMIN_ID'])
-ALERT_CHANNEL = int(settings['ALERT_CHANNEL'])
-ALERT_INTERVAL = int(settings['ALERT_INTERVAL'])
+PREFIX = settings['PREFIX']
 
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
 guild_info = {
-    'PREFIX': PREFIX,
+    'PREFIX': PREFIX,   
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
-    'FILE_CHANNEL': FILE_CHANNEL,
-    'ALERT_CHANNEL': ALERT_CHANNEL,
-    'ALERT_INTERVAL': ALERT_INTERVAL,
-    'MAX_SIZE': MAX_SIZE
 }
 
 client = DiscordBot(token=TOKEN,
