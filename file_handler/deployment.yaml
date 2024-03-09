@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: icrsbot-file-handler-deployment
+spec:
+  replicas: 1  # Number of replicas you want to run
+  selector:
+    matchLabels:
+      app: icrsbot-file-handler
+  template:
+    metadata:
+      labels:
+        app: icrsbot-file-handler
+    spec:
+      containers:
+      - name: icrsbot-file-handler
+        image: localhost:32000/icrsbot-file-handler  # Replace with your Python Docker image and tag
+        ports:
+        - containerPort: 5000  # Port your Python application is listening on
+        imagePullPolicy: "Always"
