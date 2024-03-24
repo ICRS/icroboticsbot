@@ -5,10 +5,7 @@ import signal
 import os
 import json 
 
-from dotenv import load_dotenv
 import time
-
-load_dotenv()
 
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 settings = json.load(open("settings.json", "r", encoding="utf-8"))
