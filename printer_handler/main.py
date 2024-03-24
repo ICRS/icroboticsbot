@@ -1,44 +1,21 @@
-
-# -*- coding: utf-8 -*-
-
-# mypy: ignore-errors
-
-"""
-This is the main file to start the bot.
-"""
+from src.bot_class import PrinterWebhook
 
 import os
-import json
-
-import discord
+import json 
 
 from dotenv import load_dotenv
-
-from src.bot_class import DiscordBot
+import time
 
 load_dotenv()
-settings = json.load(open("settings.json",
-                          "r", encoding="utf-8"))
 
-TOKEN = os.getenv('DISCORD_TOKEN')
-PREFIX = settings['PREFIX']
-GUILD = int(settings['DISCORD_GUILD_ID'])
-ADMIN_ID = int(settings['ADMIN_ID'])
-# PRINTER_URL = list(settings['PRINTER_ENDPOINTS'])
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+settings = json.load(open("settings.json", "r", encoding="utf-8"))
+PRINTER_NAMES = list(settings["PRINTER_NAMES"])
+PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
 
-intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True
-
-guild_info = {
-    'PREFIX': PREFIX,
-    'GUILD': GUILD,
-    'ADMIN_ID': ADMIN_ID,
-}
-
-client = DiscordBot(token=TOKEN,
-                    intents=intents,
-                    guild_info=guild_info)
-
-if __name__ == "__main__":
-    client.start_loop()
+if __name__ == '__main__':
+    w = PrinterWebhook(WEBHOOK_URL, PRINTER_NAMES, PRINTER_GATEWAY_ENDPOINT_SUFFIX)
+    
+    while True:
+        w.send_message_all()
+        time.sleep(60)

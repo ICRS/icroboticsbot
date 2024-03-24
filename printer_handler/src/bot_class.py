@@ -1,77 +1,38 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from discord_webhook import DiscordWebhook, DiscordEmbed
+from src.printer_farm import PrinterFarm
 
-# mypy: ignore-errors
-
-"""
-Discord Bot class. It handles all the commands and events.
-"""
-import json
-import asyncio
-import discord
-from discord.ext import commands
-
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
-
-__all__ = ["DiscordBot"]
-
-settings = json.load(open("settings.json",
-                          "r", encoding="utf-8"))
-
-PREFIX = settings['PREFIX']
-GUILD = settings['DISCORD_GUILD_ID']
-ADMIN_ID = settings['ADMIN_ID']
-
-default_guild_info = {
-    'PREFIX': PREFIX,
-    'GUILD': GUILD,
-    'ADMIN_ID': ADMIN_ID,
-}
+import atexit
 
 
-class DiscordBot(commands.Bot):
-    # pylint: disable=dangerous-default-value
-    def __init__(self, token, intents,
-                 guild_info=default_guild_info):
-        super().__init__(intents=intents,
-                         command_prefix=guild_info['PREFIX'],
-                         case_insensitive=True,
-                         help_command=None)
-        self.token = token
-        self.guild_info = guild_info
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
+class PrinterWebhook:
+    def __init__(self, webhook_url: str, printer_names : list[str], printer_endpoint_suffix : str) -> None:
+        self.webhook_url = webhook_url
+        self.webhook = DiscordWebhook(url=self.webhook_url, username="Printer Bot", id="Printer Bot", )
         
-        self.printers = {}
+        self.printer_farm = PrinterFarm(printer_names, printer_endpoint_suffix)
+        atexit.register(self.delete_message)
+
+        self.executed = False
+
+
+    def send_message(self, printer_name: str) -> None:
+        remaining_time = self.printer_farm.get_remaining_time(printer_name)
+        percentage = self.printer_farm.get_percentage(printer_name)
+        
+        embed = DiscordEmbed(title=printer_name, description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%", color=242424)
+        self.webhook.add_embed(embed)
+        # self.webhook.execute()
     
-    async def on_message(self, message):  # pylint: disable=arguments-differ
-        """
-        on_message is called when a message is sent in the server
+    def send_message_all(self) -> None:
+        for printer_name in self.printer_farm.get_printers():
+            self.send_message(printer_name)
+        if not self.executed:
+            self.webhook.execute()
+            self.executed = True
+        else:
+            self.webhook.edit()
 
-        Parameters
-        ----------
-        message : discord.Message
-            The message sent in the server or DM channel.
-        """
-        if message.author == self.user:
-            return
-        
-        await self.process_commands(message)
-
-    async def on_ready(self):
-        """
-        on_ready is called when the bot is ready to be used
-        """
-        guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
-
-
-    def start_loop(self):
-        """
-        start_loop starts the bot and the alert background task
-        """
-        async def run_bot():
-            await self.start(self.token)
-            await self.close()
-
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(run_bot())
+    def delete_message(self) -> None:
+        self.webhook.delete()
+    
+    
