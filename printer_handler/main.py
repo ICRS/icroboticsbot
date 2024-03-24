@@ -7,7 +7,7 @@ import json
 
 import time
 
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+WEBHOOK_URL = str(os.getenv("WEBHOOK_URL")).strip()
 settings = json.load(open("settings.json", "r", encoding="utf-8"))
 PRINTER_NAMES = list(settings["PRINTER_NAMES"])
 PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]

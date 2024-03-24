@@ -20,3 +20,4 @@ class PrinterGateway:
             return -1
         r = response.json()
         return r['percentage'] if 'percentage' in r else -1
+
