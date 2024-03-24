@@ -8,14 +8,14 @@ class PrinterGateway:
         self.printer_url = printer_url
     
     def get_remaining_time(self) -> int:
-        response = requests.get(f"{self.printer_url}/printer/status/time")
+        response = requests.get(f"http://{self.printer_url}/printer/status/time")
         if response.status_code != 200:
             return -1
         r = response.json()
         return r['time'] if 'time' in r else -1
     
     def get_percentage(self) -> int:
-        response = requests.get(f"{self.printer_url}/printer/status/percentage")
+        response = requests.get(f"http://{self.printer_url}/printer/status/percentage")
         if response.status_code != 200:
             return -1
         r = response.json()
