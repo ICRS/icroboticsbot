@@ -18,10 +18,3 @@ spec:
         ports:
         - containerPort: 5000  # Port your Python application is listening on
         imagePullPolicy: "Always"
-      env:
-        - name: DISCORD_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: discord-bot-secret
-              key: discord_token
-

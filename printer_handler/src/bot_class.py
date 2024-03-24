@@ -24,6 +24,7 @@ class PrinterWebhook:
         # self.webhook.execute()
     
     def send_message_all(self) -> None:
+        self.webhook.remove_embeds()
         for printer_name in self.printer_farm.get_printers():
             self.send_message(printer_name)
         if not self.executed:
@@ -34,5 +35,7 @@ class PrinterWebhook:
 
     def delete_message(self) -> None:
         self.webhook.delete()
+
+    
     
     
