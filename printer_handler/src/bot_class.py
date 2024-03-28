@@ -23,6 +23,8 @@ class PrinterWebhook:
             percentage = self.printer_farm.get_percentage(printer_name)
             frame = self.printer_farm.get_frame(printer_name)
 
+            fname = f"{printer_name}_stream.png"
+
             try:
                 im = Image.open(BytesIO(base64.b64decode(frame)))
             except Exception as e:
@@ -32,14 +34,14 @@ class PrinterWebhook:
             with BytesIO() as image_binary:
                 im.save(image_binary, 'PNG')
                 image_binary.seek(0)
-                # await ctx.send(file=discord.File(fp=image_binary, filename='image.png'))
 
-            embed = DiscordEmbed(title=printer_name,
-                                description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%",
-                                color=242424)
-            self.webhook.add_file(file=image_binary.getbuffer().tobytes(), filename='image.png')
-            embed.set_image(url='attachment://image.png')
-            self.webhook.add_embed(embed)
+                embed = DiscordEmbed(title=printer_name,
+                                    description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%",
+                                    color=242424)
+                self.webhook.add_embed(embed)
+                self.webhook.add_file(file=image_binary.getbuffer().tobytes(), filename=fname)
+                embed.set_image(url=f'attachment://{fname}')
+
             # self.webhook.execute()
         except Exception as e:
             print(str(e))
