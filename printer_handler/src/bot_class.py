@@ -38,7 +38,7 @@ class PrinterWebhook:
                                 description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%",
                                 color=242424)
             embed.set_image(url='attachment://image.png')
-            self.webhook.add_file(file=image_binary, filename='image.png')
+            # self.webhook.add_file(file=image_binary, filename='image.png')
             self.webhook.add_embed(embed)
             # self.webhook.execute()
         except Exception as e:
