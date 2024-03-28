@@ -18,28 +18,31 @@ class PrinterWebhook:
         self.executed = False
 
     def send_message(self, printer_name: str) -> None:
-        remaining_time = self.printer_farm.get_remaining_time(printer_name)
-        percentage = self.printer_farm.get_percentage(printer_name)
-        frame = self.printer_farm.get_frame(printer_name)
-
         try:
-            im = Image.open(BytesIO(base64.b64decode(frame)))
+            remaining_time = self.printer_farm.get_remaining_time(printer_name)
+            percentage = self.printer_farm.get_percentage(printer_name)
+            frame = self.printer_farm.get_frame(printer_name)
+
+            try:
+                im = Image.open(BytesIO(base64.b64decode(frame)))
+            except Exception as e:
+                print(str(e))
+                im = Image.open("./src/no_image.jpg")
+
+            with BytesIO() as image_binary:
+                im.save(image_binary, 'PNG')
+                image_binary.seek(0)
+                # await ctx.send(file=discord.File(fp=image_binary, filename='image.png'))
+
+            embed = DiscordEmbed(title=printer_name,
+                                description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%",
+                                color=242424)
+            embed.set_image(url='attachment://image.png')
+            self.webhook.add_file(file=image_binary, filename='image.png')
+            self.webhook.add_embed(embed)
+            # self.webhook.execute()
         except Exception as e:
             print(str(e))
-            im = Image.open("./no_image.jpg")
-
-        with BytesIO() as image_binary:
-            im.save(image_binary, 'PNG')
-            image_binary.seek(0)
-            # await ctx.send(file=discord.File(fp=image_binary, filename='image.png'))
-
-        embed = DiscordEmbed(title=printer_name,
-                             description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%",
-                             color=242424)
-        embed.set_image(url='attachment://image.png')
-        self.webhook.add_file(file=image_binary, filename='image.png')
-        self.webhook.add_embed(embed)
-        # self.webhook.execute()
 
     def send_message_all(self) -> None:
         self.webhook.remove_embeds()
