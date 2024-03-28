@@ -13,7 +13,7 @@ class PrinterFarm:
         return wrapper
 
     @printer_exists
-    def get_remaining_time(self, printer_name: str) -> int:        
+    def get_remaining_time(self, printer_name: str) -> int:
         print("Printer name: ", printer_name)
         return self.printers[printer_name].get_remaining_time()
     
@@ -21,6 +21,11 @@ class PrinterFarm:
     def get_percentage(self, printer_name : str) -> int:
         print("Printer name: ", printer_name)
         return self.printers[printer_name].get_percentage()
+    
+    @printer_exists
+    def get_frame(self, printer_name : str) -> str:
+        print("Printer name: ", printer_name)
+        return self.printers[printer_name].get_frame()
     
     def get_printers(self) -> list[str]:
         return list(self.printers.keys())
