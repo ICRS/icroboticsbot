@@ -37,8 +37,8 @@ class PrinterWebhook:
             embed = DiscordEmbed(title=printer_name,
                                 description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%",
                                 color=242424)
-            embed.set_image(url='attachment://image.png')
             self.webhook.add_file(file=image_binary.getbuffer().tobytes(), filename='image.png')
+            embed.set_image(url='attachment://image.png')
             self.webhook.add_embed(embed)
             # self.webhook.execute()
         except Exception as e:
