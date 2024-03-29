@@ -11,7 +11,9 @@ from src.printer_farm import PrinterFarm
 class PrinterWebhook:
     def __init__(self, webhook_url: str,
                  printer_names: list[str],
-                 printer_endpoint_suffix: str) -> None:
+                 printer_endpoint_suffix: str,
+                 prog_length: int = 45) -> None:
+        self.prog_length = prog_length
         self.webhook_url = webhook_url
         self.webhook = DiscordWebhook(url=self.webhook_url,
                                       username="Printer Bot",
@@ -30,7 +32,7 @@ class PrinterWebhook:
 
             fname = f"{printer_name}_stream.png"
 
-            prog_length = 50
+            prog_length = self.prog_length
             progress_text = f"Progress: {' '*int(prog_length-12)}{percentage}%"
             progress_bar = "=" * int(percentage/100 * prog_length)
             unprogressed = "-" * int(prog_length - len(progress_bar))
@@ -43,7 +45,7 @@ class PrinterWebhook:
                           f"{progress_text}\n{progress_bar+unprogressed}\n" +
                           "```") \
                 if remaining_time != 0 \
-                    else f"```ps\n[{'No printing in progress'.center(prog_length-2, " ")}]\n```"  # noqa
+                    else f"```ps\n[{'No printing in progress'.center(prog_length-2, ' ')}]\n```"  # noqa
 
             try:
                 im = Image.open(BytesIO(base64.b64decode(frame)))
