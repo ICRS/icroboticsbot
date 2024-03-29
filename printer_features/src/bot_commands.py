@@ -23,8 +23,11 @@ async def let_me_know(bot, ctx, printer):
         Discord bot instance
     ctx : Discord.Context
         Discord context
+    printer : str
+        Printer name
     """
     user = ctx.author
+    printer = "_".join(printer)
     await ctx.send(f"Sure {user.mention}, I will let you know when the printer is done")
 
 
@@ -38,6 +41,9 @@ async def timelapse_3D(bot, ctx, printer):
         Discord bot instance
     ctx : Discord.Context
         Discord context
+    printer : str
+        Printer name
     """
     user = ctx.author
+    printer = "_".join(printer)
     await ctx.send(f"Sure {user.mention}, I will generate a timelapse of the print")
