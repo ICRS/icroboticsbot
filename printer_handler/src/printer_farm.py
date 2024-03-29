@@ -1,13 +1,22 @@
+from enum import Enum
+
 from src.printer_gateway import PrinterGateway
 
-__all__ = ["PrinterFarm", "IDLE", "PRINTING", "PAUSED", "FINISHED", "UNKNOWN"]
+
+__all__ = ["PrinterFarm", "State"]
 
 
-IDLE = "IDLE"
-PRINTING = "PRINTING"
-PAUSED = "PAUSE"
-FINISHED = "FINISH"
-UNKNOWN = "UNKNOWN"
+class State(Enum):
+    IDLE = "IDLE"
+    PREPARING = "PREPARE"
+    RUNNING = "RUNNING"
+    PAUSED = "PAUSE"
+    FINISHED = "FINISH"
+    UNKNOWN = "UNKNOWN"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.UNKNOWN
 
 
 class PrinterFarm:
@@ -43,10 +52,10 @@ class PrinterFarm:
         return self.__printer_cache[printer_name]["frame"]
 
     @printer_exists
-    def get_state(self, printer_name: str) -> str:
+    def get_state(self, printer_name: str) -> State:
         print("Printer name: ", printer_name)
         state = self.printers[printer_name].get_state()
-        return state if state else UNKNOWN
+        return State(state) if state else State.UNKNOWN
 
     def get_printers(self) -> list[str]:
         return list(self.printers.keys())
