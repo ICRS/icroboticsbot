@@ -5,7 +5,7 @@ import atexit
 from PIL import Image
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
-from src.printer_farm import PrinterFarm
+from src.printer_farm import PrinterFarm, IDLE, PRINTING, PAUSED, FINISHED, UNKNOWN
 
 
 class PrinterWebhook:
@@ -19,51 +19,69 @@ class PrinterWebhook:
                                       username="Printer Bot",
                                       id="Printer Bot", )
 
+        self.__default_image = Image.open("./src/no_image.jpg")
+
         self.printer_farm = PrinterFarm(printer_names, printer_endpoint_suffix)
         atexit.register(self.delete_message)
 
         self.executed = False
 
     def send_message(self, printer_name: str) -> None:
+        skip_embed = False
+        embed_desc = ""
         try:
-            remaining_time = self.printer_farm.get_remaining_time(printer_name)
-            percentage = self.printer_farm.get_percentage(printer_name)
-            frame = self.printer_farm.get_frame(printer_name)
+            state = self.printer_farm.get_state(printer_name)
+            if state == UNKNOWN:
+                embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
 
+            elif state == IDLE:
+                embed_desc = f"```ps\n[{'No printing in progress'.center(self.prog_length-2, ' ')}]\n```"       # noqa
+
+            elif state == PRINTING or state == PAUSED:
+
+                remaining_time = self.printer_farm.get_remaining_time(printer_name)                             # noqa
+                percentage = self.printer_farm.get_percentage(printer_name)
+
+                progress_text = f"Progress: {' '*int(self.prog_length-11-len(str(percentage)))}{percentage}%"   # noqa
+                progress_bar = "=" * int(percentage/100 * self.prog_length)
+                unprogressed = "-" * int(self.prog_length - len(progress_bar))
+
+                remaining_time = "> Time remaining: " + \
+                    " "*int(self.prog_length-23-len(str(remaining_time))) + \
+                    str(remaining_time) + " mins"
+
+                embed_desc = (f"```md\n{remaining_time}\n" +
+                              f"{progress_text}\n{progress_bar+unprogressed}\n" +                               # noqa
+                              "```")
+
+            elif state == FINISHED:
+                embed_desc = f"```ps\n[{'Print finished'.center(self.prog_length-2, ' ')}]\n```"              # noqa
+
+            else:
+                embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
+
+            frame = self.printer_farm.get_frame(printer_name)
             fname = f"{printer_name}_stream.png"
 
-            prog_length = self.prog_length
-            progress_text = f"Progress: {' '*int(prog_length-12)}{percentage}%"
-            progress_bar = "=" * int(percentage/100 * prog_length)
-            unprogressed = "-" * int(prog_length - len(progress_bar))
+            if not skip_embed:
+                try:
+                    im = Image.open(BytesIO(base64.b64decode(frame)))
 
-            remaining_time = "> Time remaining: " + \
-                " "*int(prog_length-23-len(str(remaining_time))) + \
-                str(remaining_time) + " mins"
+                except Exception as e:
+                    im = self.__default_image
+                    print(str(e))
 
-            embed_desc = (f"```md\n{remaining_time}\n" +
-                          f"{progress_text}\n{progress_bar+unprogressed}\n" +
-                          "```") \
-                if remaining_time != 0 \
-                    else f"```ps\n[{'No printing in progress'.center(prog_length-2, ' ')}]\n```"  # noqa
+                with BytesIO() as image_binary:
+                    im.save(image_binary, 'PNG')
+                    image_binary.seek(0)
 
-            try:
-                im = Image.open(BytesIO(base64.b64decode(frame)))
-            except Exception as e:
-                print(str(e))
-                im = Image.open("./src/no_image.jpg")
-
-            with BytesIO() as image_binary:
-                im.save(image_binary, 'PNG')
-                image_binary.seek(0)
-
-                embed = DiscordEmbed(title=printer_name,
-                                     description=embed_desc,     # noqa # pylint: disable=line-too-long
-                                     color=242424)
-                self.webhook.add_embed(embed)
-                self.webhook.add_file(file=image_binary.getbuffer().tobytes(),
-                                      filename=fname)
-                embed.set_image(url=f'attachment://{fname}')
+                    embed = DiscordEmbed(title=printer_name,
+                                         description=embed_desc,     # noqa # pylint: disable=line-too-long
+                                         color=242424)
+                    self.webhook.add_embed(embed)
+                    self.webhook.add_file(file=image_binary.getbuffer().tobytes(),      # noqa
+                                          filename=fname)
+                    embed.set_image(url=f'attachment://{fname}')
 
         except Exception as e:
             print(str(e))
