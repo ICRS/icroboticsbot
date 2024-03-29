@@ -52,13 +52,13 @@ class DiscordBot(commands.Bot):
         """
         @self.command(name="letmeknow", pass_context=True,
                       help="Notify the user when the printer is done")
-        async def letmeknow(ctx):
-            await let_me_know(self, ctx)
+        async def letmeknow(ctx, *printer):
+            await let_me_know(self, ctx, printer)
 
         @self.command(name="timelapse", pass_context=True,
                       help="Generate a timelapse of the print")
-        async def timelapse(ctx):
-            await timelapse_3D(self, ctx)
+        async def timelapse(ctx, *printer):
+            await timelapse_3D(self, ctx, printer)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

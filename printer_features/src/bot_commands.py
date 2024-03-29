@@ -13,7 +13,7 @@ DEBUG = False
 __all__ = ["let_me_know", "timelapse_3D"]  # noqa
 
 
-async def let_me_know(bot, ctx):
+async def let_me_know(bot, ctx, printer):
     """
     let_me_know sends a message to the user that the printer is done
 
@@ -28,7 +28,7 @@ async def let_me_know(bot, ctx):
     await ctx.send(f"Sure {user.mention}, I will let you know when the printer is done")
 
 
-async def timelapse_3D(bot, ctx):
+async def timelapse_3D(bot, ctx, printer):
     """
     timelapse_3D generates a timelapse of the 3D print
 
