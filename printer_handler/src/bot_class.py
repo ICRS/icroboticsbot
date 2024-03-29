@@ -1,16 +1,21 @@
 import base64
-import os
 from io import BytesIO
-from PIL import Image
-from discord_webhook import DiscordWebhook, DiscordEmbed
-from src.printer_farm import PrinterFarm
 
 import atexit
+from PIL import Image
+from discord_webhook import DiscordWebhook, DiscordEmbed
+
+from src.printer_farm import PrinterFarm
+
 
 class PrinterWebhook:
-    def __init__(self, webhook_url: str, printer_names: list[str], printer_endpoint_suffix: str) -> None:
+    def __init__(self, webhook_url: str,
+                 printer_names: list[str],
+                 printer_endpoint_suffix: str) -> None:
         self.webhook_url = webhook_url
-        self.webhook = DiscordWebhook(url=self.webhook_url, username="Printer Bot", id="Printer Bot", )
+        self.webhook = DiscordWebhook(url=self.webhook_url,
+                                      username="Printer Bot",
+                                      id="Printer Bot", )
 
         self.printer_farm = PrinterFarm(printer_names, printer_endpoint_suffix)
         atexit.register(self.delete_message)
@@ -25,6 +30,21 @@ class PrinterWebhook:
 
             fname = f"{printer_name}_stream.png"
 
+            prog_length = 50
+            progress_text = f"Progress: {" "*int(prog_length-12)}{percentage}%"
+            progress_bar = "=" * int(percentage/100 * prog_length)
+            unprogressed = "-" * int(prog_length - len(progress_bar))
+
+            remaining_time = "> Time remaining: " + \
+                " "*int(prog_length-23-len(str(remaining_time))) + \
+                str(remaining_time) + " mins"
+
+            embed_desc = (f"```md\n{remaining_time}\n" +
+                          f"{progress_text}\n{progress_bar+unprogressed}\n" +
+                          "```") \
+                if remaining_time != 0 \
+                    else f"```ps\n[{"No printing in progress".center(prog_length-2, " ")}]\n```"  # noqa
+
             try:
                 im = Image.open(BytesIO(base64.b64decode(frame)))
             except Exception as e:
@@ -36,13 +56,13 @@ class PrinterWebhook:
                 image_binary.seek(0)
 
                 embed = DiscordEmbed(title=printer_name,
-                                    description=f"Time remaining: {remaining_time} minutes\nPercentage: {percentage}%",
-                                    color=242424)
+                                     description=embed_desc,     # noqa # pylint: disable=line-too-long
+                                     color=242424)
                 self.webhook.add_embed(embed)
-                self.webhook.add_file(file=image_binary.getbuffer().tobytes(), filename=fname)
+                self.webhook.add_file(file=image_binary.getbuffer().tobytes(),
+                                      filename=fname)
                 embed.set_image(url=f'attachment://{fname}')
 
-            # self.webhook.execute()
         except Exception as e:
             print(str(e))
 
