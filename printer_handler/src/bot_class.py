@@ -35,7 +35,7 @@ class PrinterWebhook:
                 embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
 
             elif state == State.IDLE:
-                embed_desc = f"```asciidoc\n {'No printing in progress'.center(self.prog_length-3, ' ')}::\n```"       # noqa
+                embed_desc = f"```asciidoc\n {'No print in progress'.center(self.prog_length-4, ' ')}:: \n```"   # noqa
 
             elif state == State.PREPARING:
                 embed_desc = f"```yaml\n[{'Preparing print'.center(self.prog_length-2, ' ')}]\n```"              # noqa
@@ -58,7 +58,7 @@ class PrinterWebhook:
                               "```")
 
             elif state == State.FINISHED:
-                embed_desc = f"```asciidoc\n {'Print finished'.center(self.prog_length-3, ' ')}::\n```"              # noqa
+                embed_desc = f"```asciidoc\n {'Print finished'.center(self.prog_length-4, ' ')}:: \n```"              # noqa
 
             else:
                 embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
