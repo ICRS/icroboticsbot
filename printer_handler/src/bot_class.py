@@ -5,7 +5,7 @@ import atexit
 from PIL import Image
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
-from src.printer_farm import PrinterFarm, IDLE, PRINTING, PAUSED, FINISHED, UNKNOWN
+from src.printer_farm import PrinterFarm, State
 
 
 class PrinterWebhook:
@@ -31,13 +31,16 @@ class PrinterWebhook:
         embed_desc = ""
         try:
             state = self.printer_farm.get_state(printer_name)
-            if state == UNKNOWN:
+            if state == State.UNKNOWN:
                 embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
 
-            elif state == IDLE:
-                embed_desc = f"```ps\n[{'No printing in progress'.center(self.prog_length-2, ' ')}]\n```"       # noqa
+            elif state == State.IDLE:
+                embed_desc = f"```asciidoc\n {'No printing in progress'.center(self.prog_length-3, ' ')}::\n```"       # noqa
 
-            elif state == PRINTING or state == PAUSED:
+            elif state == State.PREPARING:
+                embed_desc = f"```yaml\n[{'Preparing print'.center(self.prog_length-2, ' ')}]\n```"              # noqa
+
+            elif state == State.RUNNING or state == State.PAUSED:
 
                 remaining_time = self.printer_farm.get_remaining_time(printer_name)                             # noqa
                 percentage = self.printer_farm.get_percentage(printer_name)
@@ -54,8 +57,8 @@ class PrinterWebhook:
                               f"{progress_text}\n{progress_bar+unprogressed}\n" +                               # noqa
                               "```")
 
-            elif state == FINISHED:
-                embed_desc = f"```ps\n[{'Print finished'.center(self.prog_length-2, ' ')}]\n```"              # noqa
+            elif state == State.FINISHED:
+                embed_desc = f"```asciidoc\n {'Print finished'.center(self.prog_length-3, ' ')}::\n```"              # noqa
 
             else:
                 embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
