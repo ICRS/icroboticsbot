@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: icrsbot-printer-handler-deployment
+spec:
+  replicas: 1  # Number of replicas you want to run
+  selector:
+    matchLabels:
+      app: icrsbot-printer-handler
+  template:
+    metadata:
+      labels:
+        app: icrsbot-printer-handler
+    spec:
+      containers:
+      - name: icrsbot-printer-handler
+        image: localhost:32000/icrsbot-printer-handler  # Replace with your Python Docker image and tag
+        ports:
+        - containerPort: 5000  # Port your Python application is listening on
+        imagePullPolicy: "Always"
+        env:
+        - name: WEBHOOK_URL
+          valueFrom:
+            secretKeyRef:
+              name: discord-bot-secret
+              key: printer_status_channel_webhook
+        
