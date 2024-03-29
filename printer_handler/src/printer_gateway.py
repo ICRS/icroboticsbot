@@ -33,3 +33,9 @@ class PrinterGateway:
         r: dict = response.json()
         return r['frame'].get("body", "") if 'frame' in r else None
 
+    def get_state(self) -> str:
+        response = requests.get(f"http://{self.printer_url}/printer/status/state")
+        if response.status_code != 200:
+            return "UNKNOWN"
+        r: dict = response.json()
+        return r.get("state", "IDLE")
