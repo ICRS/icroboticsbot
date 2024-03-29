@@ -20,14 +20,12 @@ class PrinterFarm:
     def get_remaining_time(self, printer_name: str) -> int:
         print("Printer name: ", printer_name)
         remaining_time = self.printers[printer_name].get_remaining_time()
-        self.__printer_cache[printer_name]["remaining_time"] = remaining_time
         return remaining_time if remaining_time > 0 else 0
 
     @printer_exists
     def get_percentage(self, printer_name: str) -> int:
         print("Printer name: ", printer_name)
         percentage = self.printers[printer_name].get_percentage()
-        self.__printer_cache[printer_name]["percentage"] = percentage
         return percentage if percentage > 0 else 0
 
     @printer_exists
