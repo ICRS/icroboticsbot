@@ -31,7 +31,7 @@ class PrinterWebhook:
             fname = f"{printer_name}_stream.png"
 
             prog_length = 50
-            progress_text = f"Progress: {" "*int(prog_length-12)}{percentage}%"
+            progress_text = f"Progress: {' '*int(prog_length-12)}{percentage}%"
             progress_bar = "=" * int(percentage/100 * prog_length)
             unprogressed = "-" * int(prog_length - len(progress_bar))
 
@@ -43,7 +43,7 @@ class PrinterWebhook:
                           f"{progress_text}\n{progress_bar+unprogressed}\n" +
                           "```") \
                 if remaining_time != 0 \
-                    else f"```ps\n[{"No printing in progress".center(prog_length-2, " ")}]\n```"  # noqa
+                    else f"```ps\n[{'No printing in progress'.center(prog_length-2, " ")}]\n```"  # noqa
 
             try:
                 im = Image.open(BytesIO(base64.b64decode(frame)))
