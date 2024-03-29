@@ -12,9 +12,9 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import stats_card          # noqa
+from src.bot_commands import let_me_know, timelapse_3D  # noqa
 
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
+from src.utils import print                             # noqa  #pylint: disable=redefined-builtin
 from src.utils import BASE_PATH
 __all__ = ["DiscordBot"]
 
@@ -50,10 +50,15 @@ class DiscordBot(commands.Bot):
         """
         add_commands adds all the commands to the bot
         """
-        @self.command(name="stats", pass_context=True,
-                      help="Get your 3D printing stats")
-        async def stats(ctx):
-            await stats_card(self,ctx)
+        @self.command(name="letmeknow", pass_context=True,
+                      help="Notify the user when the printer is done")
+        async def letmeknow(ctx):
+            await let_me_know(self, ctx)
+
+        @self.command(name="timelapse", pass_context=True,
+                      help="Generate a timelapse of the print")
+        async def timelapse(ctx):
+            await timelapse_3D(self, ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
