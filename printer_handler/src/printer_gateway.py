@@ -26,10 +26,10 @@ class PrinterGateway:
         r = response.json()
         return r['percentage'] if 'percentage' in r else -1
 
-    def get_frame(self) -> str:
+    def get_frame(self) -> str | None:
         response = requests.get(f"http://{self.printer_url}/printer/camera")
         if response.status_code != 200:
-            return ""
-        r = response.json()
-        return r['frame'].get("body", "") if 'frame' in r else ""
+            return None
+        r: dict = response.json()
+        return r['frame'].get("body", "") if 'frame' in r else None
 
