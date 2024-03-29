@@ -20,5 +20,5 @@ if __name__ == '__main__':
 
     while True:
         w.send_message_all()
-        time.sleep(15)
+        time.sleep(10)
 
