@@ -1,6 +1,13 @@
 from src.printer_gateway import PrinterGateway
 
-__all__ = ["PrinterFarm"]
+__all__ = ["PrinterFarm", "IDLE", "PRINTING", "PAUSED", "FINISHED", "UNKNOWN"]
+
+
+IDLE = "IDLE"
+PRINTING = "PRINTING"
+PAUSED = "PAUSE"
+FINISHED = "FINISHED"
+UNKNOWN = "UNKNOWN"
 
 
 class PrinterFarm:
@@ -34,6 +41,12 @@ class PrinterFarm:
         frame = self.printers[printer_name].get_frame()
         self.__printer_cache[printer_name]["frame"] = frame if frame else self.__printer_cache[printer_name]["frame"]  # noqa # pylint: disable=line-too-long
         return self.__printer_cache[printer_name]["frame"]
+
+    @printer_exists
+    def get_state(self, printer_name: str) -> str:
+        print("Printer name: ", printer_name)
+        state = self.printers[printer_name].get_state()
+        return state if state else UNKNOWN
 
     def get_printers(self) -> list[str]:
         return list(self.printers.keys())
