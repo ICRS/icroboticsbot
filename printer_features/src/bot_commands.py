@@ -28,7 +28,7 @@ async def let_me_know(bot, ctx, printer):
     user = ctx.author
     printer = "-".join(printer)
     print(f"Let me know triggered user {user}, printer: {printer}")
-    # bot.printer_farm.let_me_know(printer, user)
+    bot.printer_farm.let_me_know(printer, user)
     await ctx.message.channel.send(f"Sure {user.mention}, I will let you know when the printer is done")
 
 
