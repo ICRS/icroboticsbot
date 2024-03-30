@@ -12,6 +12,16 @@ Discord Bot has been split into 3 microservices:
 
 See relevant directories for instructions to build containers and deployment
 
+## Build Instructions
 
 BUILDX Create Builder:
 docker buildx create --config ~/.docker/buildx/config.toml --name builder --driver-opt network=host
+
+The config.toml file should look like this:
+```
+[registry."REGISTRY_IP:REGISTRY_PORT"]
+http = true
+insecure = true
+```
+
+Run the build_docker.sh script file in each respective folder
