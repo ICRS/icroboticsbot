@@ -20,6 +20,9 @@ load_dotenv()
 settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
                           "r", encoding="utf-8"))
 
+PRINTER_NAMES = list(settings["PRINTER_NAMES"])
+PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
+
 TOKEN = os.getenv('DISCORD_TOKEN')
 PREFIX = settings['PREFIX']
 GUILD = int(settings['DISCORD_GUILD_ID'])
@@ -37,7 +40,9 @@ guild_info = {
 
 client = DiscordBot(token=TOKEN,
                     intents=intents,
-                    guild_info=guild_info)
+                    guild_info=guild_info,
+                    printer_names=PRINTER_NAMES,
+                    printer_suffix=PRINTER_GATEWAY_ENDPOINT_SUFFIX)
 
 if __name__ == "__main__":
     client.start_loop()
