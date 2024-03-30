@@ -24,4 +24,15 @@ spec:
             secretKeyRef:
               name: discord-bot-secret
               key: printer_status_channel_webhook
-        
+        volumeMounts:
+        - name: printer-config
+          mountPath: /app/settings.json
+          subPath: settings.json
+          readOnly: true
+      volumes:
+        - name: printer-config
+          configMap:
+            name: printer-config
+            items:
+              - key: printer_config
+                path: settings.json
