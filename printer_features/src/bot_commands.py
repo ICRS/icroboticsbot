@@ -28,6 +28,7 @@ async def let_me_know(bot, ctx, printer):
     """
     user = ctx.author
     printer = "_".join(printer)
+    bot.printer_farm.let_me_know(printer, user)
     await ctx.send(f"Sure {user.mention}, I will let you know when the printer is done")
 
 
@@ -46,4 +47,5 @@ async def timelapse_3D(bot, ctx, printer):
     """
     user = ctx.author
     printer = "_".join(printer)
-    await ctx.send(f"Sure {user.mention}, I will generate a timelapse of the print")
+    bot.printer_farm.timelapse(printer, user)
+    await ctx.send(f"Sure {user.mention}, I will generate a timelapse of the print once it's done")

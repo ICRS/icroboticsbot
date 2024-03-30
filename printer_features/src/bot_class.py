@@ -14,8 +14,12 @@ from discord.ext import commands
 
 from src.bot_commands import let_me_know, timelapse_3D  # noqa
 
+from src.PrinterFarm import PrinterFarm
+
 from src.utils import print                             # noqa  #pylint: disable=redefined-builtin
 from src.utils import BASE_PATH
+
+
 __all__ = ["DiscordBot"]
 
 settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
@@ -35,7 +39,9 @@ default_guild_info = {
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
     def __init__(self, token, intents,
-                 guild_info=default_guild_info):
+                 guild_info=default_guild_info,
+                 printer_names=[],
+                 printer_suffix=None):
         super().__init__(intents=intents,
                          command_prefix=guild_info['PREFIX'],
                          case_insensitive=True,
@@ -45,6 +51,9 @@ class DiscordBot(commands.Bot):
         self.bot_prefix = guild_info["PREFIX"]
         self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
+
+        self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
+        self.printer_farm.start_listener()
 
     def add_commands(self):
         """
