@@ -97,6 +97,7 @@ class PrinterListener:
     async def send_timelapse(self, timelapse: bytes) -> None:
         for user in self.__users[Command.TIMELAPSE]:
             await user.send(file=discord.File(timelapse, 'timelapse.gif'))
+        self.clear_users(Command.TIMELAPSE)
 
     def append_frame(self):
         frame = self.__get_frame()
