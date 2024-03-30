@@ -44,32 +44,39 @@ class PrinterListener:
         self.__printer_state: list[State] = []
 
     def add_user(self, user: discord.User, comm: Command) -> bool:
+        print(f"Adding user {user} to {comm}")
         self.__users[Command(comm)].append(user)
         return user in self.__users[Command(comm)]
 
     def remove_user(self, user: discord.User, comm: Command) -> bool:
+        print(f"Removing user {user} from {comm}")
         self.__users[Command(comm)].remove(user)
         return user not in self.__users[Command(comm)]
 
     def user_in(self, user: discord.User, comm: Command) -> bool:
+        print(f"Checking if user {user} is in {comm}")
         return user in self.__users[Command(comm)]
 
     def clear_users(self, comm: Command) -> bool:
+        print(f"Clearing users from {comm}")
         self.__users[Command(comm)].clear()
         return len(self.__users[Command(comm)]) == 0
 
     async def notify_users(self, comm: Command) -> bool:
+        print(f"Notifying users in {comm}")
         for user in self.__users[Command(comm)]:
             await user.send(f"Printer {self.printer_url.split('.')[0]} is finished.")  # noqa
         return True
 
     def enable_timelapse(self, user: discord.User) -> bool:
+        print(f"Enabling timelapse for {user}")
         self.__timelapsed = True
         if not self.user_in(user, Command.TIMELAPSE):
             self.add_user(user, Command.TIMELAPSE)
         return True
 
     def disable_timelapse(self, user: discord.User) -> bool:
+        print(f"Disabling timelapse for {user}")
         if self.user_in(user, Command.TIMELAPSE):
             self.remove_user(user, Command.TIMELAPSE)
         if len(self.__users[Command.TIMELAPSE]) == 0:
@@ -81,6 +88,7 @@ class PrinterListener:
         return self.__timelapsed
 
     def create_timelapse(self) -> bytes:
+        print("Creating timelapse")
         im: list[Image.Image] = []
         for frame in self.__timelapse_frames:
             im.append(Image.open(frame))
@@ -94,6 +102,7 @@ class PrinterListener:
             return buffer.getbuffer().tobytes()
 
     async def send_timelapse(self, timelapse: bytes) -> None:
+        print("Sending timelapse")
         for user in self.__users[Command.TIMELAPSE]:
             await user.send(file=discord.File(timelapse, 'timelapse.gif'))
         self.clear_users(Command.TIMELAPSE)
@@ -105,6 +114,7 @@ class PrinterListener:
                 self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
 
     def is_done(self) -> bool:
+        print("Checking if printer is done")
         self.__printer_state.append(self.__get_state())
 
         if len(self.__printer_state) < 2:
