@@ -24,3 +24,16 @@ spec:
               secretKeyRef:
                 name: discord-bot-secret 
                 key: discord_token
+        volumeMounts:
+          - name: discord-bot-secret
+            mountPath: /app/settings.json
+            subPath: settings.json
+            readOnly: true
+      volumes:
+        - name: discord-bot-secret
+          secret:
+            secretName: discord-bot-secret
+            items:
+              - key: discord_settings
+                path: settings.json
+

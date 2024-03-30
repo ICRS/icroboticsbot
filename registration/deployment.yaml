@@ -23,6 +23,10 @@ spec:
             mountPath: /app/postgres.ini
             subPath: postgres.ini
             readOnly: true
+          - name: discord-bot-secret
+            mountPath: /app/settings.json
+            subPath: settings.json
+            readOnly: true
         env:
           - name: DISCORD_TOKEN
             valueFrom:
@@ -38,4 +42,9 @@ spec:
         - name: postgres-ini 
           secret:
             secretName: postgres-ini-secret 
-
+        - name: discord-bot-secret
+          secret:
+            secretName: discord-bot-secret
+            items:
+              - key: discord_settings
+                path: settings.json
