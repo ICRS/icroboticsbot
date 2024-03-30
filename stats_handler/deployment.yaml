@@ -29,6 +29,11 @@ spec:
               secretKeyRef:
                 name: discord-bot-secret 
                 key: discord_token
+          - name: SERVER_IP
+            valueFrom:
+              secretKeyRef:
+                name: access-server-secret 
+                key: access_server_ip
       volumes:
         - name: postgres-ini 
           secret:
