@@ -100,9 +100,10 @@ class PrinterListener:
         self.clear_users(Command.TIMELAPSE)
 
     def append_frame(self):
-        frame = self.__get_frame()
-        if frame is not None:
-            self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
+        if self.__timelapsed:
+            frame = self.__get_frame()
+            if frame is not None:
+                self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
 
     def is_done(self) -> bool:
         self.__printer_state.append(self.__get_state())

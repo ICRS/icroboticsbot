@@ -6,7 +6,6 @@
 """
 Discord Bot helper functions
 """
-import discord
 
 DEBUG = False
 
