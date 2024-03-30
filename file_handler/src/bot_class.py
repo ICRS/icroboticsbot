@@ -6,6 +6,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import os
 import json
 import asyncio
 import discord
@@ -22,7 +23,7 @@ settings = json.load(open("settings.json",
 MAX_SIZE = 25000000
 PREFIX = settings['PREFIX']
 GUILD = settings['DISCORD_GUILD_ID']
-FILE_CHANNEL = settings['FILE_CHANNEL']
+FILE_CHANNEL = int(os.getenv('FILE_CHANNEL'))
 ADMIN_ID = settings['ADMIN_ID']
 
 default_guild_info = {
