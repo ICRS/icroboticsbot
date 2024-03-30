@@ -2,6 +2,7 @@ import asyncio
 from threading import Thread
 import time
 from src.PrinterListener import PrinterListener, Command
+from src.utils import print
 
 import discord
 
@@ -38,10 +39,15 @@ class PrinterFarm:
                     if printer_listener.is_timelapsed():
                         timelapse: bytes = printer_listener.create_timelapse()
                         asyncio.run(printer_listener.send_timelapse(timelapse))
-                        printer_listener.disable_timelapse()
+                        printer_listener.disable_timelapse(None)
                     asyncio.run(printer_listener.notify_users(
                         Command.LET_ME_KNOW))
                     printer_listener.clear_users(Command.LET_ME_KNOW)
+
+                if printer_listener.is_reset():
+                    printer_listener.clear_users(Command.LET_ME_KNOW)
+                    printer_listener.clear_users(Command.TIMELAPSE)
+                    printer_listener.disable_timelapse(None)
 
                 printer_listener.append_frame()
 
