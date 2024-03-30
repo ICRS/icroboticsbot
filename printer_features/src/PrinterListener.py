@@ -58,11 +58,10 @@ class PrinterListener:
         self.__users[Command(comm)].clear()
         return len(self.__users[Command(comm)]) == 0
 
-    def notify_users(self, comm: Command) -> str:
-        discord_msg = f"Printer {self.printer_url.split(".")[0]} is done! "
+    async def notify_users(self, comm: Command) -> bool:
         for user in self.__users[Command(comm)]:
-            discord_msg += user.mention + " "
-        return discord_msg
+            await user.send(f"Printer {self.printer_url.split(".")[0]} is finished.")  # noqa
+        return True
 
     def enable_timelapse(self, user: discord.User) -> bool:
         self.__timelapsed = True
