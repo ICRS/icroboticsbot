@@ -32,6 +32,7 @@ class PrinterFarm:
 
     def __thread_loop(self) -> None:
         while True:
+            print("Listening for printers")
             for printer_name, printer_listener in self.printers.items():
                 if printer_listener.is_done():
                     if printer_listener.is_timelapsed():
@@ -48,16 +49,19 @@ class PrinterFarm:
 
     @printer_exists
     def let_me_know(self, printer_name: str, user: discord.User) -> bool:
-        print("printer_name", printer_name)
+        print(f"Let me know for {user} on {printer_name}")
         if self.printers[printer_name].user_in(user, Command.LET_ME_KNOW):
+            print("Adding user")
             return self.printers[printer_name].add_user(user,
                                                         Command.LET_ME_KNOW)
         else:
+            print("Removing user")
             return self.printers[printer_name].remove_user(user,
                                                            Command.LET_ME_KNOW)
 
     @printer_exists
     def timelapse(self, printer_name: str, user: discord.User) -> bool:
+        print(f"Timelapse for {user} on {printer_name}")
         if not self.printers[printer_name].is_timelapsed():
             return self.printers[printer_name].enable_timelapse(user)
         else:
