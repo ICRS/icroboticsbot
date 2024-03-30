@@ -23,6 +23,12 @@ spec:
             mountPath: /app/postgres.ini
             subPath: postgres.ini
             readOnly: true
+        env:
+          - name: DISCORD_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: discord-bot-secret 
+                key: discord_token
       volumes:
         - name: postgres-ini 
           secret:
