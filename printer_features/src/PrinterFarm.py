@@ -9,7 +9,7 @@ __all__ = ["PrinterFarm"]
 
 
 class PrinterFarm:
-    def __init__(self, bot: discord.command.Bot,
+    def __init__(self, bot,
                  printer_names: list[str],
                  printer_suffix: str) -> None:
 
@@ -48,6 +48,7 @@ class PrinterFarm:
 
     @printer_exists
     def let_me_know(self, printer_name: str, user: discord.User) -> bool:
+        print("printer_name", printer_name)
         if self.printers[printer_name].user_in(user, Command.LET_ME_KNOW):
             return self.printers[printer_name].add_user(user,
                                                         Command.LET_ME_KNOW)
