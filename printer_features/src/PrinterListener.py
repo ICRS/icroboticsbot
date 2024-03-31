@@ -34,15 +34,21 @@ class Command(Enum):
 
 
 class PrinterListener:
-    def __init__(self, printer_url: str, timelapse_speed: float = 1.0):
+    def __init__(self, printer_name: str,
+                 printer_url: str,
+                 timelapse_speed: float = 1.0):
+
         self.printer_url = printer_url
-        self.printer_name = printer_url.split('.')[0]
+        self.printer_name = printer_name
+
         self.__timelapse_speed: float = timelapse_speed
         self.__timelapsed: bool = False
+
         self.__users: dict[Command, list[discord.User]] = {
             Command.LET_ME_KNOW: [],
             Command.TIMELAPSE: []
         }
+
         self.__timelapse_frames: list[BytesIO] = []
         self.__printer_state: list[State] = []
 
@@ -79,6 +85,11 @@ class PrinterListener:
         return True
 
     def disable_timelapse(self, user: discord.User) -> bool:
+        if user is None:
+            print(self.printer_name, "Disabling timelapse for all users")
+            self.clear_users(Command.TIMELAPSE)
+            self.__timelapsed = False
+            return True
         print(self.printer_name, f"Disabling timelapse for {user}")
         if self.user_in(user, Command.TIMELAPSE):
             self.remove_user(user, Command.TIMELAPSE)
