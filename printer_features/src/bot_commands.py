@@ -34,10 +34,10 @@ class PrinterCommandPage(View):
         super().__init__(timeout=timeout)
         self.printer = printer
 
-    @discord.ui.button(label="Button",style=discord.ButtonStyle.gray)
-    async def blurple_button(self,button:discord.ui.Button,interaction:discord.Interaction):
-        button.style=discord.ButtonStyle.green
-        await interaction.response.edit_message(content=f"This is an edited button response!", view=self)
+    @discord.ui.button(label="Button", style=discord.ButtonStyle.gray)
+    async def blurple_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+        button.style = discord.ButtonStyle.green
+        await interaction.response.edit_message(content="This is an edited button response!", view=self)
 
 
 class PrintersMainPage(View):
@@ -74,7 +74,7 @@ async def printer_buttons(bot, ctx):
     """
     user = ctx.author
     printer_names = list(bot.printer_farm.printers.keys())
-    await ctx.message.channel.send(f"Choose a printer", view=PrintersMainPage(printer_names=printer_names))
+    await ctx.message.channel.send("Choose a printer", view=PrintersMainPage(printer_names=printer_names))
 
 
 async def let_me_know(bot, ctx, printer):
