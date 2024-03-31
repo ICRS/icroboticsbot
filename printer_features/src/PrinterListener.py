@@ -44,9 +44,9 @@ class PrinterListener:
         self.__timelapse_speed: float = timelapse_speed
         self.__timelapsed: bool = False
 
-        self.__users: dict[Command, list[discord.User]] = {
-            Command.LET_ME_KNOW: [],
-            Command.TIMELAPSE: []
+        self.__users: dict[Command, set[discord.User]] = {
+            Command.LET_ME_KNOW: set(),
+            Command.TIMELAPSE: set()
         }
 
         self.__timelapse_frames: list[BytesIO] = []
@@ -54,13 +54,13 @@ class PrinterListener:
 
     def add_user(self, user: discord.User, comm: Command) -> bool:
         print(self.printer_name, f"Adding user {user} to {comm}")
-        self.__users[Command(comm)].append(user)
-        return user in self.__users[Command(comm)]
+        self.__users[Command(comm)].add(user)
+        return True
 
     def remove_user(self, user: discord.User, comm: Command) -> bool:
         print(self.printer_name, f"Removing user {user} from {comm}")
-        self.__users[Command(comm)].remove(user)
-        return user not in self.__users[Command(comm)]
+        self.__users[Command(comm)].discard(user)
+        return True
 
     def user_in(self, user: discord.User, comm: Command) -> bool:
         print(self.printer_name, f"Checking if user {user} is in {comm}")
@@ -69,7 +69,7 @@ class PrinterListener:
     def clear_users(self, comm: Command) -> bool:
         print(self.printer_name, f"Clearing users from {comm}")
         self.__users[Command(comm)].clear()
-        return len(self.__users[Command(comm)]) == 0
+        return True
 
     async def notify_users(self, comm: Command) -> bool:
         print(self.printer_name, f"Notifying users in {comm}")
