@@ -12,7 +12,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import let_me_know, timelapse_3D  # noqa
+from src.bot_commands import printer_buttons  # noqa
 
 from src.PrinterFarm import PrinterFarm
 
@@ -59,15 +59,10 @@ class DiscordBot(commands.Bot):
         """
         add_commands adds all the commands to the bot
         """
-        @self.command(name="letmeknow", pass_context=True,
-                      help="Notify the user when the printer is done")
-        async def letmeknow(ctx, *printer):
-            await let_me_know(self, ctx, printer)
-
-        @self.command(name="timelapse", pass_context=True,
-                      help="Generate a timelapse of the print")
-        async def timelapse(ctx, *printer):
-            await timelapse_3D(self, ctx, printer)
+        @self.command(name="printers", pass_context=True,
+                        help="List all the printers and add buttons to interact with them")
+        async def printers(ctx):
+            await printer_buttons(self, ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

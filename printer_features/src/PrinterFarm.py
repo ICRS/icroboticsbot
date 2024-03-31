@@ -16,7 +16,7 @@ class PrinterFarm:
 
         self.bot = bot
         self.printers: dict[str, PrinterListener] = {name: PrinterListener(
-            name + printer_suffix) for name in printer_names}
+            name, name + printer_suffix) for name in printer_names}
 
         self.__thread = Thread(target=self.__thread_loop)
         self.__thread.daemon = True
@@ -34,14 +34,14 @@ class PrinterFarm:
     def __thread_loop(self) -> None:
         while True:
             print("Listening for printers")
-            for printer_name, printer_listener in self.printers.items():
+            for _, printer_listener in self.printers.items():
                 if printer_listener.is_done():
                     if printer_listener.is_timelapsed():
                         timelapse: bytes = printer_listener.create_timelapse()
-                        asyncio.run(printer_listener.send_timelapse(timelapse))
+                        # asyncio.run(printer_listener.send_timelapse(timelapse))
                         printer_listener.disable_timelapse(None)
-                    asyncio.run(printer_listener.notify_users(
-                        Command.LET_ME_KNOW))
+                    # asyncio.run(printer_listener.notify_users(
+                    #     Command.LET_ME_KNOW))
                     printer_listener.clear_users(Command.LET_ME_KNOW)
 
                 if printer_listener.is_reset():
