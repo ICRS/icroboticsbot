@@ -11,11 +11,11 @@ import discord
 from discord.ui import View, Button
 
 from src.PrinterFarm import PrinterFarm
-from src.PrinterListener import PrinterListener
+from src.PrinterListener import PrinterListener, Command
 
 DEBUG = False
 
-__all__ = ["printer_buttons"]  # noqa
+__all__ = ["printer_buttons", "printer_status"]  # noqa
 
 
 class PrinterButton(Button):
@@ -23,54 +23,67 @@ class PrinterButton(Button):
         super().__init__(**kwargs)
         self.printer = printer
 
+    async def callback(self, interaction: discord.Interaction):
+        # This method handles clicks for all dynamically created buttons
+        # Disable the button after being clicked
+        self.disabled = True
+        message_embed = discord.Embed(
+            title=f"Printer selected: {self.printer.printer_name}",
+            description="Choose an action",
+            color=discord.Color.green())
+        message_embed.add_field(
+            name="Notify",
+            value="Notifies you when the printer is done",
+            inline=False)
+        message_embed.add_field(
+            name="Timelapse",
+            value="Generates a timelapse of the print",
+            inline=False)
+        await interaction.response.edit_message(
+            embed=message_embed,
+            view=PrinterCommandPage(printer=self.printer),
+            delete_after=60)
+
 
 class PrinterCommandPage(View):
-    def __init__(self, *, timeout=180, printer: str):
+    def __init__(self, *, timeout=180,
+                 printer: PrinterListener):
+
         super().__init__(timeout=timeout)
-        self.printer = printer
+        self.printer: PrinterListener = printer
 
-    @discord.ui.button(label="Let me know", style=discord.ButtonStyle.gray)
-    async def letmeknow(self, button: discord.ui.Button,
-                        interaction: discord.Interaction):
-        button.style = discord.ButtonStyle.green
-        await interaction.response.edit_message(
-            content="I will let you know when the printer is done!",
-            view=self)
-
-    @discord.ui.button(label="Timelapse", style=discord.ButtonStyle.gray)
-    async def timelapse(self, button: discord.ui.Button,
-                        interaction: discord.Interaction):
-        button.style = discord.ButtonStyle.green
-        await interaction.response.edit_message(
-            content="I will send you a timelapse when the printer is done",
-            view=self)
-
-    @discord.ui.button(label="Back", style=discord.ButtonStyle.red)
-    async def go_back(self, button: discord.ui.Button,
-                      interaction: discord.Interaction):
+    @discord.ui.button(label="Notify", style=discord.ButtonStyle.green)
+    async def notify(self, interaction: discord.Interaction,
+                     button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
+        self.printer.add_user(interaction.user, Command.NOTIFY)
         await interaction.response.edit_message(
-            content="Choose a printer",
-            view=self)
+            content="All set!",
+            view=None,
+            embed=None,
+            delete_after=5)
+
+    @discord.ui.button(label="Timelapse", style=discord.ButtonStyle.green)
+    async def timelapse(self, interaction: discord.Interaction,
+                        button: discord.ui.Button):
+        button.style = discord.ButtonStyle.gray
+        self.printer.enable_timelapse(interaction.user)
+        await interaction.response.edit_message(
+            content="Await the timelapse in your DMs!",
+            view=None,
+            embed=None,
+            delete_after=5)
 
 
 class PrintersMainPage(View):
-    def __init__(self, *, timeout=180, printer_farm: PrinterFarm = PrinterFarm()):
+    def __init__(self, *, timeout=180,
+                 printer_farm: PrinterFarm = PrinterFarm()):
+
         super().__init__(timeout=timeout)
         for name, listener in printer_farm.printers.items():
             self.add_item(PrinterButton(printer=listener,
                                         label=name,
-                                        style=discord.ButtonStyle.green,
-                                        custom_id=name))
-
-    async def callback(self, button: PrinterButton,
-                       interaction: discord.Interaction):
-        # This method handles clicks for all dynamically created buttons
-        # Disable the button after being clicked
-        button.disabled = True
-        await interaction.response.edit_message(
-            content=f"Printer selected: {button.printer.printer_name}",
-            view=PrinterCommandPage(printer=button.printer))
+                                        style=discord.ButtonStyle.green))
 
 
 async def printer_buttons(bot, ctx):
@@ -85,15 +98,24 @@ async def printer_buttons(bot, ctx):
         Discord context
     """
     user = ctx.author
-    printer_farm = bot.printer_farm
-    await ctx.message.channel.send("Choose a printer",
+    printer_farm: PrinterFarm = bot.printer_farm
+    message_embed = discord.Embed(
+        title="Select a printer",
+        description="Choose a printer",
+        color=discord.Color.green())
+    for name, listener in printer_farm.printers.items():
+        message_embed.add_field(
+            name=name,
+            value=f"Status: {listener.get_state()}",
+            inline=False)
+    await ctx.message.channel.send(embed=message_embed,
                                    view=PrintersMainPage(
                                        printer_farm=printer_farm))
 
 
-async def let_me_know(bot, ctx, printer):
+async def printer_status(bot, ctx):
     """
-    let_me_know sends a message to the user that the printer is done
+    printer_status sends a message with the users bound to the printers
 
     Parameters
     ----------
@@ -101,30 +123,25 @@ async def let_me_know(bot, ctx, printer):
         Discord bot instance
     ctx : Discord.Context
         Discord context
-    printer : str
-        Printer name
     """
-    user = ctx.author
-    printer = "-".join(printer)
-    print(f"Let me know triggered user {user}, printer: {printer}")
-    bot.printer_farm.let_me_know(printer, user)
-    await ctx.message.channel.send(f"Sure {user.mention}, I will let you know when the printer is done")
+    printer_farm: PrinterFarm = bot.printer_farm
+    message_embed = discord.Embed(
+        title="Printer status",
+        color=discord.Color.green())
+    for name, listener in printer_farm.printers.items():
+        table = "```yaml\n"
+        for command in Command:
+            users = listener.get_users(command)
+            if len(users) > 0:
+                table += f"{command.value}:\n"
+                table += "\n".join([f"\t{user.name}" for user in users])
+                table += "\n"
+            else:
+                table += " "
+        table += "```"
+        message_embed.add_field(
+            name=name,
+            value=table,
+            inline=False)
 
-
-async def timelapse_3D(bot, ctx, printer):
-    """
-    timelapse_3D generates a timelapse of the 3D print
-
-    Parameters
-    ----------
-    bot : DiscordBot
-        Discord bot instance
-    ctx : Discord.Context
-        Discord context
-    printer : str
-        Printer name
-    """
-    user = ctx.author
-    printer = "-".join(printer)
-    bot.printer_farm.timelapse(printer, user)
-    await ctx.message.channel.send(f"Sure {user.mention}, I will generate a timelapse of the print once it's done")
+    await ctx.message.channel.send(embed=message_embed)

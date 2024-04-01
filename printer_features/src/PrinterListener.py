@@ -30,12 +30,12 @@ class State(Enum):
 
 
 class Command(Enum):
-    LET_ME_KNOW = "letmeknow"
-    TIMELAPSE = "timelapse"
+    NOTIFY = "Notify"
+    TIMELAPSE = "Timelapse"
 
     @classmethod
     def _missing_(cls, value):
-        return cls.LET_ME_KNOW
+        return cls.NOTIFY
 
 
 class PrinterListener:
@@ -50,12 +50,20 @@ class PrinterListener:
         self.__timelapsed: bool = False
 
         self.__users: dict[Command, set[discord.User]] = {
-            Command.LET_ME_KNOW: set(),
+            Command.NOTIFY: set(),
             Command.TIMELAPSE: set()
         }
 
         self.__timelapse_frames: list[BytesIO] = []
         self.__printer_state: list[State] = []
+
+    def get_state(self) -> State:
+        return State(self.__printer_state[-1]).value if \
+            len(self.__printer_state) > 0 else State.UNKNOWN.value
+
+    def get_users(self, comm: Command) -> set[discord.User]:
+        print(self.printer_name, f"Getting users in {comm}")
+        return self.__users[Command(comm)]
 
     def add_user(self, user: discord.User, comm: Command) -> bool:
         print(self.printer_name, f"Adding user {user} to {comm}")
