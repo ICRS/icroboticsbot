@@ -18,6 +18,7 @@ DEBUG = False
 __all__ = ["printer_buttons", "printer_status"]  # noqa
 
 
+# https://github.com/Rapptz/discord.py/tree/master/examples/views
 class PrinterButton(Button):
     def __init__(self, printer: PrinterListener, **kwargs):
         super().__init__(**kwargs)
