@@ -20,6 +20,7 @@ load_dotenv()
 BASE_PATH = "./"
 # =========================================
 
+
 def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
     """
     print is a wrapper around the built-in print function

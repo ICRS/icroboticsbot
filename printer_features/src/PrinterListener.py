@@ -175,7 +175,9 @@ class PrinterListener:
         return False
 
     def __get_remaining_time(self) -> int:
-        response = requests.get(f"http://{self.printer_url}/printer/status/time")
+        response = requests.get(
+            f"http://{self.printer_url}/printer/status/time",
+            timeout=30)
         if response.status_code != 200:
             return -1
         r: dict = response.json()
@@ -183,21 +185,26 @@ class PrinterListener:
 
     def __get_percentage(self) -> int:
         response = requests.get(
-            f"http://{self.printer_url}/printer/status/percentage")
+            f"http://{self.printer_url}/printer/status/percentage",
+            timeout=30)
         if response.status_code != 200:
             return -1
         r: dict = response.json()
         return r.get("percentage", -1)
 
     def __get_frame(self) -> str | None:
-        response = requests.get(f"http://{self.printer_url}/printer/camera")
+        response = requests.get(
+            f"http://{self.printer_url}/printer/camera",
+            timeout=30)
         if response.status_code != 200:
             return None
         r: dict[str, dict] = response.json()
         return r.get("frame", {}).get("body", None)
 
     def __get_state(self) -> State:
-        response = requests.get(f"http://{self.printer_url}/printer/status/state")
+        response = requests.get(
+            f"http://{self.printer_url}/printer/status/state",
+            timeout=30)
         if response.status_code != 200:
             return State.UNKNOWN
         r: dict = response.json()

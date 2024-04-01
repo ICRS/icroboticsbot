@@ -3,14 +3,14 @@
 
 # mypy: ignore-errors
 
-import asyncio
+import asyncio                                              # noqa # pylint: disable=unused-import
 from threading import Thread
 import time
 
 from discord.ext import commands
 
-from src.PrinterListener import PrinterListener, Command
-from src.utils import print  # pylint: disable=redefined-builtin, import-error
+from src.PrinterListener import PrinterListener, Command    # noqa  #pylint: disable=import-error
+from src.utils import print                                 # noqa  #pylint: disable=redefined-builtin, import-error
 
 import discord
 
@@ -50,7 +50,7 @@ class PrinterFarm:
 
                 if printer_listener.is_done():
                     if printer_listener.is_timelapsed():
-                        timelapse: bytes = printer_listener.create_timelapse()
+                        timelapse: bytes = printer_listener.create_timelapse()  # noqa # pylint: disable=unused-variable
                         # asyncio.run(printer_listener.send_timelapse(timelapse))
                         printer_listener.stop_timelapse()
                     # asyncio.run(printer_listener.notify_users(

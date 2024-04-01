@@ -12,12 +12,12 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import printer_buttons, printer_status  # noqa
+from src.bot_commands import printer_buttons, printer_status    # noqa  #pylint: disable=import-error
 
-from src.PrinterFarm import PrinterFarm
+from src.PrinterFarm import PrinterFarm                         # noqa  #pylint: disable=import-error
 
-from src.utils import print                             # noqa  #pylint: disable=redefined-builtin
-from src.utils import BASE_PATH
+from src.utils import print                                     # noqa  #pylint: disable=redefined-builtin, import-error
+from src.utils import BASE_PATH                                 # noqa  #pylint: disable=import-error
 
 
 __all__ = ["DiscordBot"]
@@ -60,7 +60,7 @@ class DiscordBot(commands.Bot):
         add_commands adds all the commands to the bot
         """
         @self.command(name="printers", pass_context=True,
-                      help="List all the printers and add buttons to interact with them")
+                      help="List all the printers and add buttons to interact with them")   # noqa
         async def printers(ctx):
             await printer_buttons(self, ctx)
 
