@@ -7,26 +7,21 @@
 Discord Bot helper functions
 """
 
-from typing import Any, Coroutine
 import discord
-from discord.ui import View, Item, Button
-from discord.ui.item import ItemCallbackType
+from discord.ui import View, Button
+
+from src.PrinterFarm import PrinterFarm
+from src.PrinterListener import PrinterListener
 
 DEBUG = False
 
 __all__ = ["printer_buttons"]  # noqa
 
 
-class _ViewCallback:
-    __slots__ = ('view', 'callback', 'item')
-
-    def __init__(self, callback: ItemCallbackType[Any, Any], view: View, item: Item[View]) -> None:
-        self.callback: ItemCallbackType[Any, Any] = callback
-        self.view: View = view
-        self.item: Item[View] = item
-
-    def __call__(self, interaction: discord.Interaction) -> Coroutine[Any, Any, Any]:
-        return self.callback(self.view, interaction, self.item)
+class PrinterButton(Button):
+    def __init__(self, printer: PrinterListener, **kwargs):
+        super().__init__(**kwargs)
+        self.printer = printer
 
 
 class PrinterCommandPage(View):
@@ -34,31 +29,40 @@ class PrinterCommandPage(View):
         super().__init__(timeout=timeout)
         self.printer = printer
 
-    @discord.ui.button(label="Button", style=discord.ButtonStyle.gray)
-    async def blurple_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+    @discord.ui.button(label="Let me know", style=discord.ButtonStyle.gray)
+    async def letmeknow(self, button: discord.ui.Button,
+                        interaction: discord.Interaction):
         button.style = discord.ButtonStyle.green
-        await interaction.response.edit_message(content="This is an edited button response!", view=self)
+        await interaction.response.edit_message(
+            content="I will let you know when the printer is done!",
+            view=self)
+
+    @discord.ui.button(label="Timelapse", style=discord.ButtonStyle.gray)
+    async def timelapse(self, button: discord.ui.Button,
+                        interaction: discord.Interaction):
+        button.style = discord.ButtonStyle.green
+        await interaction.response.edit_message(
+            content="I will send you a timelapse when the printer is done",
+            view=self)
 
 
 class PrintersMainPage(View):
-    def __init__(self, *, timeout=180, printer_names: list[str] = []):
+    def __init__(self, *, timeout=180, printer_farm: PrinterFarm = PrinterFarm()):
         super().__init__(timeout=timeout)
-        self.printer_names = printer_names
-        for printer_name in self.printer_names:
-            self.add_item(Button(label=printer_name, style=discord.ButtonStyle.gray, custom_id=printer_name))
-        self._setup_buttons()
+        for name, listener in printer_farm.printers.items():
+            self.add_item(PrinterButton(printer=listener,
+                                        label=name,
+                                        style=discord.ButtonStyle.green,
+                                        custom_id=name))
 
-    async def dynamic_button_callback(self, button: Button, interaction: discord.Interaction):
+    async def callback(self, button: PrinterButton,
+                       interaction: discord.Interaction):
         # This method handles clicks for all dynamically created buttons
         # Disable the button after being clicked
         button.disabled = True
-        await interaction.response.edit_message(content=f"You clicked: {button.label}", view=self)
-
-    async def _setup_buttons(self):
-        # Manually assign the callback to each button
-        for item in self.children:
-            if isinstance(item, Button):
-                item.callback = _ViewCallback(self.dynamic_button_callback, self, item)
+        await interaction.response.edit_message(
+            content=f"Printer selected: {button.printer.printer_name}",
+            view=PrinterCommandPage(printer=button.printer))
 
 
 async def printer_buttons(bot, ctx):
@@ -73,8 +77,10 @@ async def printer_buttons(bot, ctx):
         Discord context
     """
     user = ctx.author
-    printer_names = list(bot.printer_farm.printers.keys())
-    await ctx.message.channel.send("Choose a printer", view=PrintersMainPage(printer_names=printer_names))
+    printer_farm = bot.printer_farm
+    await ctx.message.channel.send("Choose a printer",
+                                   view=PrintersMainPage(
+                                       printer_farm=printer_farm))
 
 
 async def let_me_know(bot, ctx, printer):

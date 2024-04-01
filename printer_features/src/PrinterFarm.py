@@ -1,8 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+
 import asyncio
 from threading import Thread
 import time
+
+from discord.ext import commands
+
 from src.PrinterListener import PrinterListener, Command
-from src.utils import print
+from src.utils import print  # pylint: disable=redefined-builtin, import-error
 
 import discord
 
@@ -10,9 +18,9 @@ __all__ = ["PrinterFarm"]
 
 
 class PrinterFarm:
-    def __init__(self, bot,
-                 printer_names: list[str],
-                 printer_suffix: str) -> None:
+    def __init__(self, bot: commands.Bot = None,
+                 printer_names: list[str] = [],
+                 printer_suffix: str = "") -> None:
 
         self.bot = bot
         self.printers: dict[str, PrinterListener] = {name: PrinterListener(

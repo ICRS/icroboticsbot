@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# mypy: ignore-errors
+
 import base64
 from enum import Enum
 from io import BytesIO
@@ -6,7 +11,7 @@ import discord
 import requests
 from PIL import Image
 
-from src.utils import print
+from src.utils import print  # pylint: disable=redefined-builtin, import-error
 
 __all__ = ['PrinterListener', 'State']
 
