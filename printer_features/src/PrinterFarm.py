@@ -43,21 +43,28 @@ class PrinterFarm:
         while True:
             print("Listening for printers")
             for _, printer_listener in self.printers.items():
+                printer_listener.update_state()
+
+                if printer_listener.is_starting():
+                    printer_listener.start_timelapse()
+
                 if printer_listener.is_done():
                     if printer_listener.is_timelapsed():
                         timelapse: bytes = printer_listener.create_timelapse()
                         # asyncio.run(printer_listener.send_timelapse(timelapse))
-                        printer_listener.disable_timelapse(None)
+                        printer_listener.stop_timelapse()
                     # asyncio.run(printer_listener.notify_users(
                     #     Command.LET_ME_KNOW))
                     printer_listener.clear_users(Command.NOTIFY)
+                    printer_listener.clear_users(Command.TIMELAPSE)
 
                 if printer_listener.is_reset():
                     printer_listener.clear_users(Command.NOTIFY)
                     printer_listener.clear_users(Command.TIMELAPSE)
-                    printer_listener.disable_timelapse(None)
+                    printer_listener.stop_timelapse()
 
-                printer_listener.append_frame()
+                if printer_listener.is_timelapsed():
+                    printer_listener.append_frame()
 
             time.sleep(10)
 

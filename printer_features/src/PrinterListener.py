@@ -90,6 +90,16 @@ class PrinterListener:
             await user.send(f"Printer {self.printer_name} is finished.")  # noqa
         return True
 
+    def start_timelapse(self) -> bool:
+        print(self.printer_name, "Starting timelapse")
+        self.__timelapsed = True
+        return True
+
+    def stop_timelapse(self) -> bool:
+        print(self.printer_name, "Stopping timelapse")
+        self.__timelapsed = False
+        return False
+
     def enable_timelapse(self, user: discord.User) -> bool:
         print(self.printer_name, f"Enabling timelapse for {user}")
         self.__timelapsed = True
@@ -98,17 +108,9 @@ class PrinterListener:
         return True
 
     def disable_timelapse(self, user: discord.User) -> bool:
-        if user is None:
-            print(self.printer_name, "Disabling timelapse for all users")
-            self.clear_users(Command.TIMELAPSE)
-            self.__timelapsed = False
-            return True
         print(self.printer_name, f"Disabling timelapse for {user}")
         if self.user_in(user, Command.TIMELAPSE):
             self.remove_user(user, Command.TIMELAPSE)
-        if len(self.__users[Command.TIMELAPSE]) == 0:
-            self.__timelapsed = False
-            return True
         return False
 
     def is_timelapsed(self) -> bool:
@@ -135,15 +137,27 @@ class PrinterListener:
         self.clear_users(Command.TIMELAPSE)
 
     def append_frame(self):
-        if self.__timelapsed:
-            frame = self.__get_frame()
-            if frame is not None:
-                self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
+        frame = self.__get_frame()
+        if frame is not None:
+            self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
+
+    def update_state(self):
+        self.__printer_state.append(self.__get_state())
+
+    def is_starting(self) -> bool:
+        print(self.printer_name, "Checking if printer is starting")
+        if len(self.__printer_state) > 0:
+            if self.__printer_state[-1] == State.PREPARING:
+                return True
+            if len(self.__printer_state) < 2:
+                return False
+            if self.__printer_state[-1] == State.RUNNING and \
+                    self.__printer_state[-2] == State.IDLE:
+                return True
+        return False
 
     def is_done(self) -> bool:
         print(self.printer_name, "Checking if printer is done")
-        self.__printer_state.append(self.__get_state())
-
         if len(self.__printer_state) < 2:
             return False
         if self.__printer_state[-1] == State.FINISHED and \
