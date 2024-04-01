@@ -53,7 +53,7 @@ class DiscordBot(commands.Bot):
         self.add_commands()
 
         self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
-        # self.printer_farm.start_listener()
+        self.printer_farm.start_listener()
 
     def add_commands(self):
         """
