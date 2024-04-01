@@ -45,6 +45,14 @@ class PrinterCommandPage(View):
             content="I will send you a timelapse when the printer is done",
             view=self)
 
+    @discord.ui.button(label="Back", style=discord.ButtonStyle.red)
+    async def go_back(self, button: discord.ui.Button,
+                      interaction: discord.Interaction):
+        button.style = discord.ButtonStyle.gray
+        await interaction.response.edit_message(
+            content="Choose a printer",
+            view=self)
+
 
 class PrintersMainPage(View):
     def __init__(self, *, timeout=180, printer_farm: PrinterFarm = PrinterFarm()):
