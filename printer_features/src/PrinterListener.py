@@ -15,6 +15,9 @@ from src.utils import print  # pylint: disable=redefined-builtin, import-error
 
 __all__ = ['PrinterListener', 'State']
 
+DEBUG = False
+ERRORS = False
+
 
 class State(Enum):
     IDLE = "IDLE"
@@ -62,53 +65,53 @@ class PrinterListener:
             len(self.__printer_state) > 0 else State.UNKNOWN.value
 
     def get_users(self, comm: Command) -> set[discord.User]:
-        print(self.printer_name, f"Getting users in {comm}")
+        print(self.printer_name, f"Getting users in {comm}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         return self.__users[Command(comm)]
 
     def add_user(self, user: discord.User, comm: Command) -> bool:
-        print(self.printer_name, f"Adding user {user} to {comm}")
+        print(self.printer_name, f"Adding user {user} to {comm}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         self.__users[Command(comm)].add(user)
         return self.user_in(user, comm)
 
     def remove_user(self, user: discord.User, comm: Command) -> bool:
-        print(self.printer_name, f"Removing user {user} from {comm}")
+        print(self.printer_name, f"Removing user {user} from {comm}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         self.__users[Command(comm)].discard(user)
         return self.user_in(user, comm)
 
     def user_in(self, user: discord.User, comm: Command) -> bool:
-        print(self.printer_name, f"Checking if user {user} is in {comm}")
+        print(self.printer_name, f"Checking if user {user} is in {comm}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         return user in self.__users[Command(comm)]
 
     def clear_users(self, comm: Command) -> bool:
-        print(self.printer_name, f"Clearing users from {comm}")
+        print(self.printer_name, f"Clearing users from {comm}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         self.__users[Command(comm)].clear()
         return len(self.__users[Command(comm)]) == 0
 
     async def notify_users(self, comm: Command) -> bool:
-        print(self.printer_name, f"Notifying users in {comm}")
+        print(self.printer_name, f"Notifying users in {comm}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         for user in self.__users[Command(comm)]:
             await user.send(f"Printer {self.printer_name} is finished.")  # noqa
         return True
 
     def start_timelapse(self) -> bool:
-        print(self.printer_name, "Starting timelapse")
+        print(self.printer_name, "Starting timelapse") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         self.__timelapsed = True
         return True
 
     def stop_timelapse(self) -> bool:
-        print(self.printer_name, "Stopping timelapse")
+        print(self.printer_name, "Stopping timelapse") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         self.__timelapsed = False
         return False
 
     def enable_timelapse(self, user: discord.User) -> bool:
-        print(self.printer_name, f"Enabling timelapse for {user}")
+        print(self.printer_name, f"Enabling timelapse for {user}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         self.__timelapsed = True
         if not self.user_in(user, Command.TIMELAPSE):
             self.add_user(user, Command.TIMELAPSE)
         return True
 
     def disable_timelapse(self, user: discord.User) -> bool:
-        print(self.printer_name, f"Disabling timelapse for {user}")
+        print(self.printer_name, f"Disabling timelapse for {user}") if DEBUG else None  # noqa # pylint: disable=expressions-not-assigned
         if self.user_in(user, Command.TIMELAPSE):
             self.remove_user(user, Command.TIMELAPSE)
         return False
@@ -117,7 +120,7 @@ class PrinterListener:
         return self.__timelapsed
 
     def create_timelapse(self) -> bytes:
-        print(self.printer_name, "Creating timelapse")
+        print(self.printer_name, "Creating timelapse") if DEBUG else None  # noqa
         im: list[Image.Image] = []
         for frame in self.__timelapse_frames:
             im.append(Image.open(frame))
@@ -131,7 +134,7 @@ class PrinterListener:
             return buffer.getbuffer().tobytes()
 
     async def send_timelapse(self, timelapse: bytes) -> None:
-        print(self.printer_name, "Sending timelapse")
+        print(self.printer_name, "Sending timelapse") if DEBUG else None  # noqa
         for user in self.__users[Command.TIMELAPSE]:
             await user.send(file=discord.File(timelapse, 'timelapse.gif'))
         self.clear_users(Command.TIMELAPSE)
@@ -143,9 +146,9 @@ class PrinterListener:
 
     def update_state(self):
         self.__printer_state.append(self.__get_state())
+        print(self.printer_name, self.__printer_state) if DEBUG else None  # noqa
 
     def is_starting(self) -> bool:
-        print(self.printer_name, "Checking if printer is starting")
         if len(self.__printer_state) > 0:
             if self.__printer_state[-1] == State.PREPARING:
                 return True
@@ -157,7 +160,6 @@ class PrinterListener:
         return False
 
     def is_done(self) -> bool:
-        print(self.printer_name, "Checking if printer is done")
         if len(self.__printer_state) < 2:
             return False
         if self.__printer_state[-1] == State.FINISHED and \
@@ -166,7 +168,6 @@ class PrinterListener:
         return False
 
     def is_reset(self) -> bool:
-        print(self.printer_name, "Checking if printer is reset")
         if len(self.__printer_state) < 2:
             return False
         if self.__printer_state[-1] == State.IDLE or \
@@ -175,37 +176,53 @@ class PrinterListener:
         return False
 
     def __get_remaining_time(self) -> int:
-        response = requests.get(
-            f"http://{self.printer_url}/printer/status/time",
-            timeout=30)
-        if response.status_code != 200:
+        response: dict = {}
+        try:
+            response = requests.get(
+                f"http://{self.printer_url}/printer/status/time",
+                timeout=30)
+        except Exception as e:
+            print(self.printer_name, f"Error getting remaining time: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
+        if response.get("status_code", -1) != 200:
             return -1
         r: dict = response.json()
         return r.get("time", -1)
 
     def __get_percentage(self) -> int:
-        response = requests.get(
-            f"http://{self.printer_url}/printer/status/percentage",
-            timeout=30)
-        if response.status_code != 200:
+        response: dict = {}
+        try:
+            response = requests.get(
+                f"http://{self.printer_url}/printer/status/percentage",
+                timeout=30)
+        except Exception as e:
+            print(self.printer_name, f"Error getting percentage: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
+        if response.get("status_code", -1) != 200:
             return -1
         r: dict = response.json()
         return r.get("percentage", -1)
 
     def __get_frame(self) -> str | None:
-        response = requests.get(
-            f"http://{self.printer_url}/printer/camera",
-            timeout=30)
-        if response.status_code != 200:
+        response: dict = {}
+        try:
+            response = requests.get(
+                f"http://{self.printer_url}/printer/camera",
+                timeout=30)
+        except Exception as e:
+            print(self.printer_name, f"Error getting frame: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
+        if response.get("status_code", -1) != 200:
             return None
         r: dict[str, dict] = response.json()
         return r.get("frame", {}).get("body", None)
 
     def __get_state(self) -> State:
-        response = requests.get(
-            f"http://{self.printer_url}/printer/status/state",
-            timeout=30)
-        if response.status_code != 200:
+        response: dict = {}
+        try:
+            response = requests.get(
+                f"http://{self.printer_url}/printer/status/state",
+                timeout=30)
+        except Exception as e:
+            print(self.printer_name, f"Error getting status: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
+        if response.get("status_code", -1) != 200:
             return State.UNKNOWN
         r: dict = response.json()
         return State(r.get("state", "IDLE"))
