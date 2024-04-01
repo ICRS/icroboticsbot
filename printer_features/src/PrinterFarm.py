@@ -7,12 +7,12 @@ import asyncio                                              # noqa # pylint: dis
 from threading import Thread
 import time
 
+import discord
 from discord.ext import commands
 
-from src.PrinterListener import PrinterListener, Command    # noqa  #pylint: disable=import-error
+from src.PrinterListener import Command, PrinterListener    # noqa  #pylint: disable=import-error
 from src.utils import print                                 # noqa  #pylint: disable=redefined-builtin, import-error
 
-import discord
 
 __all__ = ["PrinterFarm"]
 
@@ -41,7 +41,6 @@ class PrinterFarm:
 
     def __thread_loop(self) -> None:
         while True:
-            print("Listening for printers")
             for _, printer_listener in self.printers.items():
                 printer_listener.update_state()
 
