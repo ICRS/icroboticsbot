@@ -151,23 +151,23 @@ class PrinterListener:
         response = requests.get(f"http://{self.printer_url}/printer/status/time")
         if response.status_code != 200:
             return -1
-        r = response.json()
-        return r['time'] if 'time' in r else -1
+        r: dict = response.json()
+        return r.get("time", -1)
 
     def __get_percentage(self) -> int:
         response = requests.get(
             f"http://{self.printer_url}/printer/status/percentage")
         if response.status_code != 200:
             return -1
-        r = response.json()
-        return r['percentage'] if 'percentage' in r else -1
+        r: dict = response.json()
+        return r.get("percentage", -1)
 
     def __get_frame(self) -> str | None:
         response = requests.get(f"http://{self.printer_url}/printer/camera")
         if response.status_code != 200:
             return None
-        r: dict = response.json()
-        return r['frame'].get("body", "") if 'frame' in r else None
+        r: dict[str, dict] = response.json()
+        return r.get("frame", {}).get("body", None)
 
     def __get_state(self) -> State:
         response = requests.get(f"http://{self.printer_url}/printer/status/state")
