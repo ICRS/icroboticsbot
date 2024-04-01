@@ -9,11 +9,11 @@ Discord Bot class. It handles all the commands and events.
 import os
 import json
 import asyncio
+
 import discord
 from discord.ext import commands
 
 from src.bot_commands import printer_buttons, printer_status    # noqa  #pylint: disable=import-error
-
 from src.PrinterFarm import PrinterFarm                         # noqa  #pylint: disable=import-error
 
 from src.utils import print                                     # noqa  #pylint: disable=redefined-builtin, import-error

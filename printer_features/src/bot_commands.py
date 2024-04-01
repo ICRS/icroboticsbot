@@ -101,7 +101,7 @@ async def printer_buttons(bot, ctx):
     printer_farm: PrinterFarm = bot.printer_farm
     message_embed = discord.Embed(
         title="Select a printer",
-        description="Choose a printer",
+        description="",
         color=discord.Color.green())
     for name, listener in printer_farm.printers.items():
         message_embed.add_field(
@@ -142,6 +142,6 @@ async def printer_status(bot, ctx):
         message_embed.add_field(
             name=name,
             value=table,
-            inline=False)
+            inline=True)
 
     await ctx.message.channel.send(embed=message_embed)
