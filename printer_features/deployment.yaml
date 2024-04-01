@@ -24,6 +24,5 @@ spec:
           - name: DISCORD_TOKEN
             valueFrom:
               secretKeyRef:
-                name: discord-bot-secret 
+                name: discord-bot-secret
                 key: discord_token
-        
