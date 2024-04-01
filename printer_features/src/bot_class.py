@@ -12,7 +12,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import printer_buttons  # noqa
+from src.bot_commands import printer_buttons, printer_status  # noqa
 
 from src.PrinterFarm import PrinterFarm
 
@@ -53,16 +53,21 @@ class DiscordBot(commands.Bot):
         self.add_commands()
 
         self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
-        self.printer_farm.start_listener()
+        # self.printer_farm.start_listener()
 
     def add_commands(self):
         """
         add_commands adds all the commands to the bot
         """
         @self.command(name="printers", pass_context=True,
-                        help="List all the printers and add buttons to interact with them")
+                      help="List all the printers and add buttons to interact with them")
         async def printers(ctx):
             await printer_buttons(self, ctx)
+
+        @self.command(name="pstatus", pass_context=True,
+                      help="List all the printers and the users bound to them")
+        async def pstatus(ctx):
+            await printer_status(self, ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

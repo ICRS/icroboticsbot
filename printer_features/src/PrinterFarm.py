@@ -50,10 +50,10 @@ class PrinterFarm:
                         printer_listener.disable_timelapse(None)
                     # asyncio.run(printer_listener.notify_users(
                     #     Command.LET_ME_KNOW))
-                    printer_listener.clear_users(Command.LET_ME_KNOW)
+                    printer_listener.clear_users(Command.NOTIFY)
 
                 if printer_listener.is_reset():
-                    printer_listener.clear_users(Command.LET_ME_KNOW)
+                    printer_listener.clear_users(Command.NOTIFY)
                     printer_listener.clear_users(Command.TIMELAPSE)
                     printer_listener.disable_timelapse(None)
 
@@ -64,14 +64,14 @@ class PrinterFarm:
     @printer_exists
     def let_me_know(self, printer_name: str, user: discord.User) -> bool:
         print(f"Let me know for {user} on {printer_name}")
-        if self.printers[printer_name].user_in(user, Command.LET_ME_KNOW):
+        if self.printers[printer_name].user_in(user, Command.NOTIFY):
             print("Adding user")
             return self.printers[printer_name].add_user(user,
-                                                        Command.LET_ME_KNOW)
+                                                        Command.NOTIFY)
         else:
             print("Removing user")
             return self.printers[printer_name].remove_user(user,
-                                                           Command.LET_ME_KNOW)
+                                                           Command.NOTIFY)
 
     @printer_exists
     def timelapse(self, printer_name: str, user: discord.User) -> bool:
