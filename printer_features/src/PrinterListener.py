@@ -55,12 +55,12 @@ class PrinterListener:
     def add_user(self, user: discord.User, comm: Command) -> bool:
         print(self.printer_name, f"Adding user {user} to {comm}")
         self.__users[Command(comm)].add(user)
-        return True
+        return self.user_in(user, comm)
 
     def remove_user(self, user: discord.User, comm: Command) -> bool:
         print(self.printer_name, f"Removing user {user} from {comm}")
         self.__users[Command(comm)].discard(user)
-        return True
+        return self.user_in(user, comm)
 
     def user_in(self, user: discord.User, comm: Command) -> bool:
         print(self.printer_name, f"Checking if user {user} is in {comm}")
@@ -69,7 +69,7 @@ class PrinterListener:
     def clear_users(self, comm: Command) -> bool:
         print(self.printer_name, f"Clearing users from {comm}")
         self.__users[Command(comm)].clear()
-        return True
+        return len(self.__users[Command(comm)]) == 0
 
     async def notify_users(self, comm: Command) -> bool:
         print(self.printer_name, f"Notifying users in {comm}")
