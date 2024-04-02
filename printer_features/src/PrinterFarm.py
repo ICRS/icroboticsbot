@@ -5,6 +5,7 @@
 
 import asyncio                                              # noqa # pylint: disable=unused-import
 from threading import Thread
+import time
 
 import discord
 from discord.ext import commands
@@ -49,7 +50,8 @@ class PrinterFarm:
                     if printer.is_timelapsed():
                         timelapse = printer.create_timelapse()
                         if timelapse:
-                            await printer.send_timelapse(timelapse)
+                            time_str = time.strftime('%Y%m%d%H%M%S', time.localtime())
+                            await printer.send_timelapse(timelapse, time_str)
                 
                     await printer.notify_users(Command.NOTIFY)
                     await printer.clear_users(Command.NOTIFY)
