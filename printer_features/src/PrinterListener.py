@@ -14,7 +14,7 @@ from PIL import Image
 
 from src.utils import print  # pylint: disable=redefined-builtin, import-error
 
-__all__ = ['PrinterListener', 'State']
+__all__ = ['PrinterListener', 'State', 'Command']
 
 LOGS = True
 ERRORS = True
