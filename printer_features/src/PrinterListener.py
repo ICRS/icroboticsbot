@@ -18,7 +18,7 @@ __all__ = ['PrinterListener', 'State', 'Command']
 
 LOGS = True
 ERRORS = True
-DEBUG = False
+DEBUG = True
 
 class State(Enum):
     IDLE = "IDLE"
@@ -161,16 +161,15 @@ class PrinterListener:
 
     def update_state(self):
         self.__printer_state.append(self.__get_state())
-        print(self.printer_name, ", ".join(state.value for state in self.__printer_state)) if LOGS else None  # noqa
+        print(self.printer_name, ", ".join(state.value for state in self.__printer_state[-3:])) if LOGS else None  # noqa
 
     def is_starting(self) -> bool:
         if len(self.__printer_state) > 0:
             if self.__printer_state[-1] == State.PREPARING:
                 return True
-            if len(self.__printer_state) < 2:
-                return False
             if self.__printer_state[-1] == State.RUNNING and \
-                    self.__printer_state[-2] == State.IDLE:
+                    (self.__printer_state[-2] == State.IDLE or \
+                     self.__printer_state[-2] == State.FINISHED):
                 return True
         return False
 
