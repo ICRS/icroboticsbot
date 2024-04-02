@@ -98,8 +98,11 @@ class PrinterListener:
     async def notify_users(self, comm: Command) -> bool:
         print(self.printer_name, f"Notifying users in {comm}") if LOGS else None
         for user in self.__users[Command(comm)]:
-            print(self.printer_name, f"Sending message to {user}") if LOGS else None  # noqa # pylint: disable=expressions-not-assigned
-            await user.send(f"Printer {self.printer_name} is finished.")
+            try:
+                print(self.printer_name, f"Sending message to {user}") if LOGS else None  # noqa # pylint: disable=expressions-not-assigned
+                await user.send(f"Printer {self.printer_name} is finished.")
+            except Exception as e:
+                print(self.printer_name, f"Error sending message to {user}: {e}") if ERRORS else None
         return True
 
     def start_timelapse(self) -> bool:
@@ -144,9 +147,10 @@ class PrinterListener:
             buffer.seek(0)
             return buffer.getbuffer().tobytes()
 
-    async def send_timelapse(self, timelapse: bytes) -> None:
+    async def send_timelapse(self, timelapse: bytes, time: str) -> None:
         print(self.printer_name, "Sending timelapse") if LOGS else None  # noqa
-        filename = f"{self.printer_name}_timelapse_{time.strftime(time.time(), '%Y%m%d%H%M%S')}.gif"
+        filename = f"{self.printer_name}_timelapse_{time}.gif"
+        print(self.printer_name, f"Sending {filename} to {len(self.__users[Command.TIMELAPSE])} users") if LOGS else None  # noqa
         for user in self.__users[Command.TIMELAPSE]:
             try:
                 with BytesIO(timelapse) as timelapse:
