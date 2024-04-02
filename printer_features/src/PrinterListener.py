@@ -161,7 +161,7 @@ class PrinterListener:
 
     def update_state(self):
         self.__printer_state.append(self.__get_state())
-        print(self.printer_name, ", ".join(state.value for state in self.__printer_state[-3:])) if LOGS else None  # noqa
+        print(self.printer_name, ", ".join(state.value for state in self.__printer_state[-5:])) if LOGS else None  # noqa
 
     def is_starting(self) -> bool:
         if len(self.__printer_state) > 0:
