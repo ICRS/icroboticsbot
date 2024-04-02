@@ -25,10 +25,6 @@ class PrinterFarm:
         loop = asyncio.get_event_loop()
         self.__thread = Thread(target=self.__run_async_loop_in_thread, args=[loop], daemon=True).start()
 
-    def start_listener(self):
-        """Start the background thread."""
-        # self.__thread.start()
-
     def __run_async_loop_in_thread(self, loop):
         """Sets up and runs the asyncio event loop in a new thread."""
         try:
