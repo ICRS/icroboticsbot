@@ -4,14 +4,13 @@
 # mypy: ignore-errors
 
 import asyncio                                              # noqa # pylint: disable=unused-import
+import logging
 from threading import Thread
 import time
 
-import discord
 from discord.ext import commands
 
 from src.PrinterListener import Command, PrinterListener    # noqa  #pylint: disable=import-error
-from src.utils import print                                 # noqa  #pylint: disable=redefined-builtin, import-error
 
 
 __all__ = ["PrinterFarm"]
@@ -31,7 +30,7 @@ class PrinterFarm:
         try:
             asyncio.run_coroutine_threadsafe(self.__thread_loop(), loop)
         except Exception as e:
-            print(f"Error in PrinterFarm: {e}")
+            logging.error(f"Error in PrinterFarm thread: {e}")
 
     async def __thread_loop(self):
         """Main loop that checks printer states and sends notifications."""
