@@ -124,22 +124,27 @@ async def printer_status(bot, ctx):
     ctx : Discord.Context
         Discord context
     """
+    author = ctx.message.author
     printer_farm: PrinterFarm = bot.printer_farm
     message_embed = discord.Embed(
-        title="Printer status",
-        color=discord.Color.green())
+        title="Printer bound to you:",
+        color=discord.Color.blue())
+    
+    no_commands = True
     for name, listener in printer_farm.printers.items():
-        table = ""
+        commands = ""
         for command in Command:
             users = listener.get_users(command)
-            if len(users) > 0:
-                table += f"**{command.value}:**\n"
-                table += "".join([f"* {user.name}\n" for user in users])
-            else:
-                table += " "
-        message_embed.add_field(
-            name=f"***__{name}__***",
-            value=table,
-            inline=False)
+            if author in users:
+                commands += f"* {command.value}\n"
+                no_commands = False
+        if commands != "":
+            message_embed.add_field(
+                name=name,
+                value=commands,
+                inline=False)
 
-    await ctx.message.channel.send(embed=message_embed)
+    if no_commands:
+        message_embed.description = "No commands found"
+
+    await author.send(embed=message_embed)
