@@ -127,8 +127,8 @@ async def printer_status(bot, ctx):
     author = ctx.message.author
     printer_farm: PrinterFarm = bot.printer_farm
     message_embed = discord.Embed(
-        title="Printer bound to you:",
-        color=discord.Color.blue())
+        title="Printers & Notifications bound to you:",
+        color=discord.Color.red())
     
     no_commands = True
     for name, listener in printer_farm.printers.items():
