@@ -146,7 +146,7 @@ class PrinterListener:
 
     async def send_timelapse(self, timelapse: bytes) -> None:
         print(self.printer_name, "Sending timelapse") if LOGS else None  # noqa
-        filename = f"{self.printer_name}_timelapse_{time.strftime(time.time(), "%Y%m%d%H%M%S")}.gif"
+        filename = f"{self.printer_name}_timelapse_{time.strftime(time.time(), '%Y%m%d%H%M%S')}.gif"
         for user in self.__users[Command.TIMELAPSE]:
             try:
                 with BytesIO(timelapse) as timelapse:
