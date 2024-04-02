@@ -63,9 +63,9 @@ class DiscordBot(commands.Bot):
         async def printers(ctx):
             await printer_buttons(self, ctx)
 
-        @self.command(name="pstatus", pass_context=True,
+        @self.command(name="bounds", pass_context=True,
                       help="List all the printers and the users bound to them")
-        async def pstatus(ctx):
+        async def bounds(ctx):
             await printer_status(self, ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
