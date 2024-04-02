@@ -18,7 +18,7 @@ __all__ = ['PrinterListener', 'State', 'Command']
 
 LOGS = True
 ERRORS = True
-DEBUG = True
+DEBUG = False
 
 class State(Enum):
     IDLE = "IDLE"
