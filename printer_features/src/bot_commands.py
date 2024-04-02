@@ -7,6 +7,7 @@
 Discord Bot helper functions
 """
 
+import os
 import discord
 from discord.ui import View, Button
 
@@ -14,6 +15,12 @@ from src.PrinterFarm import PrinterFarm                     # noqa #pylint: disa
 from src.PrinterListener import PrinterListener, Command    # noqa #pylint: disable=import-error
 
 DEBUG = False
+
+if DEBUG:
+    from dotenv import load_dotenv
+    load_dotenv()
+
+DEBUG = os.getenv('DEBUG') if os.getenv('DEBUG') else DEBUG
 
 __all__ = ["printer_buttons", "printer_status"]  # noqa
 
