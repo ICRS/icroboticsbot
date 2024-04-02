@@ -9,6 +9,7 @@ Discord Bot class. It handles all the commands and events.
 import os
 import json
 import asyncio
+import logging
 
 import discord
 from discord.ext import commands
@@ -16,9 +17,7 @@ from discord.ext import commands
 from src.bot_commands import printer_buttons, printer_status    # noqa  #pylint: disable=import-error
 from src.PrinterFarm import PrinterFarm                         # noqa  #pylint: disable=import-error
 
-from src.utils import print                                     # noqa  #pylint: disable=redefined-builtin, import-error
 from src.utils import BASE_PATH                                 # noqa  #pylint: disable=import-error
-
 
 __all__ = ["DiscordBot"]
 
@@ -35,6 +34,7 @@ default_guild_info = {
     'ADMIN_ID': ADMIN_ID,
 }
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s -  %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
@@ -87,7 +87,7 @@ class DiscordBot(commands.Bot):
         on_ready is called when the bot is ready to be used
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
+        logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
     def start_loop(self):
         """

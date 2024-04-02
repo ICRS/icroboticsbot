@@ -78,59 +78,57 @@ class PrinterListener:
             len(self.__printer_state) > 0 else State.UNKNOWN.value
 
     def get_users(self, comm: Command) -> set[discord.User]:
-        logging.info(self.printer_name, f"Getting users in {comm}")
+        logging.info(f"{self.printer_name} Getting users in {comm}")
         return self.__users[Command(comm)]
 
     def add_user(self, user: discord.User, comm: Command) -> bool:
-        logging.info(self.printer_name, f"Adding user {user} to {comm}")
+        logging.info(f"{self.printer_name} Adding user {user} to {comm}")
         self.__users[Command(comm)].add(user)
         return True
 
     def remove_user(self, user: discord.User, comm: Command) -> bool:
-        logging.info(self.printer_name, f"Removing user {user} from {comm}")
+        logging.info(f"{self.printer_name} Removing user {user} from {comm}")
         self.__users[Command(comm)].discard(user)
         return True
 
     def user_in(self, user: discord.User, comm: Command) -> bool:
-        logging.info(self.printer_name, f"Checking if user {user} is in {comm}")
+        logging.info(f"{self.printer_name} Checking if user {user} is in {comm}")
         return user in self.__users[Command(comm)]
 
     async def clear_users(self, comm: Command) -> bool:
-        logging.info(self.printer_name, f"Clearing users from {comm}")
+        logging.info(f"{self.printer_name} Clearing users in {comm}")
         self.__users[Command(comm)].clear()
         return len(self.__users[Command(comm)]) == 0
 
     async def notify_users(self, comm: Command) -> bool:
-        logging.info(self.printer_name, f"Notifying users in {comm}")
+        logging.info(f"{self.printer_name} Notifying users in {comm}")
         for user in self.__users[Command(comm)]:
             try:
-                logging.info(self.printer_name,
-                             f"Sending message to {user}")
+                logging.info(f"{self.printer_name} Sending message to {user}")
                 await user.send(f"Printer {self.printer_name} is finished.")
             except Exception as e:
-                logging.error(self.printer_name,
-                              f"Error sending message to {user}: {e}")
+                logging.error(f"{self.printer_name} Error sending message: {e}")
         return True
 
     def start_timelapse(self) -> bool:
-        logging.info(self.printer_name, "Starting timelapse")
+        logging.info(f"{self.printer_name} Starting timelapse")
         self.__timelapsed = True
         return True
 
     def stop_timelapse(self) -> bool:
-        logging.info(self.printer_name, "Stopping timelapse")
+        logging.info(f"{self.printer_name} Stopping timelapse")
         self.__timelapsed = False
         return False
 
     def enable_timelapse(self, user: discord.User) -> bool:
-        logging.info(self.printer_name, f"Enabling timelapse for {user}")
+        logging.info(f"{self.printer_name} Enabling timelapse for {user}")
         self.__timelapsed = True
         if not self.user_in(user, Command.TIMELAPSE):
             self.add_user(user, Command.TIMELAPSE)
         return True
 
     def disable_timelapse(self, user: discord.User) -> bool:
-        logging.info(self.printer_name, f"Disabling timelapse for {user}")
+        logging.info(f"{self.printer_name} Disabling timelapse for {user}")
         if self.user_in(user, Command.TIMELAPSE):
             self.remove_user(user, Command.TIMELAPSE)
         return False
@@ -139,7 +137,7 @@ class PrinterListener:
         return self.__timelapsed
 
     def create_timelapse(self) -> bytes|None:
-        logging.info(self.printer_name, "Creating timelapse")
+        logging.info(f"{self.printer_name} Creating timelapse")
         im: list[Image.Image] = []
         for frame in self.__timelapse_frames:
             im.append(Image.open(frame))
@@ -155,32 +153,28 @@ class PrinterListener:
                 buffer.seek(0)
                 return buffer.getbuffer().tobytes()
         except Exception as e:
-            logging.error(self.printer_name,
-                          f"Error creating timelapse: {e}")
+            logging.error(f"{self.printer_name} Error creating timelapse: {e}")
             return None
 
     async def send_timelapse(self, timelapse: bytes, time: str) -> None:
         filename = f"{self.printer_name}_timelapse_{time}.gif"
-        logging.info(self.printer_name,
-                     f"Sending {filename} to {len(self.__users[Command.TIMELAPSE])} users")
+        logging.info(f"{self.printer_name} Sending {filename} to users: {len(self.__users[Command.TIMELAPSE])}")
         for user in self.__users[Command.TIMELAPSE]:
             try:
                 with BytesIO(timelapse) as timelapse:
                     await user.send(file=discord.File(fp=timelapse, filename=filename))
             except Exception as e:
-                logging.error(self.printer_name,
-                              f"Error sending timelapse: {e}")
+                logging.error(f"{self.printer_name} Error sending timelapse: {e}")
 
     def append_frame(self):
-        logging.info(self.printer_name, "Appending frame")
+        
         frame = self.__get_frame()
         if frame is not None:
             self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
 
     def update_state(self):
         self.__printer_state.append(self.__get_state())
-        logging.info(self.printer_name,
-                     ", ".join(state.value for state in self.__printer_state[-5:]))
+        logging.info(f"{self.printer_name} {', '.join(state.value for state in self.__printer_state[-5:])}")
 
     def is_starting(self) -> bool:
         if len(self.__printer_state) > 0:
@@ -215,8 +209,7 @@ class PrinterListener:
                 f"http://{self.printer_url}/printer/status/time",
                 timeout=30)
         except Exception as e:
-            logging.error(self.printer_name,
-                          f"Error getting remaining time: {e}")
+            logging.error(f"{self.printer_name} Error getting time: {e}")
         if response.status_code != 200:
             return -1
         r: dict = dict(response.json())
@@ -229,8 +222,7 @@ class PrinterListener:
                 f"http://{self.printer_url}/printer/status/percentage",
                 timeout=30)
         except Exception as e:
-            logging.error(self.printer_name,
-                          f"Error getting percentage: {e}")
+            logging.error(f"{self.printer_name} Error getting percentage: {e}")
         if response.status_code != 200:
             return -1
         r: dict = dict(response.json())
@@ -243,14 +235,12 @@ class PrinterListener:
                 f"http://{self.printer_url}/printer/camera",
                 timeout=30)
         except Exception as e:
-            logging.error(self.printer_name,
-                          f"Error getting frame: {e}")
+            logging.error(f"{self.printer_name} Error getting frame: {e}")
         if response.status_code != 200:
             return None
         r: dict[str, dict] = dict(response.json())
         if "error" in r:
-            logging.error(self.printer_name,
-                          f"Error getting frame: {r.get('error', 'error')}")
+            logging.error(f"{self.printer_name} Error getting frame: {r['error']}")
             return None
         return r.get("frame", {}).get("body", None)
 
@@ -261,8 +251,7 @@ class PrinterListener:
                 f"http://{self.printer_url}/printer/status/state",
                 timeout=30)
         except Exception as e:
-            logging.error(self.printer_name,
-                          f"Error getting status: {e}")
+            logging.error(f"{self.printer_name} Error getting state: {e}")
         if response.status_code != 200:
             return State.UNKNOWN
         r: dict = dict(response.json())
