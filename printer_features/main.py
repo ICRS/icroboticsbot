@@ -11,12 +11,16 @@ import json
 
 import discord
 
-from dotenv import load_dotenv
 from src.utils import BASE_PATH
 
 from src.bot_class import DiscordBot
 
-load_dotenv()
+DEBUG = False
+
+if DEBUG:
+    from dotenv import load_dotenv
+    load_dotenv()
+
 settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
                           "r", encoding="utf-8"))
 
