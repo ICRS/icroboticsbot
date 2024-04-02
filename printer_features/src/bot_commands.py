@@ -129,19 +129,17 @@ async def printer_status(bot, ctx):
         title="Printer status",
         color=discord.Color.green())
     for name, listener in printer_farm.printers.items():
-        table = "```yaml\n"
+        table = ""
         for command in Command:
             users = listener.get_users(command)
             if len(users) > 0:
-                table += f"{command.value}:\n"
-                table += "\n".join([f"\t{user.name}" for user in users])
-                table += "\n"
+                table += f"**{command.value}:**\n"
+                table += "".join([f"* {user.name}\n" for user in users])
             else:
                 table += " "
-        table += "```"
         message_embed.add_field(
-            name=name,
+            name=f"***__{name}__***",
             value=table,
-            inline=True)
+            inline=False)
 
     await ctx.message.channel.send(embed=message_embed)
