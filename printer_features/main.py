@@ -29,6 +29,8 @@ PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+DEBUG = os.getenv('DEBUG') if os.getenv('DEBUG') else DEBUG
+
 PREFIX = settings['PREFIX']
 GUILD = int(settings['DISCORD_GUILD_ID'])
 ADMIN_ID = int(settings['ADMIN_ID'])

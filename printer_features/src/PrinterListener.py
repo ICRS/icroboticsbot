@@ -3,7 +3,7 @@
 
 # mypy: ignore-errors
 
-import time
+import os
 import base64
 from enum import Enum
 from io import BytesIO
@@ -14,11 +14,17 @@ from PIL import Image
 
 from src.utils import print  # pylint: disable=redefined-builtin, import-error
 
+DEBUG = False
+
+if DEBUG:
+    from dotenv import load_dotenv
+    load_dotenv()
+
 __all__ = ['PrinterListener', 'State', 'Command']
 
-LOGS = True
-ERRORS = True
-DEBUG = False
+LOGS = os.getenv('LOGS') if os.getenv('LOGS') else True
+ERRORS = os.getenv('ERRORS') if os.getenv('ERRORS') else True
+DEBUG = os.getenv('DEBUG') if os.getenv('DEBUG') else DEBUG
 
 class State(Enum):
     IDLE = "IDLE"
