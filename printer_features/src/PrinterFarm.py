@@ -50,10 +50,10 @@ class PrinterFarm:
                 if printer_listener.is_done():
                     if printer_listener.is_timelapsed():
                         timelapse: bytes = printer_listener.create_timelapse()  # noqa # pylint: disable=unused-variable
-                        # asyncio.run(printer_listener.send_timelapse(timelapse))
+                        asyncio.run(printer_listener.send_timelapse(timelapse))
                         printer_listener.stop_timelapse()
-                    # asyncio.run(printer_listener.notify_users(
-                    #     Command.LET_ME_KNOW))
+                    asyncio.run(printer_listener.notify_users(
+                        Command.NOTIFY))
                     printer_listener.clear_users(Command.NOTIFY)
                     printer_listener.clear_users(Command.TIMELAPSE)
 

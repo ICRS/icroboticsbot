@@ -1,5 +1,6 @@
 import os
 import dotenv
+from random import choice
 
 import uvicorn
 from fastapi import APIRouter, FastAPI
@@ -7,6 +8,8 @@ from fastapi import APIRouter, FastAPI
 dotenv.load_dotenv()
 
 router = APIRouter()
+
+states = ["IDLE", "PREPARE", "RUNNING", "PAUSE", "FINISH"]
 
 @router.get("/printer/status/time")
 async def printer_get_time() -> dict:
@@ -21,7 +24,7 @@ async def printer_get_percentage():
 
 @router.get("/printer/status/state")
 async def printer_get_state():
-    return {"state": "IDLE"}
+    return {"state": choice(states)}
 
 
 @router.get("/printer/status/print_speed")
@@ -36,7 +39,7 @@ async def get_file_name():
 @router.get("/printer/camera")
 async def printer_get_camera():
     try:
-        last_frame = bytes()
+        last_frame = None
     except Exception as e:
         print(str(e))
         return {"error": str(e)}
