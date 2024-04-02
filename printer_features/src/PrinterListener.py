@@ -217,6 +217,9 @@ class PrinterListener:
         if response.status_code != 200:
             return None
         r: dict[str, dict] = dict(response.json())
+        if "error" in r:
+            print(self.printer_name, f"Error getting frame: {r.get('error', 'error')}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
+            return None
         return r.get("frame", {}).get("body", None)
 
     def __get_state(self) -> State:
