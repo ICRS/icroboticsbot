@@ -9,7 +9,13 @@ dotenv.load_dotenv()
 
 router = APIRouter()
 
-states = ["IDLE", "PREPARE", "RUNNING", "PAUSE", "FINISH"]
+states = ["IDLE", "IDLE", "IDLE",
+          "PREPARE", "PREPARE", "PREPARE",
+          "RUNNING", "RUNNING", "RUNNING",
+          "PAUSE", "PAUSE", "PAUSE",
+          "RUNNING", "RUNNING", "RUNNING",
+          "FINISH", "FINISH", "FINISH"]
+current_index = 0
 
 @router.get("/printer/status/time")
 async def printer_get_time() -> dict:
@@ -24,7 +30,10 @@ async def printer_get_percentage():
 
 @router.get("/printer/status/state")
 async def printer_get_state():
-    return {"state": choice(states)}
+    global current_index  # Indicate that we're using the global variable
+    state = states[current_index]  # Get the current state
+    current_index = (current_index + 1) % len(states)  # Update the index and wrap around if necessary
+    return {"state": state}
 
 
 @router.get("/printer/status/print_speed")
