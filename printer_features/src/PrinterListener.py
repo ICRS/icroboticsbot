@@ -46,7 +46,12 @@ class PrinterListener:
                  printer_url: str,
                  timelapse_speed: float = 1.0):
 
-        self.printer_url = printer_url
+        # Debugging purposes
+        # print(requests.get(f"http://localhost:6000/printer/status/state").json()) if DEBUG else None
+        if DEBUG:
+            self.printer_url = "localhost:6000"
+        else:
+            self.printer_url = printer_url
         self.printer_name = printer_name
 
         self.__timelapse_speed: float = timelapse_speed
@@ -183,9 +188,9 @@ class PrinterListener:
                 timeout=30)
         except Exception as e:
             print(self.printer_name, f"Error getting remaining time: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
-        if response.get("status_code", -1) != 200:
+        if response.status_code != 200:
             return -1
-        r: dict = response.json()
+        r: dict = dict(response.json())
         return r.get("time", -1)
 
     def __get_percentage(self) -> int:
@@ -196,9 +201,9 @@ class PrinterListener:
                 timeout=30)
         except Exception as e:
             print(self.printer_name, f"Error getting percentage: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
-        if response.get("status_code", -1) != 200:
+        if response.status_code != 200:
             return -1
-        r: dict = response.json()
+        r: dict = dict(response.json())
         return r.get("percentage", -1)
 
     def __get_frame(self) -> str | None:
@@ -209,9 +214,9 @@ class PrinterListener:
                 timeout=30)
         except Exception as e:
             print(self.printer_name, f"Error getting frame: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
-        if response.get("status_code", -1) != 200:
+        if response.status_code != 200:
             return None
-        r: dict[str, dict] = response.json()
+        r: dict[str, dict] = dict(response.json())
         return r.get("frame", {}).get("body", None)
 
     def __get_state(self) -> State:
@@ -222,7 +227,7 @@ class PrinterListener:
                 timeout=30)
         except Exception as e:
             print(self.printer_name, f"Error getting status: {e}") if ERRORS else None  # noqa # pylint: disable=expression-not-assigned
-        if response.get("status_code", -1) != 200:
+        if response.status_code != 200:
             return State.UNKNOWN
-        r: dict = response.json()
+        r: dict = dict(response.json())
         return State(r.get("state", "IDLE"))
