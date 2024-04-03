@@ -44,7 +44,12 @@ client = DiscordBot(token=TOKEN,
                     intents=intents,
                     guild_info=guild_info)
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s -  %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S',
+                    handlers=[
+                        logging.StreamHandler()
+                    ])
 
 if __name__ == "__main__":
     client.start_loop()
