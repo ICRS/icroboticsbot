@@ -25,7 +25,7 @@ from dotenv import load_dotenv
 
 __all__ = ["is_shortcode", "is_member", "add_mapping",
            "shortcode_exists", "valid_mapping", "change_valid",
-           "print"]
+           ]
 
 # ===== Constants =====
 load_dotenv()
@@ -72,24 +72,6 @@ CREATE TABLE mapping (
 '''
 SHORTCODE_REGEX = r'[a-z]{2,3}[0-9]{2,4}'
 # ===========================
-
-
-
-def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
-    """
-    print is a wrapper around the built-in print function
-
-    Parameters
-    ----------
-    args : list
-        List of arguments to pass to the print function
-    kwargs : dict
-        Dictionary of keyword arguments to pass to the print function
-    """
-    built_in_print = __builtins__['print']              # type: ignore
-    args = list(args)                                   # type: ignore
-    args.insert(0, f'{time.strftime("%H:%M:%S")} :')    # type: ignore
-    built_in_print(*args, **kwargs)
 
 
 def is_shortcode(message: str) -> bool:
