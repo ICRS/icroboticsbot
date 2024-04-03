@@ -15,7 +15,6 @@ from discord.ext import commands
 from src.bot_commands import get_help            # noqa
 from src.bot_commands import quote_person       # noqa
 
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
 __all__ = ["DiscordBot"]
 
 settings = json.load(open("settings.json",

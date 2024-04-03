@@ -9,7 +9,6 @@ Discord Bot helper functions
 import logging
 import discord
 
-from src.utils import print             # noqa  # pylint: disable=redefined-builtin
 from src.utils import generate_stat_card, BASE_PATH
 import io
 

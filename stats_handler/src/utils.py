@@ -23,7 +23,7 @@ import requests  # type: ignore
 from dotenv import load_dotenv
 
 
-__all__ = ["print", "generate_stat_card"]
+__all__ = ["generate_stat_card"]
 
 # ===== Constants =====
 load_dotenv()
@@ -45,22 +45,6 @@ db_config = {
     'port': config['postgres']['port']
 }
 # =====================
-
-def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
-    """
-    print is a wrapper around the built-in print function
-
-    Parameters
-    ----------
-    args : list
-        List of arguments to pass to the print function
-    kwargs : dict
-        Dictionary of keyword arguments to pass to the print function
-    """
-    built_in_print = __builtins__['print']              # type: ignore
-    args = list(args)                                   # type: ignore
-    args.insert(0, f'{time.strftime("%H:%M:%S")} :')    # type: ignore
-    built_in_print(*args, **kwargs)
 
 
 def generate_stat_card(user):
