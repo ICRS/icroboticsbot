@@ -7,8 +7,9 @@
 Discord Bot helper functions
 """
 
+import logging
 from src.utils import download_files, extension_list                             # noqa
-from src.utils import print             # noqa  # pylint: disable=redefined-builtin
+
 DEBUG = False
 
 __all__ = ["handle_upload"]  # noqa
@@ -25,7 +26,7 @@ async def handle_upload(bot, message):
         Discord message
     """
     files = []
-    print("file sent in files")
+    logging.info(f"{message.author} sent a file")
     for attachment in message.attachments:
         if ((attachment.filename.split(".")[-1].lower() in extension_list)
                 and (attachment.size < bot.guild_info["MAX_SIZE"])):
