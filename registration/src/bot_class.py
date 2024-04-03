@@ -6,6 +6,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import logging
 import os
 import json
 import asyncio
@@ -16,7 +17,6 @@ from src.bot_commands import register_on_guild   # noqa
 from src.bot_commands import register_on_dm      # noqa
 
 from src.utils import change_valid               # noqa
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
 
 __all__ = ["DiscordBot"]
 
@@ -79,7 +79,7 @@ class DiscordBot(commands.Bot):
         on_ready is called when the bot is ready to be used
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
+        logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
     async def on_member_join(self, member):
         """
@@ -110,7 +110,7 @@ class DiscordBot(commands.Bot):
         try:
             change_valid(member.id, 0)
         except KeyError:
-            print(member.id+' did not have membership')
+            logging.error(f"Error in changing membership for {member.id}")
 
     def start_loop(self):
         """

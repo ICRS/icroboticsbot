@@ -6,9 +6,9 @@
 """
 Discord Bot helper functions
 """
+import logging
 import discord
 
-from src.utils import print             # noqa  # pylint: disable=redefined-builtin
 from src.utils import generate_stat_card, BASE_PATH
 import io
 
@@ -32,7 +32,7 @@ async def stats_card(bot, ctx):
     try:
         card = generate_stat_card(user)
     except Exception as e:
-        print(f"Could not generate stats {e}")
+        logging.error(f"Could not generate stats {e}")
     
     temp = io.BytesIO()
     card.save(temp, format="PNG")

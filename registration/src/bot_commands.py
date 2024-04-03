@@ -6,10 +6,11 @@
 """
 Discord Bot helper functions
 """
+import logging
 import discord
 
-from src.utils import is_shortcode, is_member, shortcode_exists, valid_mapping   # noqa
-from src.utils import add_mapping, change_valid, print             # noqa  # pylint: disable=redefined-builtin
+from src.utils import is_shortcode, is_member, shortcode_exists, valid_mapping  # noqa
+from src.utils import add_mapping, change_valid                                 # noqa  # pylint: disable=redefined-builtin
 DEBUG = False
 
 __all__ = ["register_on_guild", "register_on_dm", "quote_person", "get_help", "handle_upload"]  # noqa
@@ -114,5 +115,5 @@ async def register_on_dm(bot, ctx, shortcode):
             await register_on_guild(bot, ctx)
     # pylint: disable=broad-except
     except Exception as e:
-        print("An exception occurred:", e.with_traceback())
+        logging.error(f"Error in registering user: {str(e)}")
 

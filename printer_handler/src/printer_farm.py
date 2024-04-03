@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 
 from src.printer_gateway import PrinterGateway
 
@@ -34,26 +35,26 @@ class PrinterFarm:
 
     @printer_exists
     def get_remaining_time(self, printer_name: str) -> int:
-        print("Printer name: ", printer_name)
+        logging.info("Printer name: %s", printer_name)
         remaining_time = self.printers[printer_name].get_remaining_time()
         return remaining_time if remaining_time > 0 else 0
 
     @printer_exists
     def get_percentage(self, printer_name: str) -> int:
-        print("Printer name: ", printer_name)
+        logging.info("Printer name: %s", printer_name)
         percentage = self.printers[printer_name].get_percentage()
         return percentage if percentage > 0 else 0
 
     @printer_exists
     def get_frame(self, printer_name: str) -> str:
-        print("Printer name: ", printer_name)
+        logging.info("Printer name: %s", printer_name)
         frame = self.printers[printer_name].get_frame()
         self.__printer_cache[printer_name]["frame"] = frame if frame else self.__printer_cache[printer_name]["frame"]  # noqa # pylint: disable=line-too-long
         return self.__printer_cache[printer_name]["frame"]
 
     @printer_exists
     def get_state(self, printer_name: str) -> State:
-        print("Printer name: ", printer_name)
+        logging.info("Printer name: %s", printer_name)
         state = self.printers[printer_name].get_state()
         return State(state) if state else State.UNKNOWN
 

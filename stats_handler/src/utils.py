@@ -7,6 +7,7 @@
 Utility functions used by the bot
 """
 import io
+import logging
 import os
 import json
 import psycopg2 as pg
@@ -22,7 +23,7 @@ import requests  # type: ignore
 from dotenv import load_dotenv
 
 
-__all__ = ["print", "generate_stat_card"]
+__all__ = ["generate_stat_card"]
 
 # ===== Constants =====
 load_dotenv()
@@ -44,22 +45,6 @@ db_config = {
     'port': config['postgres']['port']
 }
 # =====================
-
-def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
-    """
-    print is a wrapper around the built-in print function
-
-    Parameters
-    ----------
-    args : list
-        List of arguments to pass to the print function
-    kwargs : dict
-        Dictionary of keyword arguments to pass to the print function
-    """
-    built_in_print = __builtins__['print']              # type: ignore
-    args = list(args)                                   # type: ignore
-    args.insert(0, f'{time.strftime("%H:%M:%S")} :')    # type: ignore
-    built_in_print(*args, **kwargs)
 
 
 def generate_stat_card(user):
@@ -103,15 +88,15 @@ def generate_stat_card(user):
     if not shortcode:
         return False
     res = requests.post(url="http://" + SERVER_IP+"/getMetrics",json={"shortcode":shortcode[0]})
-    print(res)
-    print(res.text)
+    logging.info(res)
+    logging.info(res.text)
     data = json.loads(res.text)
-    print(data)
+    logging.info(data)
     username = user.name
     avatar = user.avatar
     if not avatar:
         avatar = "https://assets-global.website-files.com/5f9072399b2640f14d6a2bf4/619442eb8b3fab3eda4c29eb_Author-Wumpus-Webflow.png"
-    print(f"generating stats card for {user.name} shortcode {shortcode}")
+    logging.info(f"Generating stats card for {user.name} shortcode {shortcode}")
     if data:
         total_filament = sum([i[3] for i in data])
         total_time = sum([i[2] for i in data])
@@ -133,23 +118,21 @@ def generate_stat_card(user):
         fav_no = 0
         print_no = 1
         display_no = 0
-    print(avatar)
+    logging.info(avatar)
     r = requests.get(avatar, timeout=60)
 
     temp = io.BytesIO()
     temp.write(r.content)
-    #with (temp := io.BytesIO()) as f:
-    #    f.write(r.content)
-    
-    
+
     temp.seek(0)
     pic = ColorThief(temp)
     accent_colour=pic.get_color(quality=1)
-    print("ColorThief")
+    logging.info(accent_colour)
     pic = Image.open(temp).convert("RGBA")
     pic = pic.resize((60,60))
 
-    print("CREATE CARD")
+    logging.info("Creating card")
+
     card = Image.new('RGBA', (825, 350))
     d=ImageDraw.Draw(card)
     d.rectangle([(0,0),(825,350)],fill=(30,31,35))
@@ -163,9 +146,8 @@ def generate_stat_card(user):
     d.text((795,52),str(display_no),font=name_font,fill=(255,255,255),anchor='ra')
     d.text((649,28),"Total Prints",font=sub_font,fill=(181,181,181))
 
-    print("ADD Metrics")
+    logging.info("Adding stats")
     
-
     window = generate_card("Filament Used","{:,}".format(total_filament)+"g",accent_colour=accent_colour)
     card.paste(window,(7,125))
     window = generate_card("Total Time",format_time(total_time),accent_colour=accent_colour)
@@ -189,9 +171,7 @@ def generate_stat_card(user):
     for idx, i in enumerate(data):
         a.text((12,40+idx*35),f"{idx+1}.",font=item_font,fill=(255,255,255))
         a.text((40,40+idx*35),f"{i[3]}g",font=item_font,fill=accent_colour)
-    card.paste(window,(586,125))
-    # card.save(BASE_PATH+"card.png")    
-
+    card.paste(window,(586,125)) 
     return card
 
 if __name__ == '__main__':
