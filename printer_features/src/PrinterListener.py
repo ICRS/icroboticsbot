@@ -8,6 +8,7 @@ import base64
 import logging
 from enum import Enum
 from io import BytesIO
+from collections import deque
 
 import discord
 import requests
@@ -21,9 +22,15 @@ if DEBUG:
 
 __all__ = ['PrinterListener', 'State', 'Command']
 
-LOGS = os.getenv('LOGS') if os.getenv('LOGS') else True
-ERRORS = os.getenv('ERRORS') if os.getenv('ERRORS') else True
-DEBUG = os.getenv('DEBUG') if os.getenv('DEBUG') else DEBUG
+
+def get_env_bool(var: str, default: bool = False) -> bool:
+    return os.getenv(var, str(default)).lower() in ('true', '1', 't')
+
+
+LOGS = get_env_bool("ENV_VAR", True)
+ERRORS = get_env_bool("ERRORS", True)
+DEBUG = get_env_bool('DEBUG', DEBUG)
+
 
 class State(Enum):
     IDLE = "IDLE"
@@ -50,7 +57,8 @@ class Command(Enum):
 class PrinterListener:
     def __init__(self, printer_name: str,
                  printer_url: str,
-                 timelapse_speed: float = 1.0):
+                 timelapse_speed: float = 1.0,
+                 max_printer_states: int = 10):
 
         # Debugging purposes
         # print(requests.get(f"http://localhost:6000/printer/status/state").json()) if DEBUG else None
@@ -64,18 +72,17 @@ class PrinterListener:
         self.__timelapsed: bool = False
 
         self.__users: dict[Command, set[discord.User]] = {
-            Command.NOTIFY: set(),
-            Command.TIMELAPSE: set()
+            c: set() for c in Command
         }
 
         self.__default_image = Image.open("./src/no_image.jpg")
 
         self.__timelapse_frames: list[BytesIO] = []
-        self.__printer_state: list[State] = []
+        self.__printer_state: deque[State] = deque(maxlen=max_printer_states)
 
     def get_state(self) -> State:
         return State(self.__printer_state[-1]).value if \
-            len(self.__printer_state) > 0 else State.UNKNOWN.value
+            self.__printer_state else State.UNKNOWN.value
 
     def get_users(self, comm: Command) -> set[discord.User]:
         logging.info(f"{self.printer_name} Getting users in {comm}")
@@ -92,7 +99,8 @@ class PrinterListener:
         return True
 
     def user_in(self, user: discord.User, comm: Command) -> bool:
-        logging.info(f"{self.printer_name} Checking if user {user} is in {comm}")
+        logging.info(
+            f"{self.printer_name} Checking if user {user} is in {comm}")
         return user in self.__users[Command(comm)]
 
     async def clear_users(self, comm: Command) -> bool:
@@ -107,7 +115,8 @@ class PrinterListener:
                 logging.info(f"{self.printer_name} Sending message to {user}")
                 await user.send(f"Printer {self.printer_name} is finished.")
             except Exception as e:
-                logging.error(f"{self.printer_name} Error sending message: {e}")
+                logging.error(
+                    f"{self.printer_name} Error sending message: {e}")
         return True
 
     def start_timelapse(self) -> bool:
@@ -137,7 +146,7 @@ class PrinterListener:
     def is_timelapsed(self) -> bool:
         return self.__timelapsed
 
-    def create_timelapse(self) -> bytes|None:
+    def create_timelapse(self) -> bytes | None:
         logging.info(f"{self.printer_name} Creating timelapse")
         im: list[Image.Image] = []
         for frame in self.__timelapse_frames:
@@ -148,9 +157,9 @@ class PrinterListener:
                 if len(im) == 0:
                     im.append(self.__default_image)
                 im[0].save(buffer, format='GIF', save_all=True,
-                        append_images=im[1:], optimize=False,
-                        duration=int((1000 * 1/self.__timelapse_speed)/6),
-                        loop=0)
+                           append_images=im[1:], optimize=False,
+                           duration=int((1000 * 1/self.__timelapse_speed)/6),
+                           loop=0)
                 buffer.seek(0)
                 return buffer.getbuffer().tobytes()
         except Exception as e:
@@ -159,30 +168,32 @@ class PrinterListener:
 
     async def send_timelapse(self, timelapse: bytes, time: str) -> None:
         filename = f"{self.printer_name}_timelapse_{time}.gif"
-        logging.info(f"{self.printer_name} Sending {filename} to users: {len(self.__users[Command.TIMELAPSE])}")
+        logging.info(
+            f"{self.printer_name} Sending {filename} to users: {len(self.__users[Command.TIMELAPSE])}")
         for user in self.__users[Command.TIMELAPSE]:
             try:
                 with BytesIO(timelapse) as timelapse:
                     await user.send(file=discord.File(fp=timelapse, filename=filename))
             except Exception as e:
-                logging.error(f"{self.printer_name} Error sending timelapse: {e}")
+                logging.error(
+                    f"{self.printer_name} Error sending timelapse: {e}")
 
     def append_frame(self):
-        
         frame = self.__get_frame()
         if frame is not None:
             self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
 
     def update_state(self):
         self.__printer_state.append(self.__get_state())
-        logging.info(f"{self.printer_name} {', '.join(state.value for state in self.__printer_state[-5:])}")
+        logging.info(
+            f"{self.printer_name} {', '.join(state.value for state in self.__printer_state[-5:])}")
 
     def is_starting(self) -> bool:
         if len(self.__printer_state) > 0:
             if self.__printer_state[-1] == State.PREPARING:
                 return True
             if self.__printer_state[-1] == State.RUNNING and \
-                    (self.__printer_state[-2] == State.IDLE or \
+                    (self.__printer_state[-2] == State.IDLE or
                      self.__printer_state[-2] == State.FINISHED):
                 return True
         return False
@@ -241,7 +252,8 @@ class PrinterListener:
             return None
         r: dict[str, dict] = dict(response.json())
         if "error" in r:
-            logging.error(f"{self.printer_name} Error getting frame: {r['error']}")
+            logging.error(
+                f"{self.printer_name} Error getting frame: {r['error']}")
             return None
         return r.get("frame", {}).get("body", None)
 
