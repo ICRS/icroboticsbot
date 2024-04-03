@@ -6,6 +6,7 @@
 """
 Discord Bot helper functions
 """
+import logging
 import discord
 
 from src.utils import random_quote, print             # noqa  # pylint: disable=redefined-builtin
@@ -28,7 +29,7 @@ async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
     name : str
         Name of the person to quote
     """
-    print("quote")
+    logging.info(f"{ctx.author} requested a quote")
     temp = io.BytesIO()
     q, img = random_quote(" ".join(name))
     img.save(temp, format="PNG")

@@ -6,6 +6,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import logging
 import os
 import json
 import asyncio
@@ -14,7 +15,6 @@ from discord.ext import commands
 
 from src.bot_commands import handle_upload       # noqa
 
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
 __all__ = ["DiscordBot"]
 
 settings = json.load(open("settings.json",
@@ -69,7 +69,7 @@ class DiscordBot(commands.Bot):
         on_ready is called when the bot is ready to be used
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
+        logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
 
     def start_loop(self):

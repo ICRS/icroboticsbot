@@ -7,6 +7,7 @@
 Utility functions used by the bot
 """
 
+import logging
 import os
 import random
 import json
@@ -66,15 +67,15 @@ def random_quote(author: str) -> tuple:
         A tuple containing the quote and the path to the generated image
     """
     images = os.listdir(os.path.relpath('assets/background_images'))
-    print(images)
+    logging.info(f"Images: {images}")
     backgrounds = [os.path.relpath('assets/background_images/'+image)
                    for image in images if image.startswith(
                        author.strip().lower())]
-    print(backgrounds)
+    logging.info(f"Backgrounds: {backgrounds}")
     background = random.choice(backgrounds)
     fonts = os.listdir(os.path.relpath('assets/fonts'))
     font = os.path.relpath('assets/fonts/'+random.choice(fonts))
-    print(background, font)
+    logging.info(f"Background: {background} Font: {font}")
     with open(os.path.relpath('assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
@@ -87,7 +88,7 @@ def random_quote(author: str) -> tuple:
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])     # noqa
     choice = random.choice(choices[author])
-    print(choice, background)
+    logging.info(f"Quote: {choice} Author: {author} Background: {background} Font: {font}")
     
     img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)
