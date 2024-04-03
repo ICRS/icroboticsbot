@@ -32,13 +32,6 @@ default_guild_info = {
     'ADMIN_ID': ADMIN_ID,
 }
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S',
-                    handlers=[
-                        logging.StreamHandler()
-                    ])
-
 
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value

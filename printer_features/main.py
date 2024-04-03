@@ -6,6 +6,7 @@
 This is the main file to start the bot.
 """
 
+import logging
 import os
 import json
 
@@ -52,6 +53,13 @@ client = DiscordBot(token=TOKEN,
                     guild_info=guild_info,
                     printer_names=PRINTER_NAMES,
                     printer_suffix=PRINTER_GATEWAY_ENDPOINT_SUFFIX)
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S',
+                    handlers=[
+                        logging.StreamHandler()
+                    ])
 
 if __name__ == "__main__":
     client.start_loop()
