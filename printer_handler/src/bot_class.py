@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 
 import atexit
+import logging
 from PIL import Image
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
@@ -79,7 +80,7 @@ class PrinterWebhook:
 
                 except Exception as e:
                     im = self.__default_image
-                    print(str(e))
+                    logging.error(f"Error in opening image for {printer_name}: {str(e)}")
 
 <<<<<<< HEAD
                 with BytesIO() as image_binary:
@@ -102,7 +103,7 @@ class PrinterWebhook:
                     embed.set_image(url=f'attachment://{fname}')
 
         except Exception as e:
-            print(str(e))
+            logging.error(f"Error in sending message for {printer_name}: {str(e)}")
 
     def send_message_all(self) -> None:
         self.webhook.remove_embeds()

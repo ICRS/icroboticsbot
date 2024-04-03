@@ -7,6 +7,7 @@
 Utility functions used by the bot
 """
 
+import logging
 import re
 import os
 from datetime import date
@@ -127,7 +128,7 @@ def is_member(shortcode: str) -> bool:
         else:
             return False
     except Exception:  # pylint: disable=broad-except
-        print("Error contacting Society API")
+        logging.error("Error contacting Society API")
         return False
 
 

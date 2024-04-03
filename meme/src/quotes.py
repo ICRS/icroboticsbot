@@ -8,6 +8,7 @@
 Generate a Quote Image from a given Image and Quote
 """
 import io
+import logging
 import os
 from PIL import Image  # type: ignore
 
@@ -37,20 +38,19 @@ def generate(IMAGE_PATH, author, quote,
         Path to the generated png image and PIL Image Object
     """  # noqa ignore
     
-    
-    print(IMAGE_PATH, author, quote, IMAGE_TEMP, font, BASE_PATH)
+    logging.info(f"Generating Quote Image from {IMAGE_PATH}")
     image = Image.open(os.path.relpath(IMAGE_PATH))
-    print(image)
+    logging.info(f"Image Opened")
     grayscale = image.convert("L")
     width, height = grayscale.size
     ratio = 400/width
     grayscale = grayscale.resize((int(width*ratio), int(height*ratio)))
-    print("Image Temp", os.path.abspath(IMAGE_TEMP))
+    logging.info(f"Image Resized")
     temp = io.BytesIO()
 
     grayscale.save(temp, format="PNG")
 
-    print("IMAGE TEMP SAVED")
+    logging.info(f"Image Temp Saved")
 
     img = convert(
             quote=quote,

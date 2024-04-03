@@ -10,7 +10,7 @@ Utility functions used by the bot
 import os
 import io
 import time
-
+import logging
 
 import requests  # type: ignore
 import paramiko  # type: ignore
@@ -75,7 +75,7 @@ def download_files(files) -> None:
             file.seek(0)
             scp.putfo(file, TARGET_PATH+name)
     except Exception:  # pylint: disable=broad-except
-        print("Error appending files")
+        logging.error("Error downloading files")
 
 
 def create_sshclient(server, port, user, password) -> paramiko.SSHClient:

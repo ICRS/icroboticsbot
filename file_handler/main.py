@@ -7,6 +7,7 @@
 This is the main file to start the bot.
 """
 
+import logging
 import os
 import json
 
@@ -42,6 +43,8 @@ guild_info = {
 client = DiscordBot(token=TOKEN,
                     intents=intents,
                     guild_info=guild_info)
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s -  %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 if __name__ == "__main__":
     client.start_loop()
