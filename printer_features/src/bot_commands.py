@@ -19,8 +19,6 @@ if DEBUG:
     from dotenv import load_dotenv
     load_dotenv()
 
-DEBUG = os.getenv('DEBUG') if os.getenv('DEBUG') else DEBUG
-
 __all__ = ["printer_buttons", "printer_status"]  # noqa
 
 
