@@ -14,7 +14,7 @@ import discord
 
 from src.bot_class import DiscordBot
 
-DEBUG = str(os.getenv('DEBUG', False)) in ['true', '1']
+DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv()
