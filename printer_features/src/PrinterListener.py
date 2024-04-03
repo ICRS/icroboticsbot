@@ -227,7 +227,13 @@ class PrinterListener:
         r: dict = dict(response.json())
         return r.get("time", -1)
 
-    def __get_percentage(self) -> int:
+    def __get_percentage(self) -> int: 
+        """
+        Retrieves the percentage of completion for the printer.
+
+        Returns:
+            int: The percentage of completion, or -1 if an error occurred.
+        """
         response: requests.Response = {}
         try:
             response = requests.get(
@@ -245,7 +251,7 @@ class PrinterListener:
         try:
             response = requests.get(
                 f"http://{self.printer_url}/printer/camera",
-                timeout=30)
+                timeout=5)
         except Exception as e:
             logging.error(f"{self.printer_name} Error getting frame: {e}")
         if response.status_code != 200:
@@ -262,10 +268,10 @@ class PrinterListener:
         try:
             response = requests.get(
                 f"http://{self.printer_url}/printer/status/state",
-                timeout=30)
+                timeout=5)
         except Exception as e:
             logging.error(f"{self.printer_name} Error getting state: {e}")
         if response.status_code != 200:
             return State.UNKNOWN
-        r: dict = dict(response.json())
+        r: dict = response.json()
         return State(r.get("state", "IDLE"))

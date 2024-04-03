@@ -20,10 +20,12 @@ class PrinterFarm:
     def __init__(self, bot: commands.Bot = None, printer_names: list[str] = [], printer_suffix: str = "") -> None:
         self.bot = bot
         # Initialize printers with printer names and URLs
-        self.printers = {name: PrinterListener(name, f"{name}{printer_suffix}") for name in printer_names}
+        self.printers = {name: PrinterListener(
+            name, name + printer_suffix) for name in printer_names}
         # Thread to handle the continuous checking and notification
         loop = asyncio.get_event_loop()
-        self.__thread = Thread(target=self.__run_async_loop_in_thread, args=[loop], daemon=True).start()
+        self.__thread = Thread(target=self.__run_async_loop_in_thread, args=[
+                               loop], daemon=True).start()
 
     def __run_async_loop_in_thread(self, loop):
         """Sets up and runs the asyncio event loop in a new thread."""
@@ -35,8 +37,7 @@ class PrinterFarm:
     async def __thread_loop(self):
         """Main loop that checks printer states and sends notifications."""
         while True:
-            tasks = []
-            for printer_name, printer in self.printers.items():
+            for _, printer in self.printers.items():
                 # Perform the update state check
                 printer.update_state()
 
@@ -49,9 +50,9 @@ class PrinterFarm:
                     if printer.is_timelapsed():
                         timelapse = printer.create_timelapse()
                         if timelapse:
-                            time_str = time.strftime('%Y%m%d%H%M%S', time.localtime())
+                            time_str = time.strftime('%Y%m%d%H%M%S')
                             await printer.send_timelapse(timelapse, time_str)
-                
+
                     await printer.notify_users(Command.NOTIFY)
                     await printer.clear_users(Command.NOTIFY)
                     await printer.clear_users(Command.TIMELAPSE)
