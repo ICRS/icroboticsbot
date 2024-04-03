@@ -11,8 +11,6 @@ import json
 
 import discord
 
-from src.utils import BASE_PATH
-
 from src.bot_class import DiscordBot
 
 DEBUG = str(os.getenv('DEBUG', False)) in ['true', '1']
@@ -21,7 +19,7 @@ if DEBUG:
     load_dotenv()
 
 # ======= Get the discord settings ========
-settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
+settings = json.load(open(os.path.abspath("settings.json"),
                           "r", encoding="utf-8"))
 PREFIX = settings['PREFIX']
 GUILD = int(settings['DISCORD_GUILD_ID'])
