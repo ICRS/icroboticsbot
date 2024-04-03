@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: icrsbot-printer-features-deployment
+spec:
+  replicas: 1  # Number of replicas you want to run
+  selector:
+    matchLabels:
+      app: icrsbot-printer-features
+  template:
+    metadata:
+      labels:
+        app: icrsbot-printer-features
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: icrsbot-printer-features
+        image: localhost:32000/icrsbot-printer-features  # Replace with your Python Docker image and tag
+        ports:
+        - containerPort: 5000  # Port your Python application is listening on
+        imagePullPolicy: "Always"
+        env:
+          - name: DISCORD_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: discord-bot-secret
+                key: discord_token
+        volumeMounts:
+          - name: discord-bot-secret
+            mountPath: /app/settings.json
+            subPath: settings.json
+            readOnly: true
+          - name: printer-config
+            mountPath: /app/printer_settings.json
+            subPath: printer_settings.json
+            readOnly: true
+      volumes:
+        - name: discord-bot-secret
+          secret:
+            secretName: discord-bot-secret
+            items:
+              - key: discord_settings
+                path: settings.json
+        - name: printer-config
+          configMap:
+            name: printer-config
+            items:
+              - key: printer_config
+                path: printer_settings.json
