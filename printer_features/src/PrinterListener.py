@@ -118,6 +118,7 @@ class PrinterListener:
     def stop_timelapse(self) -> bool:
         logging.info(f"{self.printer_name} Stopping timelapse")
         self.__timelapsed = False
+        self.__timelapse_frames.clear()
         return False
 
     def enable_timelapse(self, user: discord.User) -> bool:
