@@ -8,13 +8,7 @@ Utility functions used by the bot
 """
 import time
 
-from dotenv import load_dotenv
-
-
 __all__ = ["print"]
-
-# ===== Constants =====
-load_dotenv()
 
 # ===== Get the API key =====
 BASE_PATH = "./"
