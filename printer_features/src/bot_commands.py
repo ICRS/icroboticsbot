@@ -86,7 +86,6 @@ class PrinterCommandPage(View):
 class PrintersMainPage(View):
     def __init__(self, *, timeout=180,
                  printer_farm: PrinterFarm = PrinterFarm()):
-
         super().__init__(timeout=timeout)
         for name, listener in printer_farm.printers.items():
             self.add_item(PrinterButton(printer=listener,
@@ -136,7 +135,7 @@ async def printer_status(bot, ctx):
     message_embed = discord.Embed(
         title="Printers & Notifications bound to you:",
         color=discord.Color.red())
-    
+
     no_commands = True
     for name, listener in printer_farm.printers.items():
         commands = ""

@@ -21,7 +21,7 @@ from src.utils import BASE_PATH                                 # noqa  #pylint:
 
 __all__ = ["DiscordBot"]
 
-settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
+settings = json.load(open(os.path.abspath("settings.json"),
                           "r", encoding="utf-8"))
 
 PREFIX = settings['PREFIX']
@@ -34,7 +34,13 @@ default_guild_info = {
     'ADMIN_ID': ADMIN_ID,
 }
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s -  %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S',
+                    handlers=[
+                        logging.StreamHandler()
+                    ])
+
 
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
