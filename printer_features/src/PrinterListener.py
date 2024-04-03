@@ -14,8 +14,7 @@ import discord
 import requests
 from PIL import Image
 
-DEBUG = False
-
+DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv()
