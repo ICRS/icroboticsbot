@@ -17,8 +17,6 @@ from discord.ext import commands
 from src.bot_commands import printer_buttons, printer_status    # noqa  #pylint: disable=import-error
 from src.PrinterFarm import PrinterFarm                         # noqa  #pylint: disable=import-error
 
-from src.utils import BASE_PATH                                 # noqa  #pylint: disable=import-error
-
 __all__ = ["DiscordBot"]
 
 settings = json.load(open(os.path.abspath("settings.json"),
