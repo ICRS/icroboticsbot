@@ -9,9 +9,7 @@ Discord Bot helper functions
 import logging
 import discord
 
-from src.utils import download_files, extension_list                             # noqa
-from src.utils import add_mapping, change_valid, random_quote, print             # noqa  # pylint: disable=redefined-builtin
-from src.utils import generate_stat_card, CARD_PATH
+from src.utils import random_quote             # noqa  # pylint: disable=redefined-builtin
 import io
 DEBUG = False
 
@@ -65,48 +63,3 @@ async def get_help(bot, ctx):
         embed.add_field(name=command.name, value=command.help, inline=False)
     await ctx.send(embed=embed)
 
-<<<<<<< HEAD
-
-async def handle_upload(bot, message):
-    """
-    handle_upload Handle upload of files to the server
-
-    Parameters
-    ----------
-    bot : DiscordBot
-        Discord bot instance
-    message : Discord.Message
-        Discord message
-    """
-    files = []
-    print("file sent in files")
-    for attachment in message.attachments:
-        if ((attachment.filename.split(".")[-1].lower() in extension_list)
-                and (attachment.size < bot.guild_info["MAX_SIZE"])):
-            files.append({'url': attachment.url, 'name': attachment.filename})
-
-    download_files(files)
-    await bot.bot_admin.send(f'{message.author} sent {len(files)} files with names {[file["name"] for file in files]}')  # noqa
-
-async def stats_card(bot, ctx):
-    """
-    stats_card generates a card with 3d printer usage stats for that user
-
-    Parameters
-    ----------
-    bot : DiscordBot
-        Discord bot instance
-    ctx : Discord.Context
-        Discord context
-    """
-    user = ctx.author
-    embed = discord.Embed(title=f"3D Printing Stats for {user.name}")
-    try:
-        generate_stat_card(user)
-    except Exception as e:
-        print(f"Could not generate stats {e}")
-    file = discord.File(CARD_PATH, filename="image.png")
-    embed.set_image(url="attachment://image.png")
-    await ctx.send(file=file,embed=embed)
-=======
->>>>>>> a337c8a (removed more stuff)
