@@ -16,14 +16,12 @@ DEBUG = False
 
 __all__ = ["stats_card"]  # noqa
 
-async def stats_card(bot, ctx):
+async def stats_card(ctx):
     """
     stats_card generates a card with 3d printer usage stats for that user
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
     ctx : Discord.Context
         Discord context
     """

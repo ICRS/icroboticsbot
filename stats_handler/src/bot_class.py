@@ -51,7 +51,7 @@ class DiscordBot(commands.Bot):
         @self.command(name="stats", pass_context=True,
                       help="Get your 3D printing stats")
         async def stats(ctx):
-            await stats_card(self,ctx)
+            await stats_card(ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
