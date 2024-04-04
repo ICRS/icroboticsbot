@@ -48,6 +48,14 @@ class DiscordBot(commands.Bot):
         self.bot_admin = None
     
     def get_admin_user(self):
+        """
+        get_admin_user gets the bot admin user
+
+        Returns
+        -------
+        discord.User
+            The bot admin user
+        """
         if not self.bot_admin:
             self.bot_admin = self.get_user(self.guild_info["ADMIN_ID"])
         
