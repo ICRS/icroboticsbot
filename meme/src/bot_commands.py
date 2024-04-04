@@ -9,7 +9,7 @@ Discord Bot helper functions
 import logging
 import discord
 
-from src.utils import random_quote, print             # noqa  # pylint: disable=redefined-builtin
+from src.utils import random_quote             # noqa  # pylint: disable=redefined-builtin
 import io
 DEBUG = False
 
