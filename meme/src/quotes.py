@@ -16,8 +16,7 @@ from src.quote_to_image import convert
 
 # Font Size Default to 32, Height and Width by default is 612
 def generate(IMAGE_PATH, author, quote,
-        IMAGE_TEMP=os.path.relpath("assets/generation/temp.jpg"), # noqa
-        font=("assets/fonts/Precious.ttf"), BASE_PATH="/") -> Image: # noqa
+             font=("assets/fonts/Precious.ttf")) -> Image.Image: # noqa
     """
     generate a quote image from a given image and quote
 
@@ -29,13 +28,13 @@ def generate(IMAGE_PATH, author, quote,
         Author of quote
     quote : String
         Quote
-    IMAGE_TEMP : str, optional
-        Path to temp image, by default "./assets/generation/temp.jpg"
+    font : String, optional
+        Path to the font file, by default "assets/fonts/Precious.ttf"
 
     Returns
     -------
-    tuple
-        Path to the generated png image and PIL Image Object
+    PIL.Image.Image
+        PIL Image Object
     """  # noqa ignore
     
     logging.info(f"Generating Quote Image from {IMAGE_PATH}")

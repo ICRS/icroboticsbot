@@ -12,7 +12,6 @@ import os
 import json
 import psycopg2 as pg
 import configparser
-import time
 
 from PIL import Image, ImageDraw, ImageFont
 from colorthief import ColorThief
@@ -47,8 +46,21 @@ db_config = {
 # =====================
 
 
-def generate_stat_card(user):
-    def generate_card(key,value,accent_colour,key_size=22,value_size=25):
+def generate_stat_card(user) -> Image.Image:
+    """
+    Generate a stats card for the user
+
+    Parameters
+    ----------
+    user : discord.User
+        The user to generate the stats card for
+
+    Returns
+    -------
+    Image
+        The stats card
+    """
+    def generate_card(key,value,accent_colour,key_size=22,value_size=25) -> Image.Image:
         window = Image.new('RGBA',(175,100))
         a = ImageDraw.Draw(window)
         a.rectangle([(0,0),(175,100)],fill=(47,49,54))
@@ -59,7 +71,7 @@ def generate_stat_card(user):
         a.text((12,40),value,font=value_font,fill=(255,255,255),anchor="la")
         return window
     
-    def format_time(seconds):
+    def format_time(seconds) -> str:
         days=0
         hours=0
         mins=0

@@ -7,14 +7,13 @@
 Converts a quote to an image
 """
 import os
-import PIL  # type: ignore
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 
 __all__ = ["convert"]
 
 
-def convert(quote, author, fg, image: PIL.Image, border_color,
+def convert(quote, author, fg, image: Image.Image, border_color,
             font_file=None, font_size=None, width=None, height=None):
     """
     convert a quote to an image
@@ -27,7 +26,7 @@ def convert(quote, author, fg, image: PIL.Image, border_color,
         Author of the Quote
     fg : String
         Foreground Color
-    image : PIL.Image
+    image : PIL.Image.Image
         Image to be used as background
     border_color : String
         Border Color
@@ -42,7 +41,7 @@ def convert(quote, author, fg, image: PIL.Image, border_color,
 
     Returns
     -------
-    PIL.Image
+    PIL.Image.Image
         Image with quote
     """
     x1 = width if width else 612

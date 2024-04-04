@@ -12,9 +12,9 @@ import os
 import random
 import json
 from datetime import date
-import time
 from typing import Dict, List
 
+from PIL import Image
 
 from src.quotes import generate
 
@@ -35,7 +35,7 @@ else:
 # =================================
 
 
-def random_quote(author: str) -> tuple:
+def random_quote(author: str) -> tuple[str, Image.Image]:
     """
     random_quote generates a random quote image for a given author
 
@@ -47,7 +47,7 @@ def random_quote(author: str) -> tuple:
     Returns
     -------
     tuple
-        A tuple containing the quote and the path to the generated image
+        A tuple containing the quote and the PIL Image object
     """
     images = os.listdir(os.path.relpath('assets/background_images'))
     logging.info(f"Images: {images}")

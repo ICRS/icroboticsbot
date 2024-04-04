@@ -32,10 +32,9 @@ async def stats_card(ctx):
     except Exception as e:
         logging.error(f"Could not generate stats {e}")
     
-    temp = io.BytesIO()
-    card.save(temp, format="PNG")
-    temp.seek(0)
-    
-    file = discord.File(temp, filename="image.png")
-    embed.set_image(url=f"attachment://{file.filename}.png")
-    await ctx.send(file=file,embed=embed)
+    with io.BytesIO() as image_binary:
+        card.save(image_binary, 'PNG')
+        image_binary.seek(0)
+        file = discord.File(image_binary, filename="image.png")
+        embed.set_image(url=f"attachment://{file.filename}")
+        await ctx.send(file=file,embed=embed)

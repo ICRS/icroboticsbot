@@ -22,8 +22,6 @@ async def quote_person(ctx, name):  # pylint: disable=unused-argument
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
     ctx : Discord.Context
         Discord context
     name : str
