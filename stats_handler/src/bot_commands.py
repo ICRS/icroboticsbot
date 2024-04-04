@@ -16,14 +16,12 @@ DEBUG = False
 
 __all__ = ["stats_card"]  # noqa
 
-async def stats_card(bot, ctx):
+async def stats_card(ctx):
     """
     stats_card generates a card with 3d printer usage stats for that user
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
     ctx : Discord.Context
         Discord context
     """
@@ -37,8 +35,6 @@ async def stats_card(bot, ctx):
     temp = io.BytesIO()
     card.save(temp, format="PNG")
     temp.seek(0)
-
-    # temp.write()
     
     file = discord.File(temp, filename="image.png")
     embed.set_image(url=f"attachment://{file.filename}.png")
