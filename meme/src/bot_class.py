@@ -40,7 +40,6 @@ class DiscordBot(commands.Bot):
                          help_command=None)
         self.token = token
         self.guild_info = guild_info
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
 
     def add_commands(self):
@@ -50,7 +49,7 @@ class DiscordBot(commands.Bot):
         @self.command(name="quote", pass_context=True,
                       help="Generate a quote image from the stored quotes")
         async def quote(ctx, *name):
-            await quote_person(self, ctx, name)
+            await quote_person(ctx, name)
 
         @self.command(name="alert", pass_context=True,
                       help="Alert the bot. Purely for testing purposes")
@@ -62,7 +61,7 @@ class DiscordBot(commands.Bot):
         @self.command(name="help", pass_context=True,
                       help="Get the help message with all the commands")
         async def help(ctx):  # pylint: disable=redefined-builtin
-            await get_help(self, ctx)
+            await get_help(self.commands, ctx)
             
                 
         @self.command(name="register", pass_context=True,

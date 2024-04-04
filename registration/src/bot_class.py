@@ -45,7 +45,6 @@ class DiscordBot(commands.Bot):
         self.token = token
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
 
     def add_commands(self):
@@ -56,7 +55,7 @@ class DiscordBot(commands.Bot):
                       help="Register to the server")
         async def register(ctx, shortcode=""):
             if ctx.message.guild:
-                await register_on_guild(self, ctx)
+                await register_on_guild(ctx, self.bot_prefix)
             else:
                 await register_on_dm(self, ctx, shortcode)
 

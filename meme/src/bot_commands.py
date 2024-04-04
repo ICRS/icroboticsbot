@@ -16,7 +16,7 @@ DEBUG = False
 __all__ = ["quote_person", "get_help"]  # noqa
 
 
-async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
+async def quote_person(ctx, name):  # pylint: disable=unused-argument
     """
     quote_person Generate a quote image from the stored quotes
 
@@ -46,20 +46,20 @@ async def quote_person(bot, ctx, name):  # pylint: disable=unused-argument
     await ctx.message.channel.send(embed=embed, file=file)
 
 
-async def get_help(bot, ctx):
+async def get_help(commands, ctx):
     """
     get_help Get the help message with all the commands
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
+    bot : Set[Command]
+        Set of discord commands registered
     ctx : Discord.Context
         Discord context
     """
     embed = discord.Embed(title="Help",
                           description="List of available commands:")
-    for command in bot.commands:
+    for command in commands:
         embed.add_field(name=command.name, value=command.help, inline=False)
     await ctx.send(embed=embed)
 

@@ -16,23 +16,23 @@ DEBUG = False
 __all__ = ["register_on_guild", "register_on_dm", "quote_person", "get_help", "handle_upload"]  # noqa
 
 
-async def register_on_guild(bot, ctx):
+async def register_on_guild(ctx, bot_prefix: str = "!"):
     """
     register_on_guild Register message when user tries to register on guild
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
     ctx : Discord.Context
         Discord context
+    bot_prefix : str
+        Discord command prefix
     """
     embed = discord.Embed(title="How-to register",                                  # noqa
                             description=("To get the membership role."              # noqa
                                         " Please write a message in "               # noqa
-                                        f"format:\n```{bot.bot_prefix}"             # noqa
+                                        f"format:\n```{bot_prefix}"             # noqa
                                         "register yourShortcodeHere``` \n"          # noqa
-                                        f"Example:\n ```{bot.bot_prefix}register"   # noqa
+                                        f"Example:\n ```{bot_prefix}register"   # noqa
                                         " dc1021```"),                              # noqa
                                     color=0xFF5733)                                 # noqa
     await ctx.message.author.send(embed=embed)
@@ -116,4 +116,3 @@ async def register_on_dm(bot, ctx, shortcode):
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Error in registering user: {str(e)}")
-

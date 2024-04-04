@@ -42,7 +42,6 @@ class DiscordBot(commands.Bot):
                          help_command=None)
         self.token = token
         self.guild_info = guild_info
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
 
     def add_commands(self):
@@ -52,7 +51,7 @@ class DiscordBot(commands.Bot):
         @self.command(name="stats", pass_context=True,
                       help="Get your 3D printing stats")
         async def stats(ctx):
-            await stats_card(self,ctx)
+            await stats_card(ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
