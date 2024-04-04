@@ -11,7 +11,7 @@ import os
 import discord
 from discord.ui import View, Button
 
-from src.PrinterFarm import PrinterFarm                                         # noqa #pylint: disable=import-error
+from src.PrinterFarm import PrinterFarm                    # noqa #pylint: disable=import-error
 from src.PrinterListener import PrinterListener, Command   # noqa #pylint: disable=import-error
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']
