@@ -22,10 +22,10 @@ async def register_on_guild(ctx, bot_prefix: str = "!"):
 
     Parameters
     ----------
-    bot : str
-        Discord command prefix
     ctx : Discord.Context
         Discord context
+    bot_prefix : str
+        Discord command prefix
     """
     embed = discord.Embed(title="How-to register",                                  # noqa
                             description=("To get the membership role."              # noqa
@@ -116,4 +116,3 @@ async def register_on_dm(bot, ctx, shortcode):
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Error in registering user: {str(e)}")
-

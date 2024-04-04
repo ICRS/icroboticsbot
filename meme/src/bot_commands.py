@@ -52,8 +52,8 @@ async def get_help(commands, ctx):
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
+    bot : Set[Command]
+        Set of discord commands registered
     ctx : Discord.Context
         Discord context
     """
