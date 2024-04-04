@@ -35,8 +35,6 @@ async def stats_card(ctx):
     temp = io.BytesIO()
     card.save(temp, format="PNG")
     temp.seek(0)
-
-    # temp.write()
     
     file = discord.File(temp, filename="image.png")
     embed.set_image(url=f"attachment://{file.filename}.png")
