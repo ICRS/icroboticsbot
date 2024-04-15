@@ -1,6 +1,6 @@
 import logging
 
-from bambulabs_api.states_info import GcodeState
+from bambulabs_api import GcodeState
 
 from src.printer_gateway import PrinterGateway
 

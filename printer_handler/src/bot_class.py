@@ -5,7 +5,7 @@ import atexit
 import logging
 from PIL import Image
 from discord_webhook import DiscordWebhook, DiscordEmbed
-from bambulabs_api.states_info import GcodeState
+from bambulabs_api import GcodeState
 
 from src.printer_farm import PrinterFarm
 
