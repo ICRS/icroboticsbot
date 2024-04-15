@@ -1,23 +1,10 @@
-from enum import Enum
 import logging
+
+from bambulabs_api import GcodeState
 
 from src.printer_gateway import PrinterGateway
 
-
-__all__ = ["PrinterFarm", "State"]
-
-
-class State(Enum):
-    IDLE = "IDLE"
-    PREPARING = "PREPARE"
-    RUNNING = "RUNNING"
-    PAUSED = "PAUSE"
-    FINISHED = "FINISH"
-    UNKNOWN = "UNKNOWN"
-
-    @classmethod
-    def _missing_(cls, value):
-        return cls.UNKNOWN
+__all__ = ["PrinterFarm"]
 
 
 class PrinterFarm:
@@ -37,12 +24,12 @@ class PrinterFarm:
     def get_remaining_time(self, printer_name: str) -> int:
         """
         Get the remaining time of the print job
-        
+
         Parameters
         ----------
         printer_name : str
             The name of the printer to get the remaining time for
-            
+
         Returns
         -------
         int
@@ -92,7 +79,7 @@ class PrinterFarm:
         return self.__printer_cache[printer_name]["frame"]
 
     @printer_exists
-    def get_state(self, printer_name: str) -> State:
+    def get_state(self, printer_name: str) -> GcodeState:
         """
         Get the state of the printer
 
@@ -108,7 +95,7 @@ class PrinterFarm:
         """
         logging.info("Printer name: %s", printer_name)
         state = self.printers[printer_name].get_state()
-        return State(state) if state else State.UNKNOWN
+        return GcodeState(state)
 
     def get_printers(self) -> list[str]:
         """
