@@ -8,6 +8,7 @@ class PrinterGateway:
     Printer Gateway Class to query REST endpoints
     to get information about the printers
     """
+
     def __init__(self, printer_url):
         self.printer_url = printer_url
 
@@ -20,7 +21,9 @@ class PrinterGateway:
         int
             The remaining time of the print job
         """
-        response = requests.get(f"http://{self.printer_url}/printer/status/time")
+        response = requests.get(
+            f"http://{self.printer_url}/printer/status/time"
+        )
         if response.status_code != 200:
             return -1
         r = response.json()
@@ -66,7 +69,8 @@ class PrinterGateway:
         str
             The state of the printer
         """
-        response = requests.get(f"http://{self.printer_url}/printer/status/state")
+        response = requests.get(
+            f"http://{self.printer_url}/printer/status/state")
         if response.status_code != 200:
             return "UNKNOWN"
         r: dict = response.json()

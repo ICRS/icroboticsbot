@@ -12,12 +12,13 @@ settings = json.load(open("settings.json", "r", encoding="utf-8"))
 PRINTER_NAMES = list(settings["PRINTER_NAMES"])
 PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S',
-                    handlers=[
-                        logging.StreamHandler()
-                    ])
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
+    datefmt='%d-%b-%y %H:%M:%S',
+    handlers=[
+        logging.StreamHandler()
+    ])
 
 if __name__ == '__main__':
     w = PrinterWebhook(WEBHOOK_URL, PRINTER_NAMES,
@@ -29,4 +30,3 @@ if __name__ == '__main__':
     while True:
         w.send_message_all()
         time.sleep(10)
-
