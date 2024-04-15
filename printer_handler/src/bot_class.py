@@ -5,8 +5,9 @@ import atexit
 import logging
 from PIL import Image
 from discord_webhook import DiscordWebhook, DiscordEmbed
+from bambulabs_api import GcodeState
 
-from src.printer_farm import PrinterFarm, State
+from src.printer_farm import PrinterFarm
 
 
 class PrinterWebhook:
@@ -29,8 +30,9 @@ class PrinterWebhook:
 
     def send_message(self, printer_name: str) -> None:
         """
-        Sends a message to the discord webhook with the printer's state and image
-        
+        Sends a message to the discord webhook with the printer's state
+        and image
+
         Parameters
         ----------
         printer_name : str
@@ -40,16 +42,16 @@ class PrinterWebhook:
         embed_desc = ""
         try:
             state = self.printer_farm.get_state(printer_name)
-            if state == State.UNKNOWN:
+            if state == GcodeState.UNKNOWN:
                 embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
 
-            elif state == State.IDLE:
+            elif state == GcodeState.IDLE:
                 embed_desc = f"```asciidoc\n {'No print in progress'.center(self.prog_length-4, ' ')}:: \n```"   # noqa
 
-            elif state == State.PREPARING:
+            elif state == GcodeState.PREPARE:
                 embed_desc = f"```yaml\n[{'Preparing print'.center(self.prog_length-2, ' ')}]\n```"              # noqa
 
-            elif state == State.RUNNING or state == State.PAUSED:
+            elif state == GcodeState.RUNNING or state == GcodeState.PAUSE:
 
                 remaining_time = self.printer_farm.get_remaining_time(printer_name)                             # noqa
                 percentage = self.printer_farm.get_percentage(printer_name)
@@ -66,7 +68,7 @@ class PrinterWebhook:
                               f"{progress_text}\n{progress_bar+unprogressed}\n" +                               # noqa
                               "```")
 
-            elif state == State.FINISHED:
+            elif state == GcodeState.FINISHED:
                 embed_desc = f"```asciidoc\n {'Print finished'.center(self.prog_length-4, ' ')}:: \n```"              # noqa
 
             else:
@@ -88,7 +90,9 @@ class PrinterWebhook:
 
                 except Exception as e:
                     im = self.__default_image
-                    logging.error(f"Error in opening image for {printer_name}: {str(e)}")
+                    logging.error(
+                        f"Error in opening image for {printer_name}: {str(e)}"
+                    )
 
 <<<<<<< HEAD
                 with BytesIO() as image_binary:
@@ -111,11 +115,13 @@ class PrinterWebhook:
                     embed.set_image(url=f'attachment://{fname}')
 
         except Exception as e:
-            logging.error(f"Error in sending message for {printer_name}: {str(e)}")
+            logging.error(
+                f"Error in sending message for {printer_name}: {str(e)}")
 
     def send_message_all(self) -> None:
         """
-        Sends a message to the discord webhook with the printer's state and image
+        Sends a message to the discord webhook with the printer's state
+        and image
         """
         self.webhook.remove_embeds()
         for printer_name in self.printer_farm.get_printers():
@@ -131,4 +137,3 @@ class PrinterWebhook:
         Deletes the message from the discord webhook
         """
         self.webhook.delete()
-
