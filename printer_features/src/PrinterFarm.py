@@ -17,15 +17,18 @@ __all__ = ["PrinterFarm"]
 
 
 class PrinterFarm:
-    def __init__(self, bot: commands.Bot = None, printer_names: list[str] = [], printer_suffix: str = "") -> None:
+    def __init__(self, bot: commands.Bot = None,
+                 printer_names: list[str] = [],
+                 printer_suffix: str = "") -> None:
         self.bot = bot
         # Initialize printers with printer names and URLs
         self.printers = {name: PrinterListener(
             name, name + printer_suffix) for name in printer_names}
         # Thread to handle the continuous checking and notification
         loop = asyncio.get_event_loop()
-        self.__thread = Thread(target=self.__run_async_loop_in_thread, args=[
-                               loop], daemon=True).start()
+        Thread(target=self.__run_async_loop_in_thread,
+               args=[loop],
+               daemon=True).start()
 
     def __run_async_loop_in_thread(self, loop):
         """Sets up and runs the asyncio event loop in a new thread."""
