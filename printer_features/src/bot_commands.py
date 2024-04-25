@@ -165,7 +165,7 @@ async def printer_status(bot, ctx):
         for command in Command:
             users = listener.get_users(command)
             if author in users:
-                commands += f"* {command.value.get("name")}\n"
+                commands += f"* {command.value.get('name')}\n"
                 no_commands = False
         if commands != "":
             message_embed.add_field(
