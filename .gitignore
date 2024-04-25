@@ -9,6 +9,7 @@ database.py
 db
 db.sql
 settings.json
+printer_settings.json
 /downloads
 *.ipynb
 *.png

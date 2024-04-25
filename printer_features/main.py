@@ -6,28 +6,38 @@
 This is the main file to start the bot.
 """
 
+import logging
 import os
 import json
 
 import discord
 
-from dotenv import load_dotenv
-from src.utils import BASE_PATH
-
 from src.bot_class import DiscordBot
 
-load_dotenv()
-settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
+DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']
+if DEBUG:
+    print("DEBUG MODE ON")
+    from dotenv import load_dotenv
+    load_dotenv()
+
+# ======= Get the discord settings ========
+settings = json.load(open(os.path.abspath("settings.json"),
                           "r", encoding="utf-8"))
-
-PRINTER_NAMES = list(settings["PRINTER_NAMES"])
-PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
-
-TOKEN = os.getenv('DISCORD_TOKEN')
-
 PREFIX = settings['PREFIX']
 GUILD = int(settings['DISCORD_GUILD_ID'])
 ADMIN_ID = int(settings['ADMIN_ID'])
+# =========================================
+
+# ======= Get the printer settings ========
+printer_settings = json.load(
+    open("printer_settings.json", "r", encoding="utf-8"))
+
+PRINTER_NAMES = list(printer_settings["PRINTER_NAMES"])
+PRINTER_GATEWAY_ENDPOINT_SUFFIX = str(
+    printer_settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"])
+# =========================================
+
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 intents = discord.Intents.default()
 intents.members = True
@@ -44,6 +54,13 @@ client = DiscordBot(token=TOKEN,
                     guild_info=guild_info,
                     printer_names=PRINTER_NAMES,
                     printer_suffix=PRINTER_GATEWAY_ENDPOINT_SUFFIX)
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S',
+                    handlers=[
+                        logging.StreamHandler()
+                    ])
 
 if __name__ == "__main__":
     client.start_loop()

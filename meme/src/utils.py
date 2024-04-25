@@ -7,18 +7,19 @@
 Utility functions used by the bot
 """
 
+import logging
 import os
 import random
 import json
 from datetime import date
-import time
 from typing import Dict, List
 
+from PIL import Image
 
 from src.quotes import generate
 
 
-__all__ = ["random_quote", "print"]
+__all__ = ["random_quote"]
 
 # ===== Constants =====
 
@@ -34,24 +35,7 @@ else:
 # =================================
 
 
-def print(*args, **kwargs) -> None:  # pylint: disable=redefined-builtin
-    """
-    print is a wrapper around the built-in print function
-
-    Parameters
-    ----------
-    args : list
-        List of arguments to pass to the print function
-    kwargs : dict
-        Dictionary of keyword arguments to pass to the print function
-    """
-    built_in_print = __builtins__['print']              # type: ignore
-    args = list(args)                                   # type: ignore
-    args.insert(0, f'{time.strftime("%H:%M:%S")} :')    # type: ignore
-    built_in_print(*args, **kwargs)
-
-
-def random_quote(author: str) -> tuple:
+def random_quote(author: str) -> tuple[str, Image.Image]:
     """
     random_quote generates a random quote image for a given author
 
@@ -63,18 +47,18 @@ def random_quote(author: str) -> tuple:
     Returns
     -------
     tuple
-        A tuple containing the quote and the path to the generated image
+        A tuple containing the quote and the PIL Image object
     """
     images = os.listdir(os.path.relpath('assets/background_images'))
-    print(images)
+    logging.info(f"Images: {images}")
     backgrounds = [os.path.relpath('assets/background_images/'+image)
                    for image in images if image.startswith(
                        author.strip().lower())]
-    print(backgrounds)
+    logging.info(f"Backgrounds: {backgrounds}")
     background = random.choice(backgrounds)
     fonts = os.listdir(os.path.relpath('assets/fonts'))
     font = os.path.relpath('assets/fonts/'+random.choice(fonts))
-    print(background, font)
+    logging.info(f"Background: {background} Font: {font}")
     with open(os.path.relpath('assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
@@ -87,7 +71,7 @@ def random_quote(author: str) -> tuple:
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])     # noqa
     choice = random.choice(choices[author])
-    print(choice, background)
+    logging.info(f"Quote: {choice} Author: {author} Background: {background} Font: {font}")
     
     img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)

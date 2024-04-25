@@ -4,85 +4,66 @@
 # mypy: ignore-errors
 
 import asyncio                                              # noqa # pylint: disable=unused-import
+import logging
 from threading import Thread
 import time
 
-import discord
 from discord.ext import commands
 
 from src.PrinterListener import Command, PrinterListener    # noqa  #pylint: disable=import-error
-from src.utils import print                                 # noqa  #pylint: disable=redefined-builtin, import-error
 
 
 __all__ = ["PrinterFarm"]
 
 
 class PrinterFarm:
-    def __init__(self, bot: commands.Bot = None,
-                 printer_names: list[str] = [],
-                 printer_suffix: str = "") -> None:
-
+    def __init__(self, bot: commands.Bot = None, printer_names: list[str] = [], printer_suffix: str = "") -> None:
         self.bot = bot
-        self.printers: dict[str, PrinterListener] = {name: PrinterListener(
+        # Initialize printers with printer names and URLs
+        self.printers = {name: PrinterListener(
             name, name + printer_suffix) for name in printer_names}
+        # Thread to handle the continuous checking and notification
+        loop = asyncio.get_event_loop()
+        self.__thread = Thread(target=self.__run_async_loop_in_thread, args=[
+                               loop], daemon=True).start()
 
-        self.__thread = Thread(target=self.__thread_loop)
-        self.__thread.daemon = True
+    def __run_async_loop_in_thread(self, loop):
+        """Sets up and runs the asyncio event loop in a new thread."""
+        try:
+            asyncio.run_coroutine_threadsafe(self.__thread_loop(), loop)
+        except Exception as e:
+            logging.error(f"Error in PrinterFarm thread: {e}")
 
-    def printer_exists(func):                           # noqa # pylint: disable=missing-function-docstring, no-self-argument
-        def wrapper(self, printer_name, user):
-            if printer_name not in list(self.printers.keys()):
-                raise Exception("Printer not found")
-            return func(self, printer_name, user)             # noqa # pylint: disable=not-callable
-        return wrapper
-
-    def start_listener(self) -> None:
-        self.__thread.start()
-
-    def __thread_loop(self) -> None:
+    async def __thread_loop(self):
+        """Main loop that checks printer states and sends notifications."""
         while True:
-            for _, printer_listener in self.printers.items():
-                printer_listener.update_state()
+            for _, printer in self.printers.items():
+                # Perform the update state check
+                printer.update_state()
 
-                if printer_listener.is_starting():
-                    printer_listener.start_timelapse()
+                if printer.is_starting():
+                    # Start the timelapse
+                    printer.start_timelapse()
 
-                if printer_listener.is_done():
-                    if printer_listener.is_timelapsed():
-                        timelapse: bytes = printer_listener.create_timelapse()  # noqa # pylint: disable=unused-variable
-                        # asyncio.run(printer_listener.send_timelapse(timelapse))
-                        printer_listener.stop_timelapse()
-                    # asyncio.run(printer_listener.notify_users(
-                    #     Command.LET_ME_KNOW))
-                    printer_listener.clear_users(Command.NOTIFY)
-                    printer_listener.clear_users(Command.TIMELAPSE)
+                if printer.is_done():
+                    # Check if timelapse was enabled and create/send it
+                    if printer.is_timelapsed():
+                        timelapse = printer.create_timelapse()
+                        if timelapse:
+                            time_str = time.strftime('%Y%m%d%H%M%S')
+                            await printer.send_timelapse(timelapse, time_str)
 
-                if printer_listener.is_reset():
-                    printer_listener.clear_users(Command.NOTIFY)
-                    printer_listener.clear_users(Command.TIMELAPSE)
-                    printer_listener.stop_timelapse()
+                    await printer.notify_users(Command.NOTIFY)
+                    await printer.clear_users(Command.NOTIFY)
+                    await printer.clear_users(Command.TIMELAPSE)
 
-                if printer_listener.is_timelapsed():
-                    printer_listener.append_frame()
+                # Reset checks
+                if printer.is_reset():
+                    printer.stop_timelapse()
 
-            time.sleep(10)
+                # Append frame for timelapse
+                if printer.is_timelapsed():
+                    printer.append_frame()
 
-    @printer_exists
-    def let_me_know(self, printer_name: str, user: discord.User) -> bool:
-        print(f"Let me know for {user} on {printer_name}")
-        if self.printers[printer_name].user_in(user, Command.NOTIFY):
-            print("Adding user")
-            return self.printers[printer_name].add_user(user,
-                                                        Command.NOTIFY)
-        else:
-            print("Removing user")
-            return self.printers[printer_name].remove_user(user,
-                                                           Command.NOTIFY)
-
-    @printer_exists
-    def timelapse(self, printer_name: str, user: discord.User) -> bool:
-        print(f"Timelapse for {user} on {printer_name}")
-        if not self.printers[printer_name].is_timelapsed():
-            return self.printers[printer_name].enable_timelapse(user)
-        else:
-            return self.printers[printer_name].disable_timelapse(user)
+            # Wait before checking again
+            await asyncio.sleep(10)

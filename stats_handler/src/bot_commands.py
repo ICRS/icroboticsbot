@@ -6,24 +6,22 @@
 """
 Discord Bot helper functions
 """
+import logging
 import discord
 
-from src.utils import print             # noqa  # pylint: disable=redefined-builtin
-from src.utils import generate_stat_card, BASE_PATH
+from src.utils import generate_stat_card
 import io
 
 DEBUG = False
 
 __all__ = ["stats_card"]  # noqa
 
-async def stats_card(bot, ctx):
+async def stats_card(ctx):
     """
     stats_card generates a card with 3d printer usage stats for that user
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
     ctx : Discord.Context
         Discord context
     """
@@ -32,14 +30,11 @@ async def stats_card(bot, ctx):
     try:
         card = generate_stat_card(user)
     except Exception as e:
-        print(f"Could not generate stats {e}")
+        logging.error(f"Could not generate stats {e}")
     
-    temp = io.BytesIO()
-    card.save(temp, format="PNG")
-    temp.seek(0)
-
-    # temp.write()
-    
-    file = discord.File(temp, filename="image.png")
-    embed.set_image(url=f"attachment://{file.filename}.png")
-    await ctx.send(file=file,embed=embed)
+    with io.BytesIO() as image_binary:
+        card.save(image_binary, 'PNG')
+        image_binary.seek(0)
+        file = discord.File(image_binary, filename="image.png")
+        embed.set_image(url=f"attachment://{file.filename}")
+        await ctx.send(file=file,embed=embed)

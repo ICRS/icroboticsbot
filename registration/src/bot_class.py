@@ -6,6 +6,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import logging
 import os
 import json
 import asyncio
@@ -16,7 +17,6 @@ from src.bot_commands import register_on_guild   # noqa
 from src.bot_commands import register_on_dm      # noqa
 
 from src.utils import change_valid               # noqa
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
 
 __all__ = ["DiscordBot"]
 
@@ -45,7 +45,6 @@ class DiscordBot(commands.Bot):
         self.token = token
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
 
     def add_commands(self):
@@ -56,7 +55,7 @@ class DiscordBot(commands.Bot):
                       help="Register to the server")
         async def register(ctx, shortcode=""):
             if ctx.message.guild:
-                await register_on_guild(self, ctx)
+                await register_on_guild(ctx, self.bot_prefix)
             else:
                 await register_on_dm(self, ctx, shortcode)
 
@@ -79,7 +78,7 @@ class DiscordBot(commands.Bot):
         on_ready is called when the bot is ready to be used
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
+        logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
     async def on_member_join(self, member):
         """
@@ -110,7 +109,7 @@ class DiscordBot(commands.Bot):
         try:
             change_valid(member.id, 0)
         except KeyError:
-            print(member.id+' did not have membership')
+            logging.error(f"Error in changing membership for {member.id}")
 
     def start_loop(self):
         """
