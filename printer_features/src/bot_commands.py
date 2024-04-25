@@ -14,7 +14,7 @@ from discord.ui import View, Button
 from src.PrinterFarm import PrinterFarm                    # noqa #pylint: disable=import-error
 from src.PrinterListener import PrinterListener, Command   # noqa #pylint: disable=import-error
 
-DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']
+DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv(override=True)
@@ -42,7 +42,7 @@ class PrinterButton(Button):
             title=f"Printer selected: {self.printer.printer_name}",
             description="Choose an action",
             color=discord.Color.green())
-        
+
         for command in Command:
             message_embed.add_field(
                 name=command.value.get("name", "Unknown"),
@@ -67,7 +67,7 @@ class PrinterCommandPage(View):
                      button: discord.ui.Button):
         """
         notify is called when the notify button is clicked
-        
+
         Parameters
         ----------
         interaction : discord.Interaction
