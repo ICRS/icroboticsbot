@@ -6,6 +6,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import logging
 import os
 import json
 import asyncio
@@ -14,7 +15,6 @@ from discord.ext import commands
 
 from src.bot_commands import stats_card          # noqa
 
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
 from src.utils import BASE_PATH
 __all__ = ["DiscordBot"]
 
@@ -42,7 +42,6 @@ class DiscordBot(commands.Bot):
                          help_command=None)
         self.token = token
         self.guild_info = guild_info
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
 
     def add_commands(self):
@@ -52,7 +51,7 @@ class DiscordBot(commands.Bot):
         @self.command(name="stats", pass_context=True,
                       help="Get your 3D printing stats")
         async def stats(ctx):
-            await stats_card(self,ctx)
+            await stats_card(ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
@@ -73,7 +72,7 @@ class DiscordBot(commands.Bot):
         on_ready is called when the bot is ready to be used
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
+        logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
     def start_loop(self):
         """

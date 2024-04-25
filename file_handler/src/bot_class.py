@@ -6,6 +6,7 @@
 """
 Discord Bot class. It handles all the commands and events.
 """
+import logging
 import os
 import json
 import asyncio
@@ -14,7 +15,6 @@ from discord.ext import commands
 
 from src.bot_commands import handle_upload       # noqa
 
-from src.utils import print                      # noqa  #pylint: disable=redefined-builtin
 __all__ = ["DiscordBot"]
 
 settings = json.load(open("settings.json",
@@ -24,7 +24,7 @@ MAX_SIZE = 25000000
 PREFIX = settings['PREFIX']
 GUILD = settings['DISCORD_GUILD_ID']
 FILE_CHANNEL = int(os.getenv('FILE_CHANNEL'))
-ADMIN_ID = settings['ADMIN_ID']
+ADMIN_ID = int(settings['ADMIN_ID'])
 
 default_guild_info = {
     'PREFIX': PREFIX,
@@ -45,8 +45,22 @@ class DiscordBot(commands.Bot):
                          help_command=None)
         self.token = token
         self.guild_info = guild_info
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
+        self.bot_admin = None
+    
+    def get_admin_user(self):
+        """
+        get_admin_user gets the bot admin user
 
+        Returns
+        -------
+        discord.User
+            The bot admin user
+        """
+        if not self.bot_admin:
+            self.bot_admin = self.get_user(self.guild_info["ADMIN_ID"])
+        
+        return self.bot_admin
+        
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
         on_message is called when a message is sent in the server
@@ -60,7 +74,7 @@ class DiscordBot(commands.Bot):
             return
         
         if message.channel.id == self.guild_info['FILE_CHANNEL'] and message.attachments:
-            await handle_upload(self, message)
+            await handle_upload(self.get_admin_user(), message, self.guild_info.get("MAX_SIZE"))
         
         await self.process_commands(message)
 
@@ -69,8 +83,7 @@ class DiscordBot(commands.Bot):
         on_ready is called when the bot is ready to be used
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
-
+        logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
     def start_loop(self):
         """

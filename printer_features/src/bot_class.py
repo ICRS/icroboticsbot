@@ -9,6 +9,7 @@ Discord Bot class. It handles all the commands and events.
 import os
 import json
 import asyncio
+import logging
 
 import discord
 from discord.ext import commands
@@ -16,13 +17,9 @@ from discord.ext import commands
 from src.bot_commands import printer_buttons, printer_status    # noqa  #pylint: disable=import-error
 from src.PrinterFarm import PrinterFarm                         # noqa  #pylint: disable=import-error
 
-from src.utils import print                                     # noqa  #pylint: disable=redefined-builtin, import-error
-from src.utils import BASE_PATH                                 # noqa  #pylint: disable=import-error
-
-
 __all__ = ["DiscordBot"]
 
-settings = json.load(open(os.path.abspath(BASE_PATH+"settings.json"),
+settings = json.load(open(os.path.abspath("settings.json"),
                           "r", encoding="utf-8"))
 
 PREFIX = settings['PREFIX']
@@ -49,11 +46,9 @@ class DiscordBot(commands.Bot):
         self.token = token
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
-        self.bot_admin = self.get_user(guild_info["ADMIN_ID"])
         self.add_commands()
 
         self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
-        self.printer_farm.start_listener()
 
     def add_commands(self):
         """
@@ -64,9 +59,9 @@ class DiscordBot(commands.Bot):
         async def printers(ctx):
             await printer_buttons(self, ctx)
 
-        @self.command(name="pstatus", pass_context=True,
+        @self.command(name="bounds", pass_context=True,
                       help="List all the printers and the users bound to them")
-        async def pstatus(ctx):
+        async def bounds(ctx):
             await printer_status(self, ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
@@ -88,7 +83,7 @@ class DiscordBot(commands.Bot):
         on_ready is called when the bot is ready to be used
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
-        print(f'Connected to {guild.name}, id: {guild.id}')
+        logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
     def start_loop(self):
         """
