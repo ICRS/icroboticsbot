@@ -177,4 +177,4 @@ async def printer_status(bot, ctx):
         message_embed.description = "No commands found"
 
     await author.send(embed=message_embed,
-                                   delete_after=120)
+                      delete_after=120)
