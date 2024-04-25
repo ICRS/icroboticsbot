@@ -138,7 +138,8 @@ async def printer_buttons(bot, ctx):
             inline=False)
     await ctx.message.channel.send(embed=message_embed,
                                    view=PrintersMainPage(
-                                       printer_farm=printer_farm))
+                                       printer_farm=printer_farm),
+                                   delete_after=120)
 
 
 async def printer_status(bot, ctx):
@@ -175,4 +176,5 @@ async def printer_status(bot, ctx):
     if no_commands:
         message_embed.description = "No commands found"
 
-    await author.send(embed=message_embed)
+    await author.send(embed=message_embed,
+                      delete_after=120)
