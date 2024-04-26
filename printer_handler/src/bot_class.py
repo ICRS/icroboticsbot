@@ -68,17 +68,18 @@ class PrinterWebhook:
                               "```")
 
             elif state == GcodeState.FINISH:
-                embed_desc = f"```asciidoc\n \
-                    {'Print finished'.center(self.prog_length-4, ' ')}:: \n```"
+                embed_desc = f"```asciidoc\n" + \
+                    f"{'Print finished'.center(self.prog_length-4, ' ')}:: " + \
+                        "\n```"
 
             elif state == GcodeState.FAILED:
-                embed_desc = f"```ps\n\
-                    [{'Print Failed'.center(self.prog_length-2, ' ')}]\n```"
+                embed_desc = f"```ps\n" + \
+                    f"[{'Print Failed'.center(self.prog_length-2, ' ')}]\n```"
 
             else:
-                embed_desc = f"```ps\n[\
-                    {'Unknown printer state'.center(self.prog_length-2, ' ')}\
-                        ]\n```"
+                logging.warning(f"Unknown printer state: {state}")
+                embed_desc = f"```ps\n[" + \
+                    f"{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"      # noqa
 
             frame = self.printer_farm.get_frame(printer_name)
             fname = f"{printer_name}_stream.png"
