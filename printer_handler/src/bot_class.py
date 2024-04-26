@@ -42,14 +42,13 @@ class PrinterWebhook:
         embed_desc = ""
         try:
             state = self.printer_farm.get_state(printer_name)
-            if state == GcodeState.UNKNOWN:
-                embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
 
-            elif state == GcodeState.IDLE:
+            if state == GcodeState.IDLE:
                 embed_desc = f"```asciidoc\n {'No print in progress'.center(self.prog_length-4, ' ')}:: \n```"   # noqa
 
             elif state == GcodeState.PREPARE:
-                embed_desc = f"```yaml\n[{'Preparing print'.center(self.prog_length-2, ' ')}]\n```"              # noqa
+                embed_desc = f"```yaml\n[\
+                    {'Preparing print'.center(self.prog_length-2, ' ')}]\n```"
 
             elif state == GcodeState.RUNNING or state == GcodeState.PAUSE:
 
@@ -68,25 +67,25 @@ class PrinterWebhook:
                               f"{progress_text}\n{progress_bar+unprogressed}\n" +                               # noqa
                               "```")
 
-            elif state == GcodeState.FINISHED:
-                embed_desc = f"```asciidoc\n {'Print finished'.center(self.prog_length-4, ' ')}:: \n```"              # noqa
+            elif state == GcodeState.FINISH:
+                embed_desc = f"```asciidoc\n \
+                    {'Print finished'.center(self.prog_length-4, ' ')}:: \n```"
+
+            elif state == GcodeState.FAILED:
+                embed_desc = f"```ps\n\
+                    [{'Print Failed'.center(self.prog_length-2, ' ')}]\n```"
 
             else:
-                embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
+                embed_desc = f"```ps\n[\
+                    {'Unknown printer state'.center(self.prog_length-2, ' ')}\
+                        ]\n```"
 
             frame = self.printer_farm.get_frame(printer_name)
             fname = f"{printer_name}_stream.png"
 
-<<<<<<< HEAD
             if not skip_embed:
                 try:
                     im = Image.open(BytesIO(base64.b64decode(frame)))
-=======
-            prog_length = self.prog_length
-            progress_text = f"Progress: {' '*int(prog_length-12)}{percentage}%"
-            progress_bar = "=" * int(percentage/100 * prog_length)
-            unprogressed = "-" * int(prog_length - len(progress_bar))
->>>>>>> refs/rewritten/master-10
 
                 except Exception as e:
                     im = self.__default_image
@@ -94,23 +93,16 @@ class PrinterWebhook:
                         f"Error in opening image for {printer_name}: {str(e)}"
                     )
 
-<<<<<<< HEAD
                 with BytesIO() as image_binary:
                     im.save(image_binary, 'PNG')
                     image_binary.seek(0)
-=======
-            embed_desc = (f"```md\n{remaining_time}\n" +
-                          f"{progress_text}\n{progress_bar+unprogressed}\n" +
-                          "```") \
-                if remaining_time != 0 \
-                    else f"```ps\n[{'No printing in progress'.center(prog_length-2, ' ')}]\n```"  # noqa
->>>>>>> refs/rewritten/master-10
+                    image_bytes = image_binary.getbuffer().tobytes()
 
                     embed = DiscordEmbed(title=printer_name,
-                                         description=embed_desc,     # noqa # pylint: disable=line-too-long
+                                         description=embed_desc,
                                          color=242424)
                     self.webhook.add_embed(embed)
-                    self.webhook.add_file(file=image_binary.getbuffer().tobytes(),      # noqa
+                    self.webhook.add_file(file=image_bytes,
                                           filename=fname)
                     embed.set_image(url=f'attachment://{fname}')
 
