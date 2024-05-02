@@ -8,8 +8,8 @@ Discord Bot helper functions
 """
 
 import os
-import discord
-from discord.ui import View, Button
+
+from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
 
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
@@ -23,7 +23,7 @@ __all__ = ["discord_print"]  # noqa
 
 async def discord_print(bot, ctx):
     """
-    printer_status sends a message with the users bound to the printers
+    discord_print
 
     Parameters
     ----------
@@ -33,3 +33,9 @@ async def discord_print(bot, ctx):
         Discord context
     """
     author = ctx.message.author
+    channel = ctx.message.channel
+    attachment = ctx.message.attachments[0]
+
+    if attachment.filename.endswith('.stl'):
+        await channel.send(f"File {attachment.filename} uploaded. Select options and confirm",
+                           view=SliceMenuGeneral())
