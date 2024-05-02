@@ -8,6 +8,7 @@ Discord Bot helper functions
 """
 
 import os
+import logging
 
 from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
 
@@ -34,8 +35,14 @@ async def discord_print(bot, ctx):
     """
     author = ctx.message.author
     channel = ctx.message.channel
+    if not ctx.message.attachments:
+        await channel.send("No file attached. Please attach a file to print",
+                           delete_after=10)
+        return
+
+    logging.info(f"File uploaded by {author.name}")
     attachment = ctx.message.attachments[0]
 
     if attachment.filename.endswith('.stl'):
-        await channel.send(f"File {attachment.filename} uploaded. Select options and confirm",
-                           view=SliceMenuGeneral())
+        await channel.send("Select options and confirm",
+                           view=SliceMenuGeneral(filename=attachment.filename))
