@@ -10,6 +10,8 @@ Discord Bot helper functions
 import os
 import logging
 
+import discord
+
 from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
 
 
@@ -47,3 +49,8 @@ async def discord_print(bot, ctx):
         await channel.send("Select options and confirm",
                            view=SliceMenuGeneral(filename=attachment.filename,
                                                  url=attachment.url))
+        # Get thumbnail response from gateway
+        # thumbnail = ...
+        # embed = discord.Embed(title="Thumbnail", color=discord.Color.green())
+        # embed.set_image(url=thumbnail)
+        # await channel.send(embed=embed, delete_after=60)
