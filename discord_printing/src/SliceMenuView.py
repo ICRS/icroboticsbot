@@ -8,6 +8,7 @@ __all__ = ["SliceMenuGeneral"]  # noqa
 
 slice_options: dict = {
     "filename": "",
+    "url": "",
     "height": 0.28,
     "infill": 15,
 }

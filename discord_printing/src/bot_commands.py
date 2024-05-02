@@ -45,4 +45,5 @@ async def discord_print(bot, ctx):
 
     if attachment.filename.endswith('.stl'):
         await channel.send("Select options and confirm",
-                           view=SliceMenuGeneral(filename=attachment.filename))
+                           view=SliceMenuGeneral(filename=attachment.filename,
+                                                 url=attachment.url))
