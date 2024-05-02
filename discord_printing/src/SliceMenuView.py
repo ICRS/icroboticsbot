@@ -6,7 +6,7 @@ from discord.ui import View, Button
 
 __all__ = ["SliceMenuGeneral"]  # noqa
 
-slice_options = {
+slice_options: dict = {
     "filename": "",
     "height": 0.28,
     "infill": 15,
@@ -17,14 +17,14 @@ def send_slice_to_gateway():
     logging.info("Sending slice to gateway")
 
 
-infill_options = [5, 10, 15, 20, 25, 30]
-layer_options = [0.08, 0.12, 0.16, 0.20, 0.24, 0.28]
+infill_options: list[int] = [5, 10, 15, 20, 25, 30]
+layer_options: list[float] = [0.08, 0.12, 0.16, 0.20, 0.24, 0.28]
 
 
 class LayerButton(Button):
     def __init__(self, height=layer_options[-1], **kwargs):
         super().__init__(**kwargs)
-        self.height = height
+        self.height: float = height
 
     async def callback(self, interaction: discord.Interaction):
         """
@@ -54,7 +54,7 @@ class LayerHeightMenu(View):
 class InfillButton(Button):
     def __init__(self, infill=infill_options[2], **kwargs):
         super().__init__(**kwargs)
-        self.infill = infill
+        self.infill: int = infill
 
     async def callback(self, interaction: discord.Interaction):
         """
