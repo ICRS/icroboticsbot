@@ -112,7 +112,7 @@ class SliceMenuGeneral(View):
                       button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
         embed_message = discord.Embed(title=f"{slice_options['filename']}",
-                                      description=f"Slice options:\nLayer Height: {slice_options['height']}mm\nInfill: {slice_options['infill']}%", # noqa
+                                      description=f"Slice options:\nLayer Height: {slice_options['height']}mm\nInfill: {slice_options['infill']}%\nURL: {slice_options['url']}", # noqa
                                       color=discord.Color.green())
         send_slice_to_gateway()
         await interaction.response.edit_message(
