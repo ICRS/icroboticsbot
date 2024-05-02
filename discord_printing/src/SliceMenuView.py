@@ -6,6 +6,11 @@ from discord.ui import View, Button
 
 __all__ = ["SliceMenuGeneral"]  # noqa
 
+
+infill_options: list[int] = [5, 10, 15, 20, 25, 30]
+layer_options: list[float] = [0.08, 0.12, 0.16, 0.20, 0.24, 0.28]
+
+
 slice_options: dict = {
     "filename": "",
     "url": "",
@@ -16,10 +21,6 @@ slice_options: dict = {
 
 def send_slice_to_gateway():
     logging.info("Sending slice to gateway")
-
-
-infill_options: list[int] = [5, 10, 15, 20, 25, 30]
-layer_options: list[float] = [0.08, 0.12, 0.16, 0.20, 0.24, 0.28]
 
 
 class LayerButton(Button):
