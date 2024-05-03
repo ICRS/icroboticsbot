@@ -12,10 +12,10 @@ import os
 import json
 
 import discord
-import uvicorn
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 
 from src.bot_class import DiscordBot
+from src.bot_commands import router
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']
 if DEBUG:
@@ -56,10 +56,7 @@ logging.basicConfig(level=logging.INFO,
 
 
 app = FastAPI()
-
-@app.get("/print")
-async def print_message():
-    return {"message": "Hello World"}
+app.include_router(router)
 
 loop = asyncio.get_event_loop()
 loop.create_task(client.start_loop())
