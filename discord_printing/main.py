@@ -6,11 +6,14 @@
 This is the main file to start the bot.
 """
 
+import asyncio
 import logging
 import os
 import json
 
 import discord
+import uvicorn
+from fastapi import FastAPI, APIRouter
 
 from src.bot_class import DiscordBot
 
@@ -51,5 +54,14 @@ logging.basicConfig(level=logging.INFO,
                         logging.StreamHandler()
                     ])
 
-if __name__ == "__main__":
-    client.start_loop()
+
+app = FastAPI()
+
+@app.get("/print")
+async def print_message():
+    return {"message": "Hello World"}
+
+loop = asyncio.get_event_loop()
+loop.create_task(client.start_loop())
+
+# uvicorn main:app
