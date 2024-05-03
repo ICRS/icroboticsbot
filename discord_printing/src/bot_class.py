@@ -14,7 +14,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from src.bot_commands import discord_print    # noqa  #pylint: disable=import-error
+from src.bot_commands import discord_print, get_queue, set_client    # noqa  #pylint: disable=import-error
 
 __all__ = ["DiscordBot"]
 
@@ -44,6 +44,7 @@ class DiscordBot(commands.Bot):
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
         self.add_commands()
+        set_client(self)
 
     def add_commands(self):
         """
@@ -53,6 +54,11 @@ class DiscordBot(commands.Bot):
                       help="Add the attached stl file to the printer queue")   # noqa
         async def print(ctx):
             await discord_print(self, ctx)
+
+        @self.command(name="queue", pass_context=True,
+                      help="List the current queue")   # noqa
+        async def queue(ctx):
+            await get_queue(self, ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
