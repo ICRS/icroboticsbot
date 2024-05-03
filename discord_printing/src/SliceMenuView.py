@@ -12,6 +12,7 @@ layer_options: list[float] = [0.08, 0.12, 0.16, 0.20, 0.24, 0.28]
 
 
 slice_options: dict = {
+    "shortcode": "",
     "filename": "",
     "url": "",
     "height": 0.28,
@@ -19,7 +20,7 @@ slice_options: dict = {
 }
 
 
-def send_slice_to_gateway():
+def send_file_to_autoslicer():
     logging.info("Sending slice to gateway")
 
 
@@ -115,7 +116,7 @@ class SliceMenuGeneral(View):
         embed_message = discord.Embed(title=f"{slice_options['filename']}",
                                       description=f"Slice options:\nLayer Height: {slice_options['height']}mm\nInfill: {slice_options['infill']}%\nURL: {slice_options['url']}", # noqa
                                       color=discord.Color.green())
-        send_slice_to_gateway()
+        send_file_to_autoslicer()
         await interaction.response.edit_message(
             content=None,
             view=None,

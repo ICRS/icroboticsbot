@@ -75,13 +75,16 @@ class DiscordBot(commands.Bot):
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
         logging.info(f'Connected to {guild.name}, id: {guild.id}')
 
-    def start_loop(self):
+    async def start_loop(self):
         """
         start_loop starts the bot and the alert background task
         """
-        async def run_bot():
+        try:
             await self.start(self.token)
+        except Exception as e:
+            logging.error(f"Error starting bot: {e}")
+        finally:
             await self.close()
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(run_bot())
+        # loop = asyncio.get_event_loop()
+        # loop.run_until_complete(run_bot())
