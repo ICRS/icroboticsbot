@@ -18,6 +18,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
+from src.SliceMenuView import ConfirmSlice
 
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
@@ -74,41 +75,41 @@ class Queue_Details(BaseModel):
     details: dict
 
 
-@router.get("/start_print")
+@router.post("/start_print")
 async def print_message(queue_details: Queue_Details):
     user: discord.Member = get_user_from_shortcode(queue_details.shortcode)
     if not user:
-        return {"message": "Invalid shortcode"}
+        return {"code": 400, "message": "Invalid shortcode"}
     embed = discord.Embed(title="Printing Started",
                           color=discord.Color.green())
     embed.add_field(name="Queue Details",
                     value=str(queue_details.details))
     await user.send(embed=embed)
-    return {"message": "Done"}
+    return {"code": 200, "message": "Done"}
 
 
-@router.get("/finished_print")
+@router.post("/finished_print")
 async def finish_message(queue_details: Queue_Details):
     user: discord.Member = get_user_from_shortcode(queue_details.shortcode)
     if not user:
-        return {"message": "Invalid shortcode"}
+        return {"code": 400, "message": "Invalid shortcode"}
     embed = discord.Embed(title="Printing Finished",
                           color=discord.Color.green())
     embed.add_field(name="Queue Details",
                     value=str(queue_details.details))
     await user.send(embed=embed)
-    return {"message": "Done"}
+    return {"code": 200, "message": "Done"}
 
 
-@router.get("/confirm_print")
+@router.post("/confirm_print")
 async def confirm_message(queue_details: Queue_Details):
     user: discord.Member = get_user_from_shortcode(queue_details.shortcode)
     if not user:
-        return {"message": "Invalid shortcode"}
+        return {"code": 400, "message": "Invalid shortcode"}
     embed = discord.Embed(title="Confirm Print",
                           color=discord.Color.green())
-    await user.send(embed=embed)
-    return {"message": "Done"}
+    await user.send(embed=embed, view=ConfirmSlice(user_id=user.id))
+    return {"code": 200, "message": "Done"}
 
 
 def has_access(user) -> bool | str:
@@ -167,7 +168,8 @@ async def discord_print(bot: commands.Bot, ctx: commands.Context):
 
     if attachment.filename.endswith('.stl'):
         await author.send("Select options and confirm",
-                          view=SliceMenuGeneral(shortcode=shortcode,
+                          view=SliceMenuGeneral(user_id=author.id,
+                                                shortcode=shortcode,
                                                 filename=attachment.filename,
                                                 url=attachment.url))
         # Get thumbnail response from gateway
