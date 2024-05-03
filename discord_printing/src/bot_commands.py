@@ -87,6 +87,30 @@ async def print_message(queue_details: Queue_Details):
     return {"message": "Done"}
 
 
+@router.get("/finished_print")
+async def finish_message(queue_details: Queue_Details):
+    user: discord.Member = get_user_from_shortcode(queue_details.shortcode)
+    if not user:
+        return {"message": "Invalid shortcode"}
+    embed = discord.Embed(title="Printing Finished",
+                          color=discord.Color.green())
+    embed.add_field(name="Queue Details",
+                    value=str(queue_details.details))
+    await user.send(embed=embed)
+    return {"message": "Done"}
+
+
+@router.get("/confirm_print")
+async def confirm_message(queue_details: Queue_Details):
+    user: discord.Member = get_user_from_shortcode(queue_details.shortcode)
+    if not user:
+        return {"message": "Invalid shortcode"}
+    embed = discord.Embed(title="Confirm Print",
+                          color=discord.Color.green())
+    await user.send(embed=embed)
+    return {"message": "Done"}
+
+
 def has_access(user) -> bool | str:
     with pg.connect(**db_config) as conn:
         with conn.cursor() as cursor:
