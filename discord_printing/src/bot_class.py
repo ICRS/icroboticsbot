@@ -8,7 +8,6 @@ Discord Bot class. It handles all the commands and events.
 """
 import os
 import json
-import asyncio
 import logging
 
 import discord
@@ -91,6 +90,3 @@ class DiscordBot(commands.Bot):
             logging.error(f"Error starting bot: {e}")
         finally:
             await self.close()
-
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(run_bot())
