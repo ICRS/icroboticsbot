@@ -4,6 +4,14 @@ import discord
 from discord.ui import View, Button
 import requests
 
+import json
+import os
+
+settings = json.load(open(os.path.abspath("slicer_settings.json"),
+                          "r", encoding="utf-8"))
+
+SLICER_ENDPOINT = str(settings["SLICER_ENDPOINT"])
+
 
 __all__ = ["SliceMenuGeneral"]  # noqa
 
@@ -23,29 +31,24 @@ slice_options: dict[str, dict] = {
 }
 
 
-def send_file_to_autoslicer(user_id):
+def send_to_slicer(user_id):
     logging.info("Sending slice to gateway")
-    res: requests.Response = requests.post("/slice", json=slice_options[user_id])
+    res: requests.Response = requests.post(SLICER_ENDPOINT+"/slice",
+                                           json=slice_options[user_id])
     if res.status_code != 200:
         logging.error("Failed to send slice to gateway")
         return False
     return True
 
 
-def confirm_slice(user_id):
-    logging.info("Confirming slice")
-    res: requests.Response = requests.post("/confirm", json=slice_options[user_id])
+def release(user_id, rel: bool = False):
+    logging.info("Releasing slice: "+str(rel))
+    obj = dict(slice_options[user_id])
+    obj.update({"release": rel})
+    res: requests.Response = requests.post(SLICER_ENDPOINT+"/release",
+                                           json=obj)
     if res.status_code != 200:
-        logging.error("Failed to confirm slice")
-        return False
-    return True
-
-
-def cancel_slice(user_id):
-    logging.info("Cancelling slice")
-    res: requests.Response = requests.post("/cancel", json=slice_options[user_id])
-    if res.status_code != 200:
-        logging.error("Failed to cancel slice")
+        logging.error("Failed to release slice")
         return False
     return True
 
@@ -159,7 +162,7 @@ class SliceMenuGeneral(View):
         embed_message = discord.Embed(title=f"{slice_options[self.user_id]['filename']}",
                                       description=f"Slice options:\nLayer Height: {slice_options[self.user_id]['height']}mm\nInfill: {slice_options[self.user_id]['infill']}%\nURL: {slice_options[self.user_id]['url']}", # noqa
                                       color=discord.Color.green())
-        send_file_to_autoslicer(user_id=self.user_id)
+        send_to_slicer(user_id=self.user_id)
         await interaction.response.edit_message(
             content=None,
             view=None,
@@ -176,7 +179,7 @@ class ConfirmSlice(View):
     async def confirm(self, interaction: discord.Interaction,
                       button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
-        confirm_slice(self.user_id)
+        release(self.user_id, rel=True)
         await interaction.response.edit_message(
             content="Print confirmed. Check the status in the queue.",
             view=None,
@@ -187,7 +190,7 @@ class ConfirmSlice(View):
     async def cancel(self, interaction: discord.Interaction,
                      button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
-        cancel_slice(self.user_id)
+        release(self.user_id, rel=False)
         await interaction.response.edit_message(
             content="Print cancelled.",
             view=None,
