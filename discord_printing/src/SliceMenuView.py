@@ -17,7 +17,7 @@ slice_options: dict[str, dict] = {
     #   "shortcode": "",
     #   "filename": "",
     #   "url": "",
-    #   "height": 0.28,
+    #   "layer_height": 0.28,
     #   "infill": 15,
     # }
 }
@@ -69,7 +69,7 @@ class LayerButton(Button):
         await interaction.response.edit_message(
             embed=None,
             view=SliceMenuGeneral(user_id=self.user_id,
-                                  height=self.height),
+                                  layer_height=self.height),
             delete_after=60)
 
 
