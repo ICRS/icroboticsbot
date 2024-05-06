@@ -35,7 +35,7 @@ class PrinterFarm:
         int
             The remaining time of the print job
         """
-        logging.info("Printer name: %s", printer_name)
+        logging.debug("Printer name: %s", printer_name)
         remaining_time = self.printers[printer_name].get_remaining_time()
         return remaining_time if remaining_time > 0 else 0
 
@@ -75,7 +75,8 @@ class PrinterFarm:
         """
         logging.info("Printer name: %s", printer_name)
         frame = self.printers[printer_name].get_frame()
-        self.__printer_cache[printer_name]["frame"] = frame if frame else self.__printer_cache[printer_name]["frame"]  # noqa # pylint: disable=line-too-long
+        if frame:
+            self.__printer_cache[printer_name]["frame"] = frame
         return self.__printer_cache[printer_name]["frame"]
 
     @printer_exists
@@ -93,7 +94,7 @@ class PrinterFarm:
         State
             The state of the printer
         """
-        logging.info("Printer name: %s", printer_name)
+        logging.debug("Printer name: %s", printer_name)
         state = self.printers[printer_name].get_state()
         return GcodeState(state)
 
