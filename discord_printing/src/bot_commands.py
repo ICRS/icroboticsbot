@@ -9,6 +9,8 @@ Discord Bot helper functions
 
 import os
 import logging
+import base64
+from io import BytesIO
 
 import discord
 from discord.ext import commands
@@ -16,6 +18,7 @@ import configparser
 import psycopg2 as pg
 from fastapi import APIRouter
 from pydantic import BaseModel
+from PIL import Image
 
 from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
 from src.SliceMenuView import ConfirmSlice
@@ -46,13 +49,15 @@ router = APIRouter()
 
 client: commands.Bot = None
 
+__default_image: Image.Image = Image.open("./src/no_image.jpg")
+
 
 def set_client(bot):
     global client
     client = bot
 
 
-def get_user_from_shortcode(shortcode: str) -> discord.Member:
+def get_user_from_shortcode(shortcode: str) -> discord.Member | None:
     try:
         with pg.connect(**db_config) as conn:
             with conn.cursor() as cursor:
@@ -73,6 +78,19 @@ def get_user_from_shortcode(shortcode: str) -> discord.Member:
 class Queue_Details(BaseModel):
     shortcode: str
     details: dict
+
+
+class ConfirmResponse(BaseModel):
+    shortcode: str
+    filename: str
+    url: str
+    printer_type: str
+    layer_height: float
+    infill: int
+    plates: int
+    model_time: float
+    estimated_time: float
+    thumbnail: str
 
 
 @router.post("/start_print")
@@ -101,15 +119,44 @@ async def finish_message(queue_details: Queue_Details):
     return {"code": 200, "message": "Done"}
 
 
-@router.post("/confirm_print")
-async def confirm_message(queue_details: Queue_Details):
-    user: discord.Member = get_user_from_shortcode(queue_details.shortcode)
+@router.post("/confirm")
+async def confirm_message(confirm_response: ConfirmResponse):
+    user: discord.Member = get_user_from_shortcode(confirm_response.shortcode)
     if not user:
         return {"code": 400, "message": "Invalid shortcode"}
     embed = discord.Embed(title="Confirm Print",
                           color=discord.Color.green())
-    await user.send(embed=embed, view=ConfirmSlice(user_id=user.id))
-    return {"code": 200, "message": "Done"}
+    embed.add_field(name="Filename",
+                    value=confirm_response.filename)
+    embed.add_field(name="URL",
+                    value=confirm_response.url)
+    embed.add_field(name="Printer Type",
+                    value=confirm_response.printer_type)
+    embed.add_field(name="Layer Height",
+                    value=confirm_response.layer_height)
+    embed.add_field(name="Infill",
+                    value=confirm_response.infill)
+    embed.add_field(name="Plates",
+                    value=confirm_response.plates)
+    embed.add_field(name="Model Time",
+                    value=confirm_response.model_time)
+    embed.add_field(name="Estimated Time",
+                    value=confirm_response.estimated_time)
+    try:
+        im = Image.open(BytesIO(base64.b64decode(confirm_response.thumbnail)))
+    except Exception as e:
+        im = __default_image
+        logging.error(f"Error in opening image: {str(e)}")
+
+    with BytesIO() as image_binary:
+        im.save(image_binary, 'JPEG')
+        image_binary.seek(0)
+        file = discord.File(fp=image_binary, filename="thumbnail.jpeg")
+        embed.set_image(url="attachment://thumbnail.jpeg")
+
+    embed.set_footer(text="Please confirm/cancel the print")
+
+    await user.send(embed=embed, view=ConfirmSlice(user_id=user.id), file=file)
 
 
 def has_access(user) -> bool | str:
@@ -172,8 +219,3 @@ async def discord_print(bot: commands.Bot, ctx: commands.Context):
                                                 shortcode=shortcode,
                                                 filename=attachment.filename,
                                                 url=attachment.url))
-        # Get thumbnail response from gateway
-        # thumbnail = ...
-        # embed = discord.Embed(title="Thumbnail", color=discord.Color.green())
-        # embed.set_image(url=thumbnail)
-        # await channel.send(embed=embed, delete_after=60)
