@@ -42,14 +42,13 @@ class PrinterWebhook:
         embed_desc = ""
         try:
             state = self.printer_farm.get_state(printer_name)
-            if state == GcodeState.UNKNOWN:
-                embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
 
-            elif state == GcodeState.IDLE:
+            if state == GcodeState.IDLE:
                 embed_desc = f"```asciidoc\n {'No print in progress'.center(self.prog_length-4, ' ')}:: \n```"   # noqa
 
             elif state == GcodeState.PREPARE:
-                embed_desc = f"```yaml\n[{'Preparing print'.center(self.prog_length-2, ' ')}]\n```"              # noqa
+                embed_desc = f"```yaml\n[\
+                    {'Preparing print'.center(self.prog_length-2, ' ')}]\n```"
 
             elif state == GcodeState.RUNNING or state == GcodeState.PAUSE:
 
@@ -68,11 +67,19 @@ class PrinterWebhook:
                               f"{progress_text}\n{progress_bar+unprogressed}\n" +                               # noqa
                               "```")
 
-            elif state == GcodeState.FINISHED:
-                embed_desc = f"```asciidoc\n {'Print finished'.center(self.prog_length-4, ' ')}:: \n```"              # noqa
+            elif state == GcodeState.FINISH:
+                embed_desc = f"```asciidoc\n" + \
+                    f"{'Print finished'.center(self.prog_length-4, ' ')}:: " + \
+                        "\n```"
+
+            elif state == GcodeState.FAILED:
+                embed_desc = f"```ps\n" + \
+                    f"[{'Print Failed'.center(self.prog_length-2, ' ')}]\n```"
 
             else:
-                embed_desc = f"```ps\n[{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"         # noqa
+                logging.warning(f"Unknown printer state: {state}")
+                embed_desc = f"```ps\n[" + \
+                    f"{'Unknown printer state'.center(self.prog_length-2, ' ')}]\n```"      # noqa
 
             frame = self.printer_farm.get_frame(printer_name)
             fname = f"{printer_name}_stream.png"
@@ -90,12 +97,13 @@ class PrinterWebhook:
                 with BytesIO() as image_binary:
                     im.save(image_binary, 'PNG')
                     image_binary.seek(0)
+                    image_bytes = image_binary.getbuffer().tobytes()
 
                     embed = DiscordEmbed(title=printer_name,
-                                         description=embed_desc,     # noqa # pylint: disable=line-too-long
+                                         description=embed_desc,
                                          color=242424)
                     self.webhook.add_embed(embed)
-                    self.webhook.add_file(file=image_binary.getbuffer().tobytes(),      # noqa
+                    self.webhook.add_file(file=image_bytes,
                                           filename=fname)
                     embed.set_image(url=f'attachment://{fname}')
 
