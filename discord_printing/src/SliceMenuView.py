@@ -33,7 +33,7 @@ slice_options: dict[str, dict] = {
 
 def send_to_slicer(user_id):
     logging.info("Sending slice to gateway")
-    res: requests.Response = requests.post(SLICER_ENDPOINT+"/slice",
+    res: requests.Response = requests.post(SLICER_ENDPOINT+"/slice/file",
                                            json=slice_options[user_id])
     if res.status_code != 200:
         logging.error("Failed to send slice to gateway")
@@ -45,7 +45,7 @@ def release(user_id, rel: bool = False):
     logging.info("Releasing slice: "+str(rel))
     obj = dict(slice_options[user_id])
     obj.update({"release": rel})
-    res: requests.Response = requests.post(SLICER_ENDPOINT+"/release",
+    res: requests.Response = requests.post(SLICER_ENDPOINT+"/slice/release",
                                            json=obj)
     if res.status_code != 200:
         logging.error("Failed to release slice")
@@ -186,7 +186,7 @@ class ConfirmSlice(View):
             embed=None,
             delete_after=30)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction,
                      button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
