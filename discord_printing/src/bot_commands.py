@@ -80,19 +80,6 @@ class Queue_Details(BaseModel):
     details: dict
 
 
-class ConfirmResponse(BaseModel):
-    shortcode: str
-    filename: str
-    url: str
-    printer_type: str
-    layer_height: float
-    infill: int
-    plates: int
-    model_time: float
-    estimated_time: float
-    thumbnail: str
-
-
 @router.post("/start_print")
 async def print_message(queue_details: Queue_Details):
     user: discord.Member = get_user_from_shortcode(queue_details.shortcode)
@@ -117,46 +104,6 @@ async def finish_message(queue_details: Queue_Details):
                     value=str(queue_details.details))
     await user.send(embed=embed)
     return {"code": 200, "message": "Done"}
-
-
-@router.post("/confirm")
-async def confirm_message(confirm_response: ConfirmResponse):
-    user: discord.Member = get_user_from_shortcode(confirm_response.shortcode)
-    if not user:
-        return {"code": 400, "message": "Invalid shortcode"}
-    embed = discord.Embed(title="Confirm Print",
-                          color=discord.Color.green())
-    embed.add_field(name="Filename",
-                    value=confirm_response.filename)
-    embed.add_field(name="URL",
-                    value=confirm_response.url)
-    embed.add_field(name="Printer Type",
-                    value=confirm_response.printer_type)
-    embed.add_field(name="Layer Height",
-                    value=confirm_response.layer_height)
-    embed.add_field(name="Infill",
-                    value=confirm_response.infill)
-    embed.add_field(name="Plates",
-                    value=confirm_response.plates)
-    embed.add_field(name="Model Time",
-                    value=confirm_response.model_time)
-    embed.add_field(name="Estimated Time",
-                    value=confirm_response.estimated_time)
-    try:
-        im = Image.open(BytesIO(base64.b64decode(confirm_response.thumbnail)))
-    except Exception as e:
-        im = __default_image
-        logging.error(f"Error in opening image: {str(e)}")
-
-    with BytesIO() as image_binary:
-        im.save(image_binary, 'JPEG')
-        image_binary.seek(0)
-        file = discord.File(fp=image_binary, filename="thumbnail.jpeg")
-        embed.set_image(url="attachment://thumbnail.jpeg")
-
-    embed.set_footer(text="Please confirm/cancel the print")
-
-    await user.send(embed=embed, view=ConfirmSlice(user_id=user.id), file=file)
 
 
 def has_access(user: discord.Member) -> bool | str:
