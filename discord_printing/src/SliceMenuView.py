@@ -55,6 +55,7 @@ def release(user_id, rel: bool = False):
     if res.status_code != 200:
         logging.error("Failed to release slice")
         return False
+    logging.info("Slice request submitted successfully.")
     return True
 
 
@@ -171,7 +172,7 @@ class SliceMenuGeneral(View):
         slicing_embed = discord.Embed(
             title="Slicing...",
             color=discord.Color.dark_red())
-        slicing_embed.set_footer(f"Filename: {slice_options[self.user_id]['filename']}")
+        slicing_embed.set_footer(text=f"Filename: {slice_options[self.user_id]['filename']}")
         await interaction.response.edit_message(content=None,
                                                 view=None,
                                                 embed=slicing_embed,
