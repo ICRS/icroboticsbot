@@ -29,6 +29,8 @@ if DEBUG:
     from dotenv import load_dotenv
     load_dotenv(override=True)
 
+print("DEBUG MODE: "+ str(DEBUG))
+
 # ===== DB Config =====
 if not DEBUG:
     config = configparser.ConfigParser()
@@ -48,8 +50,6 @@ __all__ = ["discord_print", "get_queue", "router", "set_client"]  # noqa
 router = APIRouter()
 
 client: commands.Bot = None
-
-__default_image: Image.Image = Image.open("./src/no_image.jpg")
 
 
 def set_client(bot):
@@ -159,7 +159,9 @@ async def confirm_message(confirm_response: ConfirmResponse):
     await user.send(embed=embed, view=ConfirmSlice(user_id=user.id), file=file)
 
 
-def has_access(user) -> bool | str:
+def has_access(user: discord.Member) -> bool | str:
+    if DEBUG:
+        return user.name
     with pg.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             # cur = con.cursor()
@@ -207,7 +209,7 @@ async def discord_print(bot: commands.Bot, ctx: commands.Context):
     logging.info(f"File uploaded by {author.name}")
     attachment: discord.Attachment = ctx.message.attachments[0]
 
-    shortcode = has_access(author)
+    shortcode = has_access(author) or DEBUG
     if not shortcode:
         await author.send("You do not have access to this command",
                           delete_after=10)

@@ -1,8 +1,11 @@
+import base64
 import logging
 
 import discord
 from discord.ui import View, Button
 import requests
+from PIL import Image
+from io import BytesIO
 
 import json
 import os
@@ -14,6 +17,8 @@ SLICER_ENDPOINT = str(settings["SLICER_ENDPOINT"])
 
 
 __all__ = ["SliceMenuGeneral"]  # noqa
+
+DEFAULT_IMAGE: Image.Image = Image.open("./src/no_image.jpg")
 
 
 infill_options: list[int] = [5, 10, 15, 20, 25, 30]
@@ -31,14 +36,14 @@ slice_options: dict[str, dict] = {
 }
 
 
-def send_to_slicer(user_id):
+def send_to_slicer(user_id) -> dict | bool:
     logging.info("Sending slice to gateway")
     res: requests.Response = requests.post(SLICER_ENDPOINT+"/slice/file",
                                            json=slice_options[user_id])
     if res.status_code != 200:
         logging.error("Failed to send slice to gateway")
         return False
-    return True
+    return dict(res.json())
 
 
 def release(user_id, rel: bool = False):
@@ -56,7 +61,7 @@ def release(user_id, rel: bool = False):
 class LayerButton(Button):
     def __init__(self, user_id, height=layer_options[-1], **kwargs):
         super().__init__(**kwargs)
-        self.user_id = user_id
+        self.user_id = str(user_id)
         self.height: float = height
 
     async def callback(self, interaction: discord.Interaction):
@@ -73,24 +78,24 @@ class LayerButton(Button):
             embed=None,
             view=SliceMenuGeneral(user_id=self.user_id,
                                   layer_height=self.height),
-            delete_after=60)
+            delete_after=120)
 
 
 class LayerHeightMenu(View):
     def __init__(self, user_id, *, timeout=180):
         super().__init__(timeout=timeout)
-        self.user_id = user_id
+        self.user_id = str(user_id)
         for layer in layer_options:
             self.add_item(LayerButton(user_id=self.user_id,
                                       height=str(layer),
                                       label=str(layer)+"mm",
-                                      style=discord.ButtonStyle.green))
+                                      style=discord.ButtonStyle.blurple))
 
 
 class InfillButton(Button):
     def __init__(self, user_id, infill=infill_options[2], **kwargs):
         super().__init__(**kwargs)
-        self.user_id = user_id
+        self.user_id = str(user_id)
         self.infill: int = infill
 
     async def callback(self, interaction: discord.Interaction):
@@ -107,35 +112,38 @@ class InfillButton(Button):
             embed=None,
             view=SliceMenuGeneral(user_id=self.user_id,
                                   infill=self.infill),
-            delete_after=60)
+            delete_after=120)
 
 
 class InfillMenu(View):
     def __init__(self, user_id, *, timeout=180):
         super().__init__(timeout=timeout)
-        self.user_id = user_id
+        self.user_id = str(user_id)
         for infill in infill_options:
             self.add_item(InfillButton(user_id=self.user_id,
                                        infill=str(infill),
                                        label=str(infill)+"%",
-                                       style=discord.ButtonStyle.green))
+                                       style=discord.ButtonStyle.blurple))
 
 
 class SliceMenuGeneral(View):
     def __init__(self, user_id, timeout=180, **kwargs):
         super().__init__(timeout=timeout)
-        self.user_id = user_id
-        if user_id not in slice_options:
-            slice_options[user_id] = {
+        self.user_id = str(user_id)
+        if self.user_id not in slice_options:
+            slice_options[self.user_id] = {
                 "shortcode": "",
                 "filename": "",
                 "url": "",
-                "height": 0.28,
+                "height": 0.20,
                 "infill": 15,
+                "printer_type": "p1p"
             }
-        slice_options[user_id].update(kwargs)
+        if 'user_id' in kwargs:
+            kwargs.user_id = self.user_id
+        slice_options[self.user_id].update(kwargs)
 
-    @discord.ui.button(label="Layer Height", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Layer Height", style=discord.ButtonStyle.blurple)
     async def height(self, interaction: discord.Interaction,
                      button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
@@ -143,9 +151,9 @@ class SliceMenuGeneral(View):
             content="Select the layer height below.",
             view=LayerHeightMenu(user_id=self.user_id),
             embed=None,
-            delete_after=60)
+            delete_after=120)
 
-    @discord.ui.button(label="Infill", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Infill", style=discord.ButtonStyle.blurple)
     async def infill(self, interaction: discord.Interaction,
                      button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
@@ -153,46 +161,85 @@ class SliceMenuGeneral(View):
             content="Select the infill below.",
             view=InfillMenu(user_id=self.user_id),
             embed=None,
-            delete_after=60)
-
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.red)
-    async def confirm(self, interaction: discord.Interaction,
-                      button: discord.ui.Button):
-        button.style = discord.ButtonStyle.gray
-        embed_message = discord.Embed(title=f"{slice_options[self.user_id]['filename']}",
-                                      description=f"Slice options:\nLayer Height: {slice_options[self.user_id]['height']}mm\nInfill: {slice_options[self.user_id]['infill']}%\nURL: {slice_options[self.user_id]['url']}", # noqa
-                                      color=discord.Color.green())
-        send_to_slicer(user_id=self.user_id)
-        await interaction.response.edit_message(
-            content=None,
-            view=None,
-            embed=embed_message,
-            delete_after=30)
-
-
-class ConfirmSlice(View):
-    def __init__(self, user_id, timeout=180, **kwargs):
-        super().__init__(timeout=timeout)
-        self.user_id = user_id
+            delete_after=120)
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction,
                       button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
+
+        slicing_embed = discord.Embed(
+            title="Slicing...",
+            color=discord.Color.dark_red())
+        slicing_embed.set_footer(f"Filename: {slice_options[self.user_id]['filename']}")
+        await interaction.response.edit_message(content=None,
+                                                view=None,
+                                                embed=slicing_embed,
+                                                delete_after=60)
+        res: dict | bool = send_to_slicer(user_id=self.user_id)
+        if not res:
+            await interaction.user.send("Failed slice. Please try again later.")
+            return
+        embed_message = discord.Embed(
+            title="Confirm Print",
+            color=discord.Color.green())
+        embed_message.add_field(name="Filename",
+                                value=res["filename"])
+        embed_message.add_field(name="URL",
+                                value=res["url"])
+        embed_message.add_field(name="Printer Type",
+                                value=res["printer_type"])
+        embed_message.add_field(name="Layer Height",
+                                value=res["layer_height"])
+        embed_message.add_field(name="Infill",
+                                value=res["infill"])
+        embed_message.add_field(name="Plates",
+                                value=res["plates"])
+        embed_message.add_field(name="Model Time",
+                                value=res["model_time"])
+        embed_message.add_field(name="Estimated Time",
+                                value=res["estimated_time"])
+        try:
+            im = Image.open(BytesIO(base64.b64decode(res["thumbnail"])))
+        except Exception as e:
+            im = DEFAULT_IMAGE
+            logging.error(f"Error in opening image: {str(e)}")
+
+        with BytesIO() as image_binary:
+            im.save(image_binary, 'JPEG')
+            image_binary.seek(0)
+            file = discord.File(fp=image_binary, filename="thumbnail.jpeg")
+            embed_message.set_image(url="attachment://thumbnail.jpeg")
+
+        embed_message.set_footer(text="Please confirm/cancel the print")
+        await interaction.user.send(embed=embed_message, view=ConfirmSlice(user_id=self.user_id), file=file)
+
+
+class ConfirmSlice(View):
+    def __init__(self, user_id, timeout=180, **kwargs):
+        super().__init__(timeout=timeout)
+        self.user_id = str(user_id)
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: discord.Interaction,
+                      button: discord.ui.Button):
+        button.style = discord.ButtonStyle.gray
+        await interaction.response.edit_message(content=None, view=None)
         release(self.user_id, rel=True)
-        await interaction.response.edit_message(
+        await interaction.user.send(
             content="Print confirmed. Check the status in the queue.",
             view=None,
             embed=None,
-            delete_after=30)
+            delete_after=60)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction,
                      button: discord.ui.Button):
         button.style = discord.ButtonStyle.gray
+        await interaction.response.edit_message(content=None, view=None)
         release(self.user_id, rel=False)
-        await interaction.response.edit_message(
+        await interaction.user.send(
             content="Print cancelled.",
             view=None,
             embed=None,
-            delete_after=30)
+            delete_after=60)
