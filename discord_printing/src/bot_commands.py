@@ -9,8 +9,6 @@ Discord Bot helper functions
 
 import os
 import logging
-import base64
-from io import BytesIO
 
 import discord
 from discord.ext import commands
@@ -18,10 +16,8 @@ import configparser
 import psycopg2 as pg
 from fastapi import APIRouter
 from pydantic import BaseModel
-from PIL import Image
 
 from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
-from src.SliceMenuView import ConfirmSlice
 
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
@@ -29,7 +25,7 @@ if DEBUG:
     from dotenv import load_dotenv
     load_dotenv(override=True)
 
-print("DEBUG MODE: "+ str(DEBUG))
+print("DEBUG MODE: " + str(DEBUG))
 
 # ===== DB Config =====
 if not DEBUG:
