@@ -10,6 +10,7 @@ Discord Bot has been split into 5 microservices:
 * Registration: code to register users to the discord
 * Printer handler: webhooks to handle printer status and camera feed
 * Printer features: 3D Printer misc commands
+* Discord Printing: Uploading and slicing files for automatic 3D printing
 
 See relevant directories for instructions to build containers and deployment
 
