@@ -18,7 +18,7 @@ spec:
       - name: icrsbot-discord-printing
         image: localhost:32000/icrsbot-discord-printing  # Replace with your Python Docker image and tag
         ports:
-        - containerPort: 5000  # Port your Python application is listening on
+        - containerPort: 8000  # Port your Python application is listening on
         imagePullPolicy: "Always"
         env:
           - name: DISCORD_TOKEN
@@ -31,10 +31,28 @@ spec:
             mountPath: /app/settings.json
             subPath: settings.json
             readOnly: true
+          - name: postgres-ini 
+            mountPath: /app/postgres.ini
+            subPath: postgres.ini
+            readOnly: true
+          - name: slicer-settings   
+            mountPath: /app/slicer_settings.json
+            subPath: slicer_settings.json
+            readOnly: true
+
       volumes:
+        - name: postgres-ini 
+          secret:
+            secretName: postgres-ini-secret 
         - name: discord-bot-secret
           secret:
             secretName: discord-bot-secret
             items:
               - key: discord_settings
                 path: settings.json
+        - name: slicer-settings
+          configMap:
+            name: auto-slicer-config
+            items:
+              - key: endpoint
+                path: slicer_settings.json
