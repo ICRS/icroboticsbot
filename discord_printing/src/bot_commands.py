@@ -12,8 +12,6 @@ import logging
 
 import discord
 from discord.ext import commands
-import configparser
-import psycopg2 as pg
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -25,21 +23,6 @@ if DEBUG:
     from dotenv import load_dotenv
     load_dotenv(override=True)
 
-print("DEBUG MODE: " + str(DEBUG))
-
-# ===== DB Config =====
-if not DEBUG:
-    config = configparser.ConfigParser()
-    config.read('postgres.ini')
-
-    db_config = {
-        'database': config['postgres']['database'],
-        'user': config['postgres']['user'],
-        'password': config['postgres']['password'],
-        'host': config['postgres']['host'],
-        'port': config['postgres']['port']
-    }
-# =====================
 
 __all__ = ["discord_print", "get_queue", "router", "set_client"]  # noqa
 
@@ -54,11 +37,10 @@ def set_client(bot):
 
 
 def get_user_from_shortcode(shortcode: str) -> discord.Member | None:
+    global client
     try:
-        with pg.connect(**db_config) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT user_id FROM public.mapping WHERE shortcode=%s", (shortcode,))
-                user_id = cursor.fetchone()
+        # Get the user from the database endpoint
+        user_id = None
     except Exception as e:
         logging.error(f"Error in get_user_from_shortcode: {e}")
         return None
@@ -105,11 +87,8 @@ async def finish_message(queue_details: Queue_Details):
 def has_access(user: discord.Member) -> bool | str:
     if DEBUG:
         return user.name
-    with pg.connect(**db_config) as conn:
-        with conn.cursor() as cursor:
-            # cur = con.cursor()
-            cursor.execute("SELECT shortcode From public.mapping WHERE user_id=%s",(str(user.id),))
-            shortcode = cursor.fetchone()
+    # Get access from the database endpoint
+    shortcode = None
     if not shortcode:
         return False
     return shortcode
