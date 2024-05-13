@@ -19,6 +19,8 @@ spec:
         - containerPort: 5000  # Port your Python application is listening on
         imagePullPolicy: "Always"
         env:
+        - name: TZ
+          value: Europe/London
         - name: WEBHOOK_URL
           valueFrom:
             secretKeyRef:
