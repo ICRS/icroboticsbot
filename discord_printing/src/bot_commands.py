@@ -7,6 +7,7 @@
 Discord Bot helper functions
 """
 
+import json
 import os
 import logging
 
@@ -14,6 +15,7 @@ import discord
 from discord.ext import commands
 from fastapi import APIRouter
 from pydantic import BaseModel
+import requests
 
 from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
 
@@ -22,6 +24,12 @@ DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylin
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv(override=True)
+
+
+settings = json.load(open(os.path.abspath("database_settings.json"),
+                          "r", encoding="utf-8"))
+
+DATABASE_ENDPOINT = settings['DATABASE_ENDPOINT']
 
 
 __all__ = ["discord_print", "get_queue", "router", "set_client"]  # noqa
@@ -40,7 +48,12 @@ def get_user_from_shortcode(shortcode: str) -> discord.Member | None:
     global client
     try:
         # Get the user from the database endpoint
-        user_id = None
+        req = requests.get(f"{DATABASE_ENDPOINT}/shortcode/discord-id",
+                           params={"shortcode": shortcode})
+        if req.status_code == 200:
+            user_id = dict(req.json()).get("discord-id", None)
+        else:
+            raise Exception("{}: {}".format(req.status_code, req.text))
     except Exception as e:
         logging.error(f"Error in get_user_from_shortcode: {e}")
         return None
@@ -51,6 +64,47 @@ def get_user_from_shortcode(shortcode: str) -> discord.Member | None:
     guild: discord.Guild = discord.utils.get(client.guilds,
                                              id=client.guild_info["GUILD"])
     return discord.utils.get(guild.members, id=int(user_id))
+
+
+def get_shortcode_from_user(user: discord.Member) -> str | None:
+    try:
+        # Get the shortcode from the database endpoint
+        req = requests.get(f"{DATABASE_ENDPOINT}/discord-id/shortcode",
+                           params={"id": user.id})
+        if req.status_code == 200:
+            shortcode = dict(req.json()).get("shortcode", None)
+        else:
+            raise Exception("{}: {}".format(req.status_code, req.text))
+    except Exception as e:
+        logging.error(f"Error in get_shortcode_from_user: {e}")
+        return None
+
+    if not shortcode:
+        return None
+
+    return shortcode
+
+
+def has_access(user: discord.Member) -> bool | str:
+    if DEBUG:
+        return user.name
+    shortcode = get_shortcode_from_user(user)
+    if not shortcode:
+        return False
+    # Get access from the database endpoint
+    try:
+        req = requests.get(f"{DATABASE_ENDPOINT}/permissions/print",
+                           params={"shortcode": shortcode})
+        if req.status_code == 200:
+            can_print = dict(req.json()).get("can_print", False)
+        else:
+            raise Exception("{}: {}".format(req.status_code, req.text))
+    except Exception as e:
+        logging.error(f"Error in has_access: {e}")
+        return False
+    if can_print:
+        return shortcode
+    return False
 
 
 class Queue_Details(BaseModel):
@@ -82,16 +136,6 @@ async def finish_message(queue_details: Queue_Details):
                     value=str(queue_details.details))
     await user.send(embed=embed)
     return {"code": 200, "message": "Done"}
-
-
-def has_access(user: discord.Member) -> bool | str:
-    if DEBUG:
-        return user.name
-    # Get access from the database endpoint
-    shortcode = None
-    if not shortcode:
-        return False
-    return shortcode
 
 
 def get_queue(bot: commands.Bot, ctx: commands.Context):
