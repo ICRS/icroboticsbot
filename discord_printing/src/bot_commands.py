@@ -69,11 +69,13 @@ def get_user_from_shortcode(shortcode: str) -> discord.Member | None:
 def get_shortcode_from_user(user: discord.Member) -> str | None:
     try:
         # Get the shortcode from the database endpoint
+        logging.info(f"Endpoint: {DATABASE_ENDPOINT}")
         req = requests.get(f"{DATABASE_ENDPOINT}/discord-id/shortcode",
-                           params={"id": user.id})
+                           params={"id": str(user.id)})
         if req.status_code == 200:
             shortcode = dict(req.json()).get("shortcode", None)
         else:
+            logging.error(f"Request {req}")
             raise Exception("{}: {}".format(req.status_code, req.text))
     except Exception as e:
         logging.error(f"Error in get_shortcode_from_user: {e}")
@@ -93,7 +95,7 @@ def has_access(user: discord.Member) -> bool | str:
         return False
     # Get access from the database endpoint
     try:
-        req = requests.get(f"{DATABASE_ENDPOINT}/permissions/print",
+        req = requests.get(f"{DATABASE_ENDPOINT}/shortcode/permissions/print",
                            params={"shortcode": shortcode})
         if req.status_code == 200:
             can_print = dict(req.json()).get("can_print", False)

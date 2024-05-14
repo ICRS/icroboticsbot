@@ -26,24 +26,23 @@ spec:
               secretKeyRef:
                 name: discord-bot-secret
                 key: discord_token
+          - name: TZ
+            value: Europe/London
         volumeMounts:
           - name: discord-bot-secret
             mountPath: /app/settings.json
             subPath: settings.json
             readOnly: true
-          - name: postgres-ini 
-            mountPath: /app/postgres.ini
-            subPath: postgres.ini
-            readOnly: true
           - name: slicer-settings   
             mountPath: /app/slicer_settings.json
             subPath: slicer_settings.json
             readOnly: true
-
+          - name: database-settings
+            mountPath: /app/database_settings.json
+            subPath: database_settings.json
+            readOnly: true
+          
       volumes:
-        - name: postgres-ini 
-          secret:
-            secretName: postgres-ini-secret 
         - name: discord-bot-secret
           secret:
             secretName: discord-bot-secret
@@ -56,3 +55,9 @@ spec:
             items:
               - key: endpoint
                 path: slicer_settings.json
+        - name: database-settings
+          configMap:
+            name: database-config
+            items:
+              - key: endpoint
+                path: database_settings.json
