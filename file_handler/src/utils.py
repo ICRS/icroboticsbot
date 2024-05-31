@@ -34,7 +34,7 @@ SLICER_ADDR = os.getenv('SLICER_ADDR')
 TARGET_PATH = str(os.getenv("TARGET_PATH"))
 # =========================================
 
-extension_list = ['stl', '3mf', 'obj', 'stp', 'step']
+extension_list = ['stl', '3mf', 'obj', 'stp', 'step', 'svg', 'ai', 'png', 'jpg', 'dxf', 'pdf', 'eps', 'dwg']
 
 
 def download_files(files) -> None:
