@@ -49,7 +49,7 @@ def not_on_guild_msg():
 def how_to_msg():
     embed = discord.Embed(title="How-to register",                                  # noqa
                        description=("To get the membership role."              # noqa
-                                   " Please reply to THIS message message in "               # noqa
+                                   " Please reply to THIS message like this "               # noqa
                                    f"format:\n```!register yourShortcodeHere``` \n"          # noqa
                                    f"Example:\n ```!register dc1021```"),                              # noqa
                                color=info_color)                                 # noqa
