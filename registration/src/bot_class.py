@@ -13,8 +13,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import register_on_guild   # noqa
-from src.bot_commands import register_on_dm      # noqa
+from src.bot_commands import register_user      # noqa
 
 from src.utils import change_valid               # noqa
 
@@ -54,10 +53,7 @@ class DiscordBot(commands.Bot):
         @self.command(name="register", pass_context=True,
                       help="Register to the server")
         async def register(ctx, shortcode=""):
-            if ctx.message.guild:
-                await register_on_guild(self, ctx, shortcode)
-            else:
-                await register_on_dm(self, ctx, shortcode)
+            await register_user(self, ctx, shortcode)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
