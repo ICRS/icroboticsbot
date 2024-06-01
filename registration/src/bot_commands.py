@@ -113,26 +113,28 @@ async def register_on_dm(bot, ctx, shortcode):
     """
 
     try:
-        if is_shortcode(shortcode):
-            if is_member(shortcode) or DEBUG:
-                server = discord.utils.get(bot.guilds,
-                                           id=bot.guild_info['GUILD'])
-                member = server.get_member(ctx.author.id)
-                if member:
-                    if not shortcode_exists(shortcode):
-                        await add_role_and_update(server, member, ctx)
-                    else:
-                        await update_member_in_db(member, shortcode, ctx)
-                else:
-                    embed = discord.Embed(title="Join the server!",                                             # noqa  # pylint: disable
-                              description="Looks like you're not on the discord server :(",                     # noqa  # pylint: disable
-                              url="https://discord.gg/3YKPjgskS3",                                              # noqa  # pylint: disable
-                              color=0x3a88fe)                                                                   # noqa  # pylint: disable
-                    await ctx.message.channel.send(embed=embed)
+        if not(is_shortcode(shortcode)):
+            return await register_on_guild(bot, ctx)
+        if not(is_member(shortcode) or DEBUG):
+            return await user_not_member(ctx)
+        
+        
+        server = discord.utils.get(bot.guilds,
+                                   id=bot.guild_info['GUILD'])
+        member = server.get_member(ctx.author.id)
+        if member:
+            if not shortcode_exists(shortcode):
+                await add_role_and_update(server, member, ctx)
             else:
-                await user_not_member(ctx)
+                await update_member_in_db(member, shortcode, ctx)
         else:
-            await register_on_guild(bot, ctx)
+            embed = discord.Embed(title="Join the server!",                                             # noqa  # pylint: disable
+                      description="Looks like you're not on the discord server :(",                     # noqa  # pylint: disable
+                      url="https://discord.gg/3YKPjgskS3",                                              # noqa  # pylint: disable
+                      color=0x3a88fe)                                                                   # noqa  # pylint: disable
+            await ctx.message.channel.send(embed=embed)
+                
+            
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Error in registering user: {str(e)}")
