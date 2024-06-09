@@ -60,4 +60,23 @@ class PrinterListener:
 
 
     def release(self):
-        return
+        uid = "00000000"
+        available = True
+
+        try:
+            if self.__get_state() != GcodeState.IDLE or self.__get_state() != GcodeState.FINISH:
+                logging.error(f"Printer {self.printer_name} is not available to release")  # noqa  # pylint: disable=logging-fstring-interpolation
+                available = False
+        except Exception as e:
+            logging.error(f"Error getting state: {e}")
+
+        try:
+            r = requests.post(
+                f"http://{self.printer_url}/printer/available", # noqa
+                params={"uid": uid, "available": available},
+            )
+        except Exception as e:
+            logging.error(f"Error releasing printer: {e}")
+            r = requests.Response()
+            r.status_code = 500
+        return r.status_code
