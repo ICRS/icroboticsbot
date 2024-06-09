@@ -14,6 +14,12 @@ import discord
 from discord.ext import commands
 
 from src.bot_commands import discord_print, get_queue, set_client, release_printer    # noqa  #pylint: disable=import-error
+from src.PrinterListener import PrinterFarm  # noqa  #pylint: disable=import-error
+
+DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
+if DEBUG:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
 
 __all__ = ["DiscordBot"]
 
@@ -34,7 +40,9 @@ default_guild_info = {
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
     def __init__(self, token, intents,
-                 guild_info=default_guild_info):
+                 guild_info=default_guild_info,
+                 printer_names=[],
+                 printer_suffix=None):
         super().__init__(intents=intents,
                          command_prefix=guild_info['PREFIX'],
                          case_insensitive=True,
@@ -42,6 +50,9 @@ class DiscordBot(commands.Bot):
         self.token = token
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
+
+        self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
+
         self.add_commands()
         set_client(self)
 
