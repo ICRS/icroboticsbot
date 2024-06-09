@@ -21,8 +21,8 @@ __all__ = ["SliceMenuGeneral"]  # noqa
 DEFAULT_IMAGE: Image.Image = Image.open("./src/no_image.jpg")
 
 
-infill_options: list[int] = [5, 10, 15, 20, 25, 30]
-layer_options: list[float] = [0.08, 0.12, 0.16, 0.20, 0.24, 0.28]
+INFILL_OPTIONS: list[int] = [5, 10, 15, 20, 25, 30]
+LAYER_OPTIONS: list[float] = [0.08, 0.12, 0.16, 0.20, 0.24, 0.28]
 
 
 slice_options: dict[str, dict] = {
@@ -39,11 +39,19 @@ slice_options: dict[str, dict] = {
 def send_to_slicer(user_id) -> dict | bool:
     logging.info("Sending slice to gateway")
     res: requests.Response = requests.post(SLICER_ENDPOINT+"/slice/file",
-                                           json=slice_options[user_id])
+                                           params=slice_options[user_id],
+                                           timeout=120)
     if res.status_code != 200:
         logging.error("Failed to send slice to gateway")
         return False
-    return dict(res.json())
+    json_res = res.json()
+    time: str = json_res["estimated_time"]
+    time_splitted = time.split(" ")
+    if len(time_splitted) > 2:
+        hours = int(time_splitted[-3][:-1])
+        if hours > 2:
+            return False
+    return dict(json_res)
 
 
 def release(user_id, rel: bool = False):
@@ -51,7 +59,7 @@ def release(user_id, rel: bool = False):
     obj = dict(slice_options[user_id])
     obj.update({"release": rel})
     res: requests.Response = requests.post(SLICER_ENDPOINT+"/slice/release",
-                                           json=obj)
+                                           params=obj, timeout=120)
     if res.status_code != 200:
         logging.error("Failed to release slice")
         return False
@@ -60,7 +68,7 @@ def release(user_id, rel: bool = False):
 
 
 class LayerButton(Button):
-    def __init__(self, user_id, height=layer_options[-1], **kwargs):
+    def __init__(self, user_id, height=LAYER_OPTIONS[-1], **kwargs):
         super().__init__(**kwargs)
         self.user_id = str(user_id)
         self.height: float = height
@@ -86,7 +94,7 @@ class LayerHeightMenu(View):
     def __init__(self, user_id, *, timeout=180):
         super().__init__(timeout=timeout)
         self.user_id = str(user_id)
-        for layer in layer_options:
+        for layer in LAYER_OPTIONS:
             self.add_item(LayerButton(user_id=self.user_id,
                                       height=str(layer),
                                       label=str(layer)+"mm",
@@ -94,7 +102,7 @@ class LayerHeightMenu(View):
 
 
 class InfillButton(Button):
-    def __init__(self, user_id, infill=infill_options[2], **kwargs):
+    def __init__(self, user_id, infill=INFILL_OPTIONS[2], **kwargs):
         super().__init__(**kwargs)
         self.user_id = str(user_id)
         self.infill: int = infill
@@ -120,7 +128,7 @@ class InfillMenu(View):
     def __init__(self, user_id, *, timeout=180):
         super().__init__(timeout=timeout)
         self.user_id = str(user_id)
-        for infill in infill_options:
+        for infill in INFILL_OPTIONS:
             self.add_item(InfillButton(user_id=self.user_id,
                                        infill=str(infill),
                                        label=str(infill)+"%",
