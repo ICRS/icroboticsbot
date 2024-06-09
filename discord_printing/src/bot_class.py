@@ -13,7 +13,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from src.bot_commands import discord_print, get_queue, set_client    # noqa  #pylint: disable=import-error
+from src.bot_commands import discord_print, get_queue, set_client, release_printer    # noqa  #pylint: disable=import-error
 
 __all__ = ["DiscordBot"]
 
@@ -58,6 +58,11 @@ class DiscordBot(commands.Bot):
                       help="List the current queue")   # noqa
         async def queue(ctx):
             await get_queue(self, ctx)
+
+        @self.command(name="release", pass_context=True,
+                      help="Release the printer")   # noqa
+        async def release(ctx):
+            await release_printer(self, ctx)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

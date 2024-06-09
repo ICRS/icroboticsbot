@@ -45,7 +45,7 @@ if not DEBUG:
     }
 # =====================
 
-__all__ = ["discord_print", "get_queue", "router", "set_client"]  # noqa
+__all__ = ["discord_print", "get_queue", "router", "set_client", "release_printer"]  # noqa
 
 router = APIRouter()
 
@@ -168,3 +168,17 @@ async def discord_print(bot: commands.Bot, ctx: commands.Context):
                                                 shortcode=shortcode,
                                                 filename=attachment.filename,
                                                 url=attachment.url))
+
+
+async def release_printer(bot: commands.Bot, ctx: commands.Context):
+    """
+    release_printer
+
+    Parameters
+    ----------
+    bot : DiscordBot
+        Discord bot instance
+    ctx : Discord.Context
+        Discord context
+    """
+    return
