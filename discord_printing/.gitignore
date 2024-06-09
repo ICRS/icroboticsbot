@@ -163,3 +163,4 @@ cython_debug/
 *.stl
 
 slicer_settings.json
+database_settings.json
