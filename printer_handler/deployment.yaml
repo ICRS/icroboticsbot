@@ -31,6 +31,13 @@ spec:
           mountPath: /app/settings.json
           subPath: settings.json
           readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
       volumes:
         - name: printer-config
           configMap:
