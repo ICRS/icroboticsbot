@@ -18,6 +18,7 @@ from pydantic import BaseModel
 import requests
 
 from src.SliceMenuView import SliceMenuGeneral  # noqa #pylint: disable=import-error
+from src.PrinterMenuView import PrinterMenu  # noqa #pylint: disable=import-error
 
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
@@ -32,7 +33,7 @@ settings = json.load(open(os.path.abspath("database_settings.json"),
 DATABASE_ENDPOINT = settings['DATABASE_ENDPOINT']
 
 
-__all__ = ["discord_print", "get_queue", "router", "set_client"]  # noqa
+__all__ = ["discord_print", "get_queue", "router", "set_client", "release_printer"]  # noqa
 
 router = APIRouter()
 
@@ -189,3 +190,29 @@ async def discord_print(bot: commands.Bot, ctx: commands.Context):
                                                 shortcode=shortcode,
                                                 filename=attachment.filename,
                                                 url=attachment.url))
+
+
+async def release_printer(bot: commands.Bot, ctx: commands.Context):
+    """
+    release_printer
+
+    Parameters
+    ----------
+    bot : DiscordBot
+        Discord bot instance
+    ctx : Discord.Context
+        Discord context
+    """
+    if ctx.message.author.id != bot.guild_info['ADMIN_ID']:
+        await ctx.send("You do not have access to this command",
+                       delete_after=10)
+        return
+    
+    # Release the printer
+    await ctx.send("Select printer to release",
+                   view=PrinterMenu(
+                          timeout=180,
+                          printer_names=list(bot.printer_farm)
+                   ))
+
+    return
