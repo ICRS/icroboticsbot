@@ -8,13 +8,15 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 from bambulabs_api import GcodeState
 
 from src.printer_farm import PrinterFarm
+import datetime
 
 
 class PrinterWebhook:
     def __init__(self, webhook_url: str,
                  printer_names: list[str],
                  printer_endpoint_suffix: str,
-                 prog_length: int = 45) -> None:
+                 prog_length: int = 45,
+                 timeout: int = 60) -> None:
         self.prog_length = prog_length
         self.webhook_url = webhook_url
         self.webhook = DiscordWebhook(url=self.webhook_url,
@@ -28,6 +30,10 @@ class PrinterWebhook:
 
         self.executed = False
 
+        # Health check
+        self.timeout = timeout
+        self.last_executed = datetime.datetime.now()
+
     def send_message(self, printer_name: str) -> None:
         """
         Sends a message to the discord webhook with the printer's state
@@ -38,7 +44,6 @@ class PrinterWebhook:
         printer_name : str
             The name of the printer to send the message for
         """
-        skip_embed = False
         embed_desc = ""
         try:
             state = self.printer_farm.get_state(printer_name)
@@ -68,12 +73,12 @@ class PrinterWebhook:
                               "```")
 
             elif state == GcodeState.FINISH:
-                embed_desc = f"```asciidoc\n" + \
-                    f"{'Print finished'.center(self.prog_length-4, ' ')}:: " + \
-                        "\n```"
+                embed_desc = "```asciidoc\n" + \
+                    f"{'Print finished'.center(self.prog_length-4,' ')}:: " + \
+                    "\n```"
 
             elif state == GcodeState.FAILED:
-                embed_desc = f"```ps\n" + \
+                embed_desc = "```ps\n" + \
                     f"[{'Print Failed'.center(self.prog_length-2, ' ')}]\n```"
 
             else:
@@ -84,28 +89,27 @@ class PrinterWebhook:
             frame = self.printer_farm.get_frame(printer_name)
             fname = f"{printer_name}_stream.png"
 
-            if not skip_embed:
-                try:
-                    im = Image.open(BytesIO(base64.b64decode(frame)))
+            try:
+                im = Image.open(BytesIO(base64.b64decode(frame)))
 
-                except Exception as e:
-                    im = self.__default_image
-                    logging.error(
-                        f"Error in opening image for {printer_name}: {str(e)}"
-                    )
+            except Exception as e:
+                im = self.__default_image
+                logging.error(
+                    f"Error in opening image for {printer_name}: {str(e)}"
+                )
 
-                with BytesIO() as image_binary:
-                    im.save(image_binary, 'PNG')
-                    image_binary.seek(0)
-                    image_bytes = image_binary.getbuffer().tobytes()
+            with BytesIO() as image_binary:
+                im.save(image_binary, 'PNG')
+                image_binary.seek(0)
+                image_bytes = image_binary.getbuffer().tobytes()
 
-                    embed = DiscordEmbed(title=printer_name,
-                                         description=embed_desc,
-                                         color=242424)
-                    self.webhook.add_embed(embed)
-                    self.webhook.add_file(file=image_bytes,
-                                          filename=fname)
-                    embed.set_image(url=f'attachment://{fname}')
+                embed = DiscordEmbed(title=printer_name,
+                                     description=embed_desc,
+                                     color=242424)
+                self.webhook.add_embed(embed)
+                self.webhook.add_file(file=image_bytes,
+                                      filename=fname)
+                embed.set_image(url=f'attachment://{fname}')
 
         except Exception as e:
             logging.error(
@@ -120,13 +124,31 @@ class PrinterWebhook:
         for printer_name in self.printer_farm.get_printers():
             self.send_message(printer_name)
         if not self.executed:
-            self.webhook.execute()
+            response = self.webhook.execute()
             self.executed = True
         else:
-            self.webhook.edit()
+            response = self.webhook.edit()
+
+        if response.status_code != 200:
+            logging.error(f"Error in sending message: {response.text}")
+        else:
+            self.last_executed = datetime.datetime.now()
 
     def delete_message(self) -> None:
         """
         Deletes the message from the discord webhook
         """
         self.webhook.delete()
+
+    def health_check(self) -> bool:
+        """
+        Checks if the webhook is still valid. If the last execution happened
+        within the timeout successfully return True, otherwise False
+
+        Returns
+        -------
+        bool
+            True if the webhook is valid, False otherwise
+        """
+        time_ = self.last_executed + datetime.timedelta(seconds=self.timeout)
+        return time_ > datetime.datetime.now()
