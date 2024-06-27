@@ -9,7 +9,6 @@ Utility functions used by the bot
 import io
 import logging
 import os
-import json
 
 from PIL import Image, ImageDraw, ImageFont
 from colorthief import ColorThief
