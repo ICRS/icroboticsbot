@@ -31,9 +31,9 @@ spec:
                 key: discord_token
           - name: SERVER_IP
             valueFrom:
-              secretKeyRef:
-                name: access-server-secret 
-                key: access_server_ip
+              configMapKeyRef:
+                name: database-config
+                key: endpoint
       volumes:
         - name: discord-bot-secret
           secret:
