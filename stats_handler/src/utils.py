@@ -10,7 +10,6 @@ import io
 import logging
 import os
 import json
-import configparser
 
 from PIL import Image, ImageDraw, ImageFont
 from colorthief import ColorThief
@@ -30,19 +29,6 @@ load_dotenv()
 BASE_PATH = "./"
 SERVER_IP = os.getenv("SERVER_IP")
 # =========================================
-
-# ===== DB Config =====
-config = configparser.ConfigParser()
-config.read('postgres.ini')
-
-db_config = {
-    'database': config['postgres']['database'],
-    'user': config['postgres']['user'],
-    'password': config['postgres']['password'],
-    'host': config['postgres']['host'],
-    'port': config['postgres']['port']
-}
-# =====================
 
 DEFAULT_AVATAR = "https://assets-global.website-files.com/5f9072399b2640f14d6a2bf4/619442eb8b3fab3eda4c29eb_Author-Wumpus-Webflow.png"  # noqa: E501
 
