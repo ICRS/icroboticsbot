@@ -88,7 +88,7 @@ def generate_stat_card(user) -> Image.Image:
 
         return res
 
-    res = requests.get(url="http://" + SERVER_IP +
+    res = requests.get(url=SERVER_IP +
                        "/print-metrics/member/stats/discord",
                        params={
                            "discord_id": str(user.id)
@@ -96,9 +96,7 @@ def generate_stat_card(user) -> Image.Image:
                        )
     if res.status_code != 200:
         return False
-    logging.info(res)
-    logging.info(res.text)
-    data = json.loads(res.text)
+    data = res.json()
     logging.info(data)
     username = user.name
     avatar = user.avatar
@@ -109,6 +107,8 @@ def generate_stat_card(user) -> Image.Image:
         total_time = sum([i[2] for i in data])
         printers = {}
         names = list(set([i[-1] for i in data]))
+        logging.info(total_filament, total_time, names)
+
         for name in names:
             printers[name] = sum([1 for i in data if i[-1] == name])
         printers = dict(sorted(printers.items(), key=lambda item: item[1]))
@@ -164,7 +164,7 @@ def generate_stat_card(user) -> Image.Image:
     card.paste(window, (7, 243))
     window = generate_card(
         "Avg. Weight",
-        "{:f,}".format(round(total_filament/print_no), 1)+"g",
+        f"{round(total_filament/print_no)}g",
         accent_colour=accent_colour)
     card.paste(window, (200, 125))
     window = generate_card("Avg. Time", format_time(

@@ -33,7 +33,7 @@ spec:
             valueFrom:
               configMapKeyRef:
                 name: database-config
-                key: endpoint
+                key: endpoint-url
       volumes:
         - name: discord-bot-secret
           secret:
