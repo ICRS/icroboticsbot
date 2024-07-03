@@ -56,6 +56,6 @@ def how_to_msg():
     return embed.set_footer(text="Check out our Insta too: https://linktr.ee/icrobotics")                       # noqa  # pylint: disable
 
 
-async def error_msg(ctx, e):
+async def error_msg(e):
     logging.error(f"Error in registering user: {e}")
-    return discord.Embed(title="Error", description=(e))
+    return discord.Embed(title="Error", description=(e), color=error_color)
