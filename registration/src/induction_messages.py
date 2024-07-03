@@ -8,8 +8,8 @@ success_color = 0x46fa64
 
 def success_induction_msg():
     embed = discord.Embed(title="Verified!",
-                                                                                                                description="Member has been inducted",
-                                                                                                                color=success_color)
+                                                                                                                description="Member has been inducted",         # noqa # pylint: disable
+                                                                                                                color=success_color)                            # noqa # pylint: disable
     return embed
 
 def invalid_shortcode():
