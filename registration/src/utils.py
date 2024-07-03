@@ -7,6 +7,7 @@
 Utility functions used by the bot
 """
 
+import json
 import logging
 import re
 import os
@@ -20,16 +21,21 @@ import configparser
 from icu_ea_api import ICUEActivitiesAPI  # type: ignore
 
 from dotenv import load_dotenv
+import requests
+
+from src.bot_messages import *
+
+load_dotenv()
+BASE_PATH = "./"
+SERVER_IP = os.getenv("SERVER_IP")
+BASIC_AUTH_TOKEN = os.getenv("BASIC_AUTH_TOKEN")
 
 
 
 __all__ = ["is_shortcode", "is_member", "add_mapping",
-           "shortcode_exists", "valid_mapping", "change_valid",
+           "shortcode_exists", "valid_mapping", "change_valid", 
+           "add_induction_to_member", "is_uid", "format_uid",
            ]
-
-# ===== Constants =====
-load_dotenv()
-
 
 config = configparser.ConfigParser()
 config.read('postgres.ini')
@@ -70,7 +76,9 @@ CREATE TABLE mapping (
     active  INTEGER DEFAULT 1
 )
 '''
-SHORTCODE_REGEX = r'[a-z]{2,3}[0-9]{2,4}'
+SHORTCODE_REGEX = r'^[a-z]{2,3}[0-9]{2,4}$'
+UID_REGEX= r'^[0-9A-F]{8,14}$'
+
 # ===========================
 
 
@@ -83,9 +91,38 @@ def is_shortcode(message: str) -> bool:
     bool
         True if the string contains a shortcode, False otherwise
     """
-    message = message.lower()
+    message = message.lower().strip()
     found = re.findall(SHORTCODE_REGEX, message)
     return any(found)
+
+def is_uid(message: str) -> bool:
+    """
+    is_uid checks if a given string contains a uid card number
+
+    Returns
+    -------
+    bool
+        True if the string contains a shortcode, False otherwise
+    """
+    message = format_uid(message)
+    found = re.findall(UID_REGEX, message)
+    return any(found)
+
+
+def format_uid(message: str) -> bool:
+    """
+    format_uid formats a valid uid card number
+
+    Returns
+    -------
+    str
+        formatted UID
+    """
+    message = message.upper()
+    message = message.replace(" ", "")
+    message = message.replace(":", "")
+    message = message.replace("-", "")
+    return message
 
 
 def is_member(shortcode: str) -> bool:
@@ -112,7 +149,6 @@ def is_member(shortcode: str) -> bool:
     except Exception:  # pylint: disable=broad-except
         logging.error("Error contacting Society API")
         return False
-
 
 def add_mapping(shortcode, userid) -> bool:
     """
@@ -151,6 +187,34 @@ def add_mapping(shortcode, userid) -> bool:
     else:
         raise ValueError('Invalid shortcode')            
 
+async def add_induction_to_member(ctx, shortcode, uid) -> bool:
+    try:
+        payload = json.dumps({
+          "id": uid,
+          "shortcode": shortcode,
+          "canPrint:": True,
+          "canLaserCut": False
+        })
+        headers = {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+        }
+
+        logging.info(f"Server IP: {SERVER_IP}")
+
+        res = requests.request("POST", url=SERVER_IP + "/member/add", headers=headers, data=payload)
+
+        if res.status_code == 200:
+            return True
+        
+        logging.error(f"Error in inducting user: {res.reason}")
+        await ctx.send(embed=error_msg(str(res.reason)))
+        return False
+    
+    # pylint: disable=broad-except
+    except Exception as e:
+        logging.error(f"Error in inducting user: {e}")
+        await ctx.send(embed=error_msg(e))
 
 def shortcode_exists(shortcode) -> bool:
     """
@@ -182,7 +246,6 @@ def shortcode_exists(shortcode) -> bool:
                 return any(cursor.fetchall())
     else:
         raise ValueError('Invalid shortcode')
-
 
 def valid_mapping(shortcode, userid) -> bool:
     """

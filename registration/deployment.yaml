@@ -33,6 +33,16 @@ spec:
               secretKeyRef:
                 name: discord-bot-secret 
                 key: discord_token
+          - name: SERVER_IP
+            valueFrom:
+              configMapKeyRef:
+                name: database-config
+                key: endpoint-url
+          - name: BASIC_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: database-adapter-secret
+                key: basic-auth-token
           - name: API_KEY
             valueFrom:
               secretKeyRef:

@@ -13,7 +13,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import register_user      # noqa
+from src.bot_commands import register_user, induct_member      # noqa
 
 from src.utils import change_valid               # noqa
 
@@ -54,6 +54,11 @@ class DiscordBot(commands.Bot):
                       help="Register to the server")
         async def register(ctx, shortcode=""):
             await register_user(self, ctx, shortcode)
+
+        @self.command(name="induct", pass_context=True,
+                      help="induct a member to the space")
+        async def induct(ctx, shortcode="", uid=""):
+            await induct_member(self, ctx, shortcode, uid)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
