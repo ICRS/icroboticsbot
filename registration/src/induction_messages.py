@@ -38,14 +38,21 @@ def invalid_UID():
     
 def server_error_msg():
     embed = discord.Embed(
-        title="That ain't right",                                                                     # noqa # pylint: disable
+        title="That ain't right",       
         description=("THE SERVER HATES YOU, AND YOU HAVE UPSET THE KUBERNETES GODS"),     # noqa # pylint: disable
         color=error_color)      
     return embed
 
-def server_error_msg():
+def is_not_inducted_msg():
     embed = discord.Embed(
-        title="That ain't right",                                                                     # noqa # pylint: disable
-        description=("THE SERVER HATES YOU, AND YOU HAVE UPSET THE KUBERNETES GODS"),     # noqa # pylint: disable
+        title="Nope",                                                        
+        description=("Not a member"),
         color=error_color)      
+    return embed
+
+def is_inducted_msg():
+    embed = discord.Embed(
+        title="Yep",                              
+        description=("They are a member"),
+        color=success_color)      
     return embed

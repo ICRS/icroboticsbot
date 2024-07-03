@@ -6,6 +6,7 @@
 """
 Discord Bot helper functions
 """
+import json
 import discord
 
 from src.utils import *                                  # noqa
@@ -114,7 +115,31 @@ async def induct_member(bot, ctx, shortcode, uid):
 
 
 async def validate_shortcode(bot, ctx, shortcode):  
-    if not(is_shortcode(shortcode)):
+    try:
+        server = discord.utils.get(bot.guilds,
+                                   id=bot.guild_info['GUILD'])
+        author = server.get_member(ctx.author.id)
+
+        if not("committee" in [y.name.lower() for y in author.roles]):
+            return await ctx.send(embed=not_committee())
+
+        if not(is_shortcode(shortcode)):
             return await ctx.send(embed=invalid_shortcode())
-    pass
-    # TODO
+
+        member_perms = await get_member_perms(ctx, shortcode)
+
+        if(member_perms == False):
+            return
+        
+        if len(member_perms) == 0:
+            return await ctx.send(embed=is_not_inducted_msg())
+
+        if member_perms["inducted"]:
+            return await ctx.send(embed=is_inducted_msg())
+        
+        return await ctx.send(embed=is_not_inducted_msg())
+                    
+            
+    # pylint: disable=broad-except
+    except Exception as e:
+        await ctx.send(embed=error_msg(e))
