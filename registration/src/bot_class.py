@@ -13,7 +13,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import register_user, induct_member      # noqa
+from src.bot_commands import register_user, induct_member, validate_shortcode      # noqa
 
 from src.utils import change_valid               # noqa
 
@@ -59,6 +59,11 @@ class DiscordBot(commands.Bot):
                       help="induct a member to the space")
         async def induct(ctx, shortcode="", uid=""):
             await induct_member(self, ctx, shortcode, uid)
+
+        @self.command(name="check", pass_context=True,
+                      help="check if shortcode belongs to a inducted member")
+        async def validate_code(ctx, shortcode=""):
+            await validate_shortcode(self, ctx, shortcode)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
