@@ -27,3 +27,12 @@ insecure = true
 ```
 
 Run the build_docker.sh script file in each respective folder
+
+
+## Deployment instructions:
+
+Deploy each project to k8s respectively with:
+```
+kubectl apply -f deployment.yaml 
+```
+
