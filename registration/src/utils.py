@@ -12,25 +12,18 @@ import logging
 import re
 import os
 from datetime import date
-# import sqlite3 as sq
-import time
 
 import psycopg2 as pg
 import configparser
 
 from icu_ea_api import ICUEActivitiesAPI  # type: ignore
 
-from dotenv import load_dotenv
 import requests
 
 from src.bot_messages import *
 
-load_dotenv()
-BASE_PATH = "./"
 SERVER_IP = os.getenv("SERVER_IP")
 BASIC_AUTH_TOKEN = os.getenv("BASIC_AUTH_TOKEN")
-
-
 
 __all__ = ["is_shortcode", "is_member", "add_mapping",
            "shortcode_exists", "valid_mapping", "change_valid", 
