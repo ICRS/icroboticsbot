@@ -9,9 +9,10 @@ Discord Bot helper functions
 import json
 import discord
 
-from src.utils import *                                  # noqa
-from src.bot_messages import *
-from src.induction_messages import *
+from src.utils.api import *
+from src.utils.validation import *
+from src.utils.bot_messages import *
+from src.utils.induction_messages import *
 
 
 DEBUG = False
@@ -139,6 +140,45 @@ async def validate_shortcode(bot, ctx, shortcode):
         
         return await ctx.send(embed=is_not_inducted_msg())
                     
+            
+    # pylint: disable=broad-except
+    except Exception as e:
+        await ctx.send(embed=error_msg(e))
+
+
+async def whois(bot, ctx, user):  
+    try:
+        server = discord.utils.get(bot.guilds,
+                                   id=bot.guild_info['GUILD'])
+        author = server.get_member(ctx.author.id)
+
+        if not("committee" in [y.name.lower() for y in author.roles]):
+            return await ctx.send(embed=not_committee())
+        
+        if not(is_discord_id(user)):
+            return await ctx.send(embed=invalid_discord_id())
+        
+        id = format_discord_id(user)
+
+        stats = await get_stats_from_user(ctx, id)
+
+        if(stats == []):
+            return await ctx.send(embed=cant_find_discord_user())
+
+        time_sum = 0
+        weight_sum = 0
+
+        for item in stats:
+            time_sum += item[2]
+            weight_sum += item[3]
+        
+        last_print = stats[-1]
+        totals = [time_sum, weight_sum]
+
+        logging.debug(last_print)
+        logging.debug(totals)
+
+        return await ctx.message.author.send(embed=show_discord_stats(last_print, totals, user))
             
     # pylint: disable=broad-except
     except Exception as e:
