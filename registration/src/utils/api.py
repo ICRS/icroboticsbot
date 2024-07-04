@@ -27,7 +27,7 @@ BASIC_AUTH_TOKEN = os.getenv("BASIC_AUTH_TOKEN")
 
 __all__ = ["is_shortcode", "is_member", "add_mapping",
            "shortcode_exists", "valid_mapping", "change_valid", 
-           "add_induction_to_member", "is_uid", "format_uid", "get_member_perms", "get_stats_from_user"
+           "add_induction_to_member", "is_uid", "format_uid", "get_member_perms", "get_stats_from_discord", "get_discord_from_shortcode", "get_stats_from_shortcode"
            ]
 
 config = configparser.ConfigParser()
@@ -191,7 +191,7 @@ async def get_member_perms(ctx, shortcode):
 
         return False
 
-async def get_stats_from_user(ctx, discord_id):
+async def get_stats_from_discord(ctx, discord_id):
     try:
         headers = {
           'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
@@ -209,6 +209,49 @@ async def get_stats_from_user(ctx, discord_id):
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Exeption in getting stats: {e}")
+        await ctx.send(embed=error_msg(e))
+
+        return False
+
+
+async def get_stats_from_shortcode(ctx, shortcode):
+    try:
+        headers = {
+          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+        }
+
+        res = requests.request("GET", url=SERVER_IP + "/print-metrics/member/stats/shortcode?shortcode="+str(shortcode), headers=headers)
+
+        if res.status_code == 200:
+            return res.json()
+        
+        logging.error(f"Error getting stats: {res.reason}")
+        await ctx.send(embed=error_msg(str(res.reason)))
+        return False
+    
+    # pylint: disable=broad-except
+    except Exception as e:
+        logging.error(f"Exeption in getting stats: {e}")
+        await ctx.send(embed=error_msg(e))
+
+        return False
+    
+async def get_discord_from_shortcode(ctx, shortcode):
+    try:
+        headers = {
+          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+        }
+
+        res = requests.request("GET", url=SERVER_IP + "/shortcode/discord-id?shortcode="+str(shortcode), headers=headers)
+
+        if res.status_code == 200:
+            return res.json()
+        
+        # await ctx.send(embed=error_msg("couldnt get Discord User"))
+        return {"discord_id": None}
+    
+    # pylint: disable=broad-except
+    except Exception as e:
         await ctx.send(embed=error_msg(e))
 
         return False

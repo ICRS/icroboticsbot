@@ -155,12 +155,18 @@ async def whois(bot, ctx, user):
         if not("committee" in [y.name.lower() for y in author.roles]):
             return await ctx.send(embed=not_committee())
         
-        if not(is_discord_id(user)):
+        if not(is_discord_id(user)) and not(is_shortcode(user)):
             return await ctx.send(embed=invalid_discord_id())
-        
-        id = format_discord_id(user)
 
-        stats = await get_stats_from_user(ctx, id)
+        stats = []
+        # allow shortcode or @user
+        if(is_shortcode(user)):
+            stats = await get_stats_from_shortcode(ctx, user)
+            id = (await get_discord_from_shortcode(ctx, user))["discord_id"] 
+            id = id if id else "not on discord"
+        else:
+            id = format_discord_id(user)
+            stats = await get_stats_from_discord(ctx, id)
 
         if(stats == []):
             return await ctx.send(embed=cant_find_discord_user())
@@ -174,11 +180,22 @@ async def whois(bot, ctx, user):
         
         last_print = stats[-1]
         totals = [time_sum, weight_sum]
+        shortcode = last_print[0]
+
+        perms = await get_member_perms(ctx, shortcode)
 
         logging.debug(last_print)
         logging.debug(totals)
 
-        return await ctx.message.author.send(embed=show_discord_stats(last_print, totals, user))
+        data = {
+            "perms": perms,
+            "last_print": last_print,
+            "totals": totals,
+            "discord_id": id,
+            "short_code": shortcode
+        }
+
+        return await ctx.message.author.send(embed=show_discord_stats(data))
             
     # pylint: disable=broad-except
     except Exception as e:
