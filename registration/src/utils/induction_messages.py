@@ -80,7 +80,8 @@ def show_discord_stats(data):
         color=success_color)     
     embed.add_field(name="User Permissions",                                                # noqa  # pylint: disable
         value=(
-            "inducted: " + str(data["perms"]["inducted"]) + "\n"
+            "Inducted: " + str(data["perms"]["inducted"]) + "\n" +
+            "Can Print: " + str(data["perms"]["print"]) + "\n"
         ),                             
         inline=False) 
     embed.add_field(name="Last Print",                                                # noqa  # pylint: disable

@@ -26,7 +26,7 @@ async def add_role_and_update(server, member, shortcode):
     add_mapping(shortcode, member.id)
 
 
-async def register_user(bot, ctx, shortcode):
+async def register_user(bot, interaction, shortcode):
     """
     register_on_dm Register message when user tries to register on DM
 
@@ -42,35 +42,35 @@ async def register_user(bot, ctx, shortcode):
 
     try:
         if not(is_shortcode(shortcode)):
-            return await ctx.message.author.send(embed=how_to_msg())
+            return await interaction.response.send_message(embed=how_to_msg(), ephemeral=True)
         if not(is_member(shortcode) or DEBUG):
-            return await ctx.message.author.send(embed=user_not_member_msg())
+            return await interaction.response.send_message(embed=user_not_member_msg(), ephemeral=True)
         
         
         server = discord.utils.get(bot.guilds,
                                    id=bot.guild_info['GUILD'])
-        member = server.get_member(ctx.author.id)
+        member = interaction.user
 
         if not member:
-            return await ctx.message.author.send(embed=not_on_guild_msg())
+            return await interaction.response.send_message(embed=not_on_guild_msg(), ephemeral=True)
 
         if shortcode_exists(shortcode):  
             if valid_mapping(shortcode, member.id):
-                return await ctx.message.author.send(embed=code_already_used_msg())
+                return await interaction.response.send_message(embed=code_already_used_msg(), ephemeral=True)
             else:
                 change_valid(member.id, 1)
-                return await ctx.message.author.send(embed=reverified_msg())
+                return await interaction.response.send_message(embed=reverified_msg(), ephemeral=True)
     
         await add_role_and_update(server, member, shortcode)
-        return await ctx.message.author.send(embed=success_msg())
+        return await interaction.response.send_message(embed=success_msg(), ephemeral=True)
                 
             
     # pylint: disable=broad-except
     except Exception as e:
-        await ctx.message.author.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
 
-async def induct_member(bot, ctx, shortcode, uid):
+async def induct_member(bot, interaction, shortcode, uid):
     """
     register_on_dm Register message when user tries to register on DM
 
@@ -85,91 +85,85 @@ async def induct_member(bot, ctx, shortcode, uid):
     uid : str
         uid of the user's card
     """
+    author = interaction.user
+
 
     try:
-        server = discord.utils.get(bot.guilds,
-                                   id=bot.guild_info['GUILD'])
-        author = server.get_member(ctx.author.id)
-
-
         if not("committee" in [y.name.lower() for y in author.roles]):
-            return await ctx.send(embed=not_committee())
+            return await interaction.response.send_message(embed=not_committee())
 
         if not(is_shortcode(shortcode)):
-            return await ctx.send(embed=invalid_shortcode())
+            return await interaction.response.send_message(embed=invalid_shortcode(), ephemeral=True)
         elif not(is_uid(uid)):
-            return await ctx.send(embed=invalid_UID())
+            return await interaction.response.send_message(embed=invalid_UID(), ephemeral=True)
         
         uid = format_uid(uid)
         
-        server_success = await add_induction_to_member(ctx, shortcode, uid)
+        server_success = await add_induction_to_member(interaction, shortcode, uid)
 
         if server_success:
-            return await ctx.send(embed=success_induction_msg())
+            return await interaction.response.send_message(embed=success_induction_msg(), ephemeral=True)
         
-        return await ctx.send(embed=server_error_msg())
+        return await interaction.response.send_message(embed=server_error_msg())
                     
             
     # pylint: disable=broad-except
     except Exception as e:
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
 
-async def validate_shortcode(bot, ctx, shortcode):  
+async def validate_shortcode(bot, interaction, shortcode):  
     try:
         server = discord.utils.get(bot.guilds,
                                    id=bot.guild_info['GUILD'])
-        author = server.get_member(ctx.author.id)
+        author = server.get_member(interaction.user.id)
 
         if not("committee" in [y.name.lower() for y in author.roles]):
-            return await ctx.send(embed=not_committee())
+            return await interaction.response.send_message(embed=not_committee())
 
         if not(is_shortcode(shortcode)):
-            return await ctx.send(embed=invalid_shortcode())
+            return await interaction.response.send_message(embed=invalid_shortcode(), ephemeral=True)
 
-        member_perms = await get_member_perms(ctx, shortcode)
+        member_perms = await get_member_perms(interaction, shortcode)
 
         if(member_perms == False):
             return
         
         if len(member_perms) == 0:
-            return await ctx.send(embed=is_not_inducted_msg())
+            return await interaction.response.send_message(embed=is_not_inducted_msg(), ephemeral=True)
 
         if member_perms["inducted"]:
-            return await ctx.send(embed=is_inducted_msg())
+            return await interaction.response.send_message(embed=is_inducted_msg(), ephemeral=True)
         
-        return await ctx.send(embed=is_not_inducted_msg())
+        return await interaction.response.send_message(embed=is_not_inducted_msg(), ephemeral=True)
                     
             
     # pylint: disable=broad-except
     except Exception as e:
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
 
-async def whois(bot, ctx, user):  
+async def whois(interaction, user):  
     try:
-        server = discord.utils.get(bot.guilds,
-                                   id=bot.guild_info['GUILD'])
-        author = server.get_member(ctx.author.id)
-
+        author = interaction.user
         if not("committee" in [y.name.lower() for y in author.roles]):
-            return await ctx.send(embed=not_committee())
+            return await interaction.response.send_message(embed=not_committee())
         
         if not(is_discord_id(user)) and not(is_shortcode(user)):
-            return await ctx.send(embed=invalid_discord_id())
+            return await interaction.response.send_message(embed=invalid_discord_id(), ephemeral=True)
 
         stats = []
         # allow shortcode or @user
         if(is_shortcode(user)):
-            stats = await get_stats_from_shortcode(ctx, user)
-            id = (await get_discord_from_shortcode(ctx, user))["discord_id"] 
+            stats = await get_stats_from_shortcode(interaction, user)
+            id = (await get_discord_from_shortcode(interaction, user))["discord_id"] 
             id = id if id else "not on discord"
         else:
             id = format_discord_id(user)
-            stats = await get_stats_from_discord(ctx, id)
+            stats = await get_stats_from_discord(interaction, id)
 
         if(stats == []):
-            return await ctx.send(embed=cant_find_discord_user())
+            return await interaction.response.send_message(embed=cant_find_discord_user(), ephemeral=True)
 
         time_sum = 0
         weight_sum = 0
@@ -182,7 +176,7 @@ async def whois(bot, ctx, user):
         totals = [time_sum, weight_sum]
         shortcode = last_print[0]
 
-        perms = await get_member_perms(ctx, shortcode)
+        perms = await get_member_perms(interaction, shortcode)
 
         logging.debug(last_print)
         logging.debug(totals)
@@ -195,8 +189,8 @@ async def whois(bot, ctx, user):
             "short_code": shortcode
         }
 
-        return await ctx.message.author.send(embed=show_discord_stats(data))
+        return await interaction.response.send_message(embed=show_discord_stats(data), ephemeral=True)
             
     # pylint: disable=broad-except
     except Exception as e:
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
