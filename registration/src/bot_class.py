@@ -54,26 +54,24 @@ class DiscordBot(commands.Bot):
         """
         add_commands adds all the commands to the bot
         """
-        @self.hybrid_command(name="register", pass_context=True,
-                      help="Register to the server")
-        async def register(ctx, shortcode=""):
-            await register_user(self, ctx, shortcode)
+        @self.tree.command(name="register",
+                      description="Register to the server")
+        async def register(interaction, shortcode:str):
+            await register_user(self, interaction, shortcode)
 
-        @self.hybrid_command(name="induct", pass_context=True,
-                      help="induct a member to the space")
-        async def induct(ctx, shortcode="", uid=""):
-            await induct_member(self, ctx, shortcode, uid)
+        @self.tree.command(name="induct",
+                      description="induct a member to the space")
+        async def induct(interaction, shortcode:str, uid:str):
+            await induct_member(self, interaction, shortcode, uid)
 
-        @self.hybrid_command(name="check", pass_context=True,
-                      help="check if shortcode belongs to a inducted member")
-        async def validate_code(ctx, shortcode=""):
-            await validate_shortcode(self, ctx, shortcode)
-
-        @self.hybrid_command(name="whois", pass_context=True,
-                      help="get stats and shortcode for a given discord user")
-        async def whois_cmd(ctx, user=""):
-            await whois(self, ctx, user)
-
+        @self.tree.command(name="check",
+                      description="check if shortcode belongs to a inducted member")
+        async def validate_code(interaction, shortcode:str):
+            await validate_shortcode(self, interaction, shortcode)
+        @self.tree.command(name="whois",
+                      description="check info of a shortcode/discord memer")
+        async def whois_cmd(interaction, user:str):
+            await whois(interaction, user)
 
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
