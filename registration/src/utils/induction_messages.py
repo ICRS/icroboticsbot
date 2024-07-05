@@ -21,6 +21,15 @@ def invalid_shortcode():
         color=error_color)      
     return embed
 
+def invalid_discord_id():
+    embed = discord.Embed(
+        title="Thats not right",
+        description=(
+            "Please ensure the discord ID/user or shortcode is valid"
+        ),
+        color=error_color)      
+    return embed
+
 def not_committee():
     embed = discord.Embed(
         title="Nope",
@@ -55,4 +64,37 @@ def is_inducted_msg():
         title="Yep",                              
         description=("They are a member"),
         color=success_color)      
+    return embed
+
+def cant_find_discord_user():
+    embed = discord.Embed(
+        title="Nope",                                                        
+        description=("Couldn't find them in the BD"),
+        color=error_color)      
+    return embed
+
+def show_discord_stats(data):
+    embed = discord.Embed(
+        title="Short code - " + data["short_code"],    
+        description=("discord user: <@" + data["discord_id"] + ">"),
+        color=success_color)     
+    embed.add_field(name="User Permissions",                                                # noqa  # pylint: disable
+        value=(
+            "inducted: " + str(data["perms"]["inducted"]) + "\n"
+        ),                             
+        inline=False) 
+    embed.add_field(name="Last Print",                                                # noqa  # pylint: disable
+        value=(
+            "Printer: " + data["last_print"][4] + "\n" +
+            "Weight: " + str(data["last_print"][3]) + "g\n" +
+            "Time: " + str(round(data["last_print"][2]/60, 2)) + "min\n" +
+            "Started At: " + data["last_print"][1]
+        ),                             
+        inline=False)    
+    embed.add_field(name="Total Prints",                                                # noqa  # pylint: disable
+        value=(
+            "Weight: " + str(data["totals"][1]) + "g\n" +
+            "Time: " + str(round(data["totals"][0]/60, 2)) + "min\n"
+        ),                             
+        inline=False)    
     return embed
