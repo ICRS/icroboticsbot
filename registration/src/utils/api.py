@@ -98,7 +98,7 @@ def add_mapping(shortcode, userid) -> bool:
     else:
         raise ValueError('Invalid shortcode')            
 
-async def add_induction_to_member(ctx, shortcode, uid) -> bool:
+async def add_induction_to_member(interaction, shortcode, uid) -> bool:
     try:
         payload = json.dumps({
           "id": uid,
@@ -117,13 +117,13 @@ async def add_induction_to_member(ctx, shortcode, uid) -> bool:
             return True
         
         logging.error(f"Error in inducting user: {res.reason}")
-        await ctx.send(embed=error_msg(str(res.reason)))
+        await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
     
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Error in inducting user: {e}")
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
 def shortcode_exists(shortcode) -> bool:
     if is_shortcode(shortcode):
@@ -169,7 +169,7 @@ def change_valid(userid, valid: int) -> bool:
     else:
         raise KeyError('Issue changing valid status')
 
-async def get_member_perms(ctx, shortcode):
+async def get_member_perms(interaction, shortcode):
     try:
         headers = {
           'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
@@ -181,17 +181,17 @@ async def get_member_perms(ctx, shortcode):
             return res.json()
         
         logging.error(f"Error getting member: {res.reason}")
-        await ctx.send(embed=error_msg(str(res.reason)))
+        await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
     
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Exeption in getting member: {e}")
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
         return False
 
-async def get_stats_from_discord(ctx, discord_id):
+async def get_stats_from_discord(interaction, discord_id):
     try:
         headers = {
           'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
@@ -203,18 +203,18 @@ async def get_stats_from_discord(ctx, discord_id):
             return res.json()
         
         logging.error(f"Error getting stats: {res.reason}")
-        await ctx.send(embed=error_msg(str(res.reason)))
+        await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
     
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Exeption in getting stats: {e}")
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
         return False
 
 
-async def get_stats_from_shortcode(ctx, shortcode):
+async def get_stats_from_shortcode(interaction, shortcode):
     try:
         headers = {
           'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
@@ -226,17 +226,17 @@ async def get_stats_from_shortcode(ctx, shortcode):
             return res.json()
         
         logging.error(f"Error getting stats: {res.reason}")
-        await ctx.send(embed=error_msg(str(res.reason)))
+        await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
     
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Exeption in getting stats: {e}")
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
         return False
     
-async def get_discord_from_shortcode(ctx, shortcode):
+async def get_discord_from_shortcode(interaction, shortcode):
     try:
         headers = {
           'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
@@ -247,12 +247,12 @@ async def get_discord_from_shortcode(ctx, shortcode):
         if res.status_code == 200:
             return res.json()
         
-        # await ctx.send(embed=error_msg("couldnt get Discord User"))
+        await interaction.response.send_message(embed=error_msg("couldnt get Discord User"), ephemeral=True)
         return {"discord_id": None}
     
     # pylint: disable=broad-except
     except Exception as e:
-        await ctx.send(embed=error_msg(e))
+        await interaction.response.send_message(embed=error_msg(e))
 
         return False
 
