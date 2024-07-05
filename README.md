@@ -1,6 +1,6 @@
 # icroboticsbot
 
-Discord bot for the Imperial College Robotics Society discord server
+Discord bot for the Imperial College Robotics Society discord server using Docker and Kubernetes
 
 
 Discord Bot has been split into 5 microservices:
