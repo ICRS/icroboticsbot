@@ -13,9 +13,9 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import register_user, induct_member, validate_shortcode
+from src.bot_commands import register_user, induct_member, validate_shortcode, whois
 
-from src.utils import change_valid
+from src.utils.api import change_valid
 
 __all__ = ["DiscordBot"]
 
@@ -68,6 +68,11 @@ class DiscordBot(commands.Bot):
                       help="check if shortcode belongs to a inducted member")
         async def validate_code(ctx, shortcode=""):
             await validate_shortcode(self, ctx, shortcode)
+
+        @self.hybrid_command(name="whois", pass_context=True,
+                      help="get stats and shortcode for a given discord user")
+        async def whois_cmd(ctx, user=""):
+            await whois(self, ctx, user)
 
 
 
