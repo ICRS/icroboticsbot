@@ -30,7 +30,7 @@ from src.utils.induction_messages import (
     not_committee, server_error_msg, show_discord_stats, success_induction_msg,
 )
 
-DATABSE_ADAPTER_IP = os.getenv("SERVER_IP")
+DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 
 
 DEBUG = False
@@ -61,10 +61,10 @@ async def register_user(
                 embed=not_on_guild_msg(), ephemeral=True)
 
         result = requests.post(
-            DATABSE_ADAPTER_IP + "/discord-id/register/user",
+            DATABASE_ADAPTER_IP + "/discord-id/register",
             params={
                 "shortcode": shortcode.strip().lower(),
-                "interaction": str(member.id)
+                "discord_id": str(member.id)
             })
 
         if result.status_code == 401:
