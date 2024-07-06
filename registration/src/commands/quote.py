@@ -7,10 +7,11 @@ from typing import Dict, List
 import io
 from PIL import Image
 
+from src.utils.info_msg import quote_msg
 from src.utils.error_msg import *
 from src.utils.quote_utils import generate
 
-async def quote_person(interaction, name):  # pylint: disable=unused-argument
+async def quote_person(interaction, name):
     """
     quote_person Generate a quote image from the stored quotes
 
@@ -33,13 +34,7 @@ async def quote_person(interaction, name):  # pylint: disable=unused-argument
     
     file = discord.File(temp, filename="quote.png")
 
-    embed = discord.Embed(title=q[0],
-                          description=q[1],
-                          color=0x3a88fe)
-
-    embed.set_image(url=f"attachment://{file.filename}.png")
-
-    await interaction.response.send_message(embed=embed, file=file)
+    await interaction.response.send_message(embed=quote_msg(q[0], q[1]), file=file)
 
 
 async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
