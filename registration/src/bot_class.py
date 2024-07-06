@@ -7,13 +7,13 @@
 Discord Bot class. It handles all the commands and events.
 """
 import logging
-import os
 import json
 import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import register_user, induct_member, validate_shortcode, whois
+from src.bot_commands import (
+    register_user, induct_member, validate_shortcode, whois)
 
 from src.utils.api import change_valid
 
@@ -32,6 +32,7 @@ default_guild_info = {
     'ADMIN_ID': ADMIN_ID,
 }
 
+
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
     def __init__(self, token, intents,
@@ -43,36 +44,48 @@ class DiscordBot(commands.Bot):
         self.token = token
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
+
+        server = discord.utils.get(
+            self.guilds,
+            id=self.guild_info['GUILD'])
+        self.verified_member_role = discord.utils.get(
+            server.roles, name='Verified Member')
+
         self.add_commands()
 
         @self.event
         async def on_ready():
             await self.tree.sync()
 
-
     def add_commands(self):
         """
         add_commands adds all the commands to the bot
         """
-        @self.tree.command(name="register",
-                      description="Register to the server")
-        async def register(interaction, shortcode:str):
-            await register_user(self, interaction, shortcode)
+        @self.tree.command(
+            name="register",
+            description="Register to the server")
+        async def register(interaction: discord.Interaction, shortcode: str):
+            await register_user(
+                self.verified_member_role, interaction, shortcode)
 
-        @self.tree.command(name="induct",
-                      description="induct a member to the space")
-        async def induct(interaction, shortcode:str, uid:str):
-            await induct_member(self, interaction, shortcode, uid)
+        @self.tree.command(
+            name="induct",
+            description="induct a member to the space")
+        async def induct(
+                interaction: discord.Interaction, shortcode: str, uid: str):
+            await induct_member(interaction, shortcode, uid)
 
-        @self.tree.command(name="check",
-                      description="check if shortcode belongs to a inducted member")
-        async def validate_code(interaction, shortcode:str):
+        @self.tree.command(
+            name="check",
+            description="check if shortcode belongs to a inducted member")
+        async def validate_code(interaction, shortcode: str):
             await validate_shortcode(self, interaction, shortcode)
-        @self.tree.command(name="whois",
-                      description="check info of a shortcode/discord memer")
-        async def whois_cmd(interaction, user:str):
-            await whois(interaction, user)
 
+        @self.tree.command(
+            name="whois",
+            description="check info of a shortcode/discord memer")
+        async def whois_cmd(interaction, user: str):
+            await whois(interaction, user)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
@@ -136,7 +149,3 @@ class DiscordBot(commands.Bot):
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(run_bot())
-
-
-
-

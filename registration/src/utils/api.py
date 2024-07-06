@@ -25,9 +25,11 @@ from src.utils.bot_messages import *
 SERVER_IP = os.getenv("SERVER_IP")
 BASIC_AUTH_TOKEN = os.getenv("BASIC_AUTH_TOKEN")
 
-__all__ = ["is_shortcode", "is_member", "add_mapping",
-           "shortcode_exists", "valid_mapping", "change_valid", 
-           "add_induction_to_member", "is_uid", "format_uid", "get_member_perms", "get_stats_from_discord", "get_discord_from_shortcode", "get_stats_from_shortcode"
+__all__ = ["is_member",
+           "shortcode_exists", "valid_mapping", "change_valid",
+           "add_induction_to_member", "get_member_perms",
+           "get_stats_from_discord", "get_discord_from_shortcode",
+           "get_stats_from_shortcode"
            ]
 
 config = configparser.ConfigParser()
@@ -83,6 +85,7 @@ def is_member(shortcode: str) -> bool:
         logging.error("Error contacting Society API")
         return False
 
+
 def add_mapping(shortcode, userid) -> bool:
     userid = str(userid)
     if is_shortcode(shortcode):
@@ -96,34 +99,37 @@ def add_mapping(shortcode, userid) -> bool:
                 conn.commit()
         return True
     else:
-        raise ValueError('Invalid shortcode')            
+        raise ValueError('Invalid shortcode')
+
 
 async def add_induction_to_member(interaction, shortcode, uid) -> bool:
     try:
         payload = json.dumps({
-          "id": uid,
-          "shortcode": shortcode,
-          "canPrint:": True,
-          "canLaserCut": False
+            "id": uid,
+            "shortcode": shortcode,
+            "canPrint:": True,
+            "canLaserCut": False
         })
         headers = {
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
         }
 
-        res = requests.request("POST", url=SERVER_IP + "/member/add", headers=headers, data=payload)
+        res = requests.request("POST", url=SERVER_IP +
+                               "/member/add", headers=headers, data=payload)
 
         if res.status_code == 200:
             return True
-        
+
         logging.error(f"Error in inducting user: {res.reason}")
         await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
-    
+
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Error in inducting user: {e}")
         await interaction.response.send_message(embed=error_msg(e))
+
 
 def shortcode_exists(shortcode) -> bool:
     if is_shortcode(shortcode):
@@ -135,6 +141,7 @@ def shortcode_exists(shortcode) -> bool:
                 return any(cursor.fetchall())
     else:
         raise ValueError('Invalid shortcode')
+
 
 def valid_mapping(shortcode, userid) -> bool:
     if is_shortcode(shortcode):
@@ -154,6 +161,7 @@ def valid_mapping(shortcode, userid) -> bool:
     else:
         raise ValueError('Invalid shortcode')
 
+
 def change_valid(userid, valid: int) -> bool:
     if (valid in {0, 1}):
         with pg.connect(**db_config) as conn:
@@ -169,21 +177,23 @@ def change_valid(userid, valid: int) -> bool:
     else:
         raise KeyError('Issue changing valid status')
 
+
 async def get_member_perms(interaction, shortcode):
     try:
         headers = {
-          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
         }
 
-        res = requests.request("GET", url=SERVER_IP + "/member/permissions/shortcode?shortcode="+shortcode, headers=headers)
+        res = requests.request(
+            "GET", url=SERVER_IP + "/member/permissions/shortcode?shortcode="+shortcode, headers=headers)
 
         if res.status_code == 200:
             return res.json()
-        
+
         logging.error(f"Error getting member: {res.reason}")
         await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
-    
+
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Exeption in getting member: {e}")
@@ -191,21 +201,23 @@ async def get_member_perms(interaction, shortcode):
 
         return False
 
+
 async def get_stats_from_discord(interaction, discord_id):
     try:
         headers = {
-          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
         }
 
-        res = requests.request("GET", url=SERVER_IP + "/print-metrics/member/stats/discord?discord_id="+str(discord_id), headers=headers)
+        res = requests.request(
+            "GET", url=SERVER_IP + "/print-metrics/member/stats/discord?discord_id="+str(discord_id), headers=headers)
 
         if res.status_code == 200:
             return res.json()
-        
+
         logging.error(f"Error getting stats: {res.reason}")
         await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
-    
+
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Exeption in getting stats: {e}")
@@ -217,39 +229,42 @@ async def get_stats_from_discord(interaction, discord_id):
 async def get_stats_from_shortcode(interaction, shortcode):
     try:
         headers = {
-          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
         }
 
-        res = requests.request("GET", url=SERVER_IP + "/print-metrics/member/stats/shortcode?shortcode="+str(shortcode), headers=headers)
+        res = requests.request(
+            "GET", url=SERVER_IP + "/print-metrics/member/stats/shortcode?shortcode="+str(shortcode), headers=headers)
 
         if res.status_code == 200:
             return res.json()
-        
+
         logging.error(f"Error getting stats: {res.reason}")
         await interaction.response.send_message(embed=error_msg(str(res.reason)))
         return False
-    
+
     # pylint: disable=broad-except
     except Exception as e:
         logging.error(f"Exeption in getting stats: {e}")
         await interaction.response.send_message(embed=error_msg(e))
 
         return False
-    
+
+
 async def get_discord_from_shortcode(interaction, shortcode):
     try:
         headers = {
-          'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
+            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
         }
 
-        res = requests.request("GET", url=SERVER_IP + "/shortcode/discord-id?shortcode="+str(shortcode), headers=headers)
+        res = requests.request(
+            "GET", url=SERVER_IP + "/shortcode/discord-id?shortcode="+str(shortcode), headers=headers)
 
         if res.status_code == 200:
             return res.json()
-        
+
         await interaction.response.send_message(embed=error_msg("couldnt get Discord User"), ephemeral=True)
         return {"discord_id": None}
-    
+
     # pylint: disable=broad-except
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
@@ -258,4 +273,3 @@ async def get_discord_from_shortcode(interaction, shortcode):
 
 if __name__ == '__main__':
     pass
-
