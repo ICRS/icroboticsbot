@@ -45,12 +45,6 @@ class DiscordBot(commands.Bot):
         self.guild_info = guild_info
         self.bot_prefix = guild_info["PREFIX"]
 
-        server = discord.utils.get(
-            self.guilds,
-            id=self.guild_info['GUILD'])
-        self.verified_member_role = discord.utils.get(
-            server.roles, name='Verified Member')
-
         self.add_commands()
 
         @self.event
