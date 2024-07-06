@@ -35,8 +35,6 @@ DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 
 DEBUG = False
 
-__all__ = ["register_on_guild", "register_on_dm", "quote_person", "get_help", "handle_upload"]  # noqa
-
 
 async def register_user(
         role: discord.Role, interaction: discord.Interaction, shortcode: str):
@@ -223,6 +221,5 @@ async def whois(interaction, user):
         return await interaction.response.send_message(
             embed=show_discord_stats(data), ephemeral=True)
 
-    # pylint: disable=broad-except
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
