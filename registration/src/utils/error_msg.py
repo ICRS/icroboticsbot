@@ -35,72 +35,29 @@ def user_not_member_msg():
               "https://discord.gg/3YKPjgskS3"))
 
 def invalid_UID():
-    embed = discord.Embed(
-        title="That ain't right",
-        description=(
-            "Please ensure the UID (8-14 digit hex, eg. AB12FC23) is valid"),
-        color=error_color)
-    return embed
-
+    return error_msg("Please ensure the UID (8-14 digit hex, eg. AB12FC23) is valid")
 
 def server_error_msg():
-    embed = discord.Embed(
-        title="That ain't right",
-        description=("THE SERVER HATES YOU, AND YOU HAVE UPSET THE "
-                     "KUBERNETES GODS"),
-        color=error_color)
-    return embed
+    return error_msg("THE SERVER HATES YOU, AND YOU HAVE UPSET THE KUBERNETES GODS", "THEIR WRATH IS COMING")
 
 def not_committee():
-    embed = discord.Embed(
-        title="Nope",
-        description=(
-            "Sorry Only @committee can run that command"
-        ),
-        color=error_color)
-    return embed
+    return error_msg("Sorry Only @committee can run that command", "Nah")
 
 def cant_find_discord_user():
-    embed = discord.Embed(
-        title="Nope",
-        description=("Couldn't find them in the BD"),
-        color=error_color)
-    return embed
+    return error_msg("Couldn't find them in the BD", "nooope")
 
 def invalid_shortcode():
-    embed = discord.Embed(
-        title="Thats not right",
-        description=(
-            "Please ensure the short code (eg: ab123) is valid"
-        ),
-        color=error_color)
-    return embed
-
+    return error_msg("Please ensure the short code (eg: ab123) is valid", "hmmmmm")
 
 def invalid_discord_id():
-    embed = discord.Embed(
-        title="Thats not right",
-        description=(
-            "Please ensure the discord ID/user or shortcode is valid"
-        ),
-        color=error_color)
-    return embed
+    return error_msg("Please ensure the discord ID/user or shortcode is valid", "Thats not right")
 
 def quote_not_found():
-    embed = discord.Embed(
-        title="404 :()",
-        description=("Oh no, we cant find a quote from that person"),
-        color=error_color)
-    return embed
-
+    return error_msg("Oh no, we cant find a quote from that person", "404 :(")
 
 def is_not_inducted_msg():
-    embed = discord.Embed(
-        title="Nope",
-        description=("Not a member"),
-        color=error_color)
-    return embed
+    return error_msg("Not a member", "Nope")
 
-async def error_msg(e):
-    logging.error(f"Error in registering user: {e}")
-    return discord.Embed(title="Error", description=(e), color=error_color)
+def error_msg(msg,title="Error"):
+    logging.error(f"Error: {msg}")
+    return discord.Embed(title=title, description=(msg), color=error_color)
