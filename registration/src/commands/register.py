@@ -10,8 +10,7 @@ from src.utils.info_msg import *
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 
 
-async def register_user(
-        role: discord.Role, interaction: discord.Interaction, shortcode: str):
+async def register_user(interaction: discord.Interaction, shortcode: str):
     """
     register_on_dm Register message when user tries to register on DM
 
@@ -27,6 +26,7 @@ async def register_user(
 
     try:
         member = interaction.user
+        role = discord.utils.get(interaction.guild.roles, name="Verified Member")
 
         if not member:
             return await interaction.response.send_message(
@@ -57,7 +57,6 @@ async def register_user(
         else:
             return await interaction.response.send_message(
                 embed=error_msg("Something went wrong on the server!"),
-                ephemeral=False
             )
 
     except Exception as e:

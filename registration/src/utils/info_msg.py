@@ -16,8 +16,17 @@ def how_to_msg():
         title="How-to register",
         description=("To get the membership role."
                      " Please reply to THIS message like this "
-                     "format:\n```!register yourShortcodeHere``` \n"
-                     "Example:\n ```!register dc1021```"),
+                     "format:\n```/register yourShortcodeHere``` \n"
+                     "Example:\n ```/register ab123```"),
         color=info_color)
     return embed.set_footer(
         text="Check out our Insta too: https://linktr.ee/icrobotics")
+
+
+def quote_msg(title, message, file):
+    embed =  discord.Embed(title=title,
+                          description=message,
+                          color=info_color)
+    embed.set_image(url=f"attachment://{file.filename}.png")
+    
+    return embed
