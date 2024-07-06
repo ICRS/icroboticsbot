@@ -46,7 +46,7 @@ async def add_induction_to_member(interaction, shortcode, uid) -> bool:
 
         logging.error(f"Error in inducting user: {res.reason}")
         await interaction.response.send_message(
-            embed=error_msg(str(res.reason)))
+            embed=error_msg(str(res.reason), "Bad Response"))
         return False
     except Exception as e:
         logging.error(f"Error in inducting user: {e}")
@@ -77,7 +77,7 @@ async def get_member_perms(interaction, shortcode):
 
         logging.error(f"Error getting member: {res.reason}")
         await interaction.response.send_message(
-            embed=error_msg(str(res.reason)))
+            embed=error_msg(str(res.reason), "Bad Response"))
         return False
 
     # pylint: disable=broad-except
@@ -106,7 +106,7 @@ async def get_stats_from_discord(interaction, discord_id):
 
         logging.error(f"Error getting stats: {res.reason}")
         await interaction.response.send_message(
-            embed=error_msg(str(res.reason)))
+            embed=error_msg(str(res.reason), "Bad Response"))
         return False
 
     # pylint: disable=broad-except

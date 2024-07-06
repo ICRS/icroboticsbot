@@ -2,7 +2,6 @@ import discord
 
 success_color = 0x46fa64
 
-
 def success_induction_msg():
     embed = discord.Embed(
         title="Verified!",
