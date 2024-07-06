@@ -12,9 +12,11 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import (
-    register_user, induct_member, validate_shortcode, whois)
-
+from src.commands.induct import induct_member
+from src.commands.register import register_user
+from src.commands.whois import whois
+from src.commands.help import get_help
+from src.commands.quote import quote_person
 from src.utils.api import deregister_discord_id
 
 __all__ = ["DiscordBot"]
@@ -32,7 +34,6 @@ default_guild_info = {
     'ADMIN_ID': ADMIN_ID,
 }
 
-
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
     def __init__(self, token, intents,
@@ -43,7 +44,6 @@ class DiscordBot(commands.Bot):
                          help_command=None)
         self.token = token
         self.guild_info = guild_info
-        self.bot_prefix = guild_info["PREFIX"]
 
         self.add_commands()
 
@@ -57,29 +57,40 @@ class DiscordBot(commands.Bot):
         """
         @self.tree.command(
             name="register",
-            description="Register to the server")
+            description="Link your dicsord profile to your shortcode")
         async def register(interaction: discord.Interaction, shortcode: str):
-            await register_user(
-                self.verified_member_role, interaction, shortcode)
+            await register_user(interaction, shortcode)
 
         @self.tree.command(
             name="induct",
-            description="induct a member to the space")
+            description="ADMIN ONLY: induct a member to the space")
         async def induct(
                 interaction: discord.Interaction, shortcode: str, uid: str):
             await induct_member(interaction, shortcode, uid)
 
         @self.tree.command(
-            name="check",
-            description="check if shortcode belongs to a inducted member")
-        async def validate_code(interaction, shortcode: str):
-            await validate_shortcode(self, interaction, shortcode)
-
-        @self.tree.command(
             name="whois",
-            description="check info of a shortcode/discord memer")
+            description="ADMIN ONLY: check info of a shortcode/discord memer")
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
+
+        @self.tree.command(name="quote",
+                      description="Generate a quote image from the stored quotes by either Peter or Baig")
+        async def quote(interaction, name:str|None=""):
+            await quote_person(interaction, name)
+
+        @self.tree.command(name="alert",
+                      description="Alert the bot. Purely for testing purposes")
+        async def alert(interaction):
+            await interaction.response.send_message('''
+                Alert! <:ALERT:1033044801714671727>
+                ''')
+            
+        @self.tree.command(name="help",
+                      description="List all the Snazzy Commands we have")
+        async def help_cmd(interaction):
+            await get_help(interaction, self.tree)
+            
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
@@ -113,7 +124,7 @@ class DiscordBot(commands.Bot):
         """
         embed = discord.Embed(
             title=f"Welcome {member.name} to the ICRS server!",
-            description=(f"Remember to verify using {self.bot_prefix}register"
+            description=(f"Remember to verify using /register"
                          " in the bot channel to gain full access"
                          " to the server"),
             color=0x3a88fe)

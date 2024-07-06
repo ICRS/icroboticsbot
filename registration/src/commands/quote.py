@@ -1,41 +1,43 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# mypy: ignore-errors
-
-"""
-Utility functions used by the bot
-"""
-
 import logging
+import discord
 import os
 import random
 import json
-from datetime import date
 from typing import Dict, List
-
+import io
 from PIL import Image
 
-from src.quotes import generate
+from src.utils.info_msg import quote_msg
+from src.utils.error_msg import *
+from src.utils.quote_utils import generate
+
+async def quote_person(interaction, name):
+    """
+    quote_person Generate a quote image from the stored quotes
+
+    Parameters
+    ----------
+    interaction : Discord.interaction
+        interaction
+    name : str
+        Name of the person to quote
+    """
+    logging.info(f"{interaction.user} requested a quote")
+    temp = io.BytesIO()
+    q, img = await random_quote(interaction, name)
+
+    if(q == None):
+        return
+
+    img.save(temp, format="PNG")
+    temp.seek(0)
+    
+    file = discord.File(temp, filename="quote.png")
+
+    await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)
 
 
-__all__ = ["random_quote"]
-
-# ===== Constants =====
-
-# ===== Get the current date =====
-date_now = date.today()
-month_now = date_now.month
-year_now = str(date_now.year)
-if month_now > 8:
-    year_string = f"{year_now[2:]}-{int(year_now[2:])+1}"
-else:
-    year_string = f"{int(year_now[2:])-1}-{year_now[2:]}"
-
-# =================================
-
-
-def random_quote(author: str) -> tuple[str, Image.Image]:
+async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
     """
     random_quote generates a random quote image for a given author
 
@@ -49,11 +51,20 @@ def random_quote(author: str) -> tuple[str, Image.Image]:
     tuple
         A tuple containing the quote and the PIL Image object
     """
-    images = os.listdir(os.path.relpath('assets/background_images'))
-    logging.info(f"Images: {images}")
+    image_list = os.listdir(os.path.relpath('assets/background_images'))
+    logging.info(f"Images: {image_list}")
+    logging.info(f"Author: {author}")
+
+    author = author.replace(" ", "").lower()
+
     backgrounds = [os.path.relpath('assets/background_images/'+image)
-                   for image in images if image.startswith(
-                       author.strip().lower())]
+                   for image in image_list if image.startswith(
+                       author)]
+    if(len(backgrounds) == 0):
+        await interaction.response.send_message(embed=quote_not_found())
+        return None, None
+
+
     logging.info(f"Backgrounds: {backgrounds}")
     background = random.choice(backgrounds)
     fonts = os.listdir(os.path.relpath('assets/fonts'))
@@ -79,6 +90,3 @@ def random_quote(author: str) -> tuple[str, Image.Image]:
     return (author.capitalize(), choice), img
 
 
-
-if __name__ == '__main__':
-    pass
