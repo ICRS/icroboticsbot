@@ -12,9 +12,11 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.bot_commands import (
-    register_user, induct_member, validate_shortcode, whois)
-
+from src.commands.induct import induct_member
+from src.commands.register import register_user
+from src.commands.whois import whois
+from src.commands.help import get_help
+from src.commands.quote import quote_person
 from src.utils.api import deregister_discord_id
 
 __all__ = ["DiscordBot"]
@@ -31,7 +33,6 @@ default_guild_info = {
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
 }
-
 
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
@@ -70,16 +71,23 @@ class DiscordBot(commands.Bot):
             await induct_member(interaction, shortcode, uid)
 
         @self.tree.command(
-            name="check",
-            description="check if shortcode belongs to a inducted member")
-        async def validate_code(interaction, shortcode: str):
-            await validate_shortcode(self, interaction, shortcode)
-
-        @self.tree.command(
             name="whois",
             description="check info of a shortcode/discord memer")
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
+
+        @self.tree.command(name="quote",
+                      description="Generate a quote image from the stored quotes")
+        async def quote(interaction, name:str|None=""):
+            await quote_person(interaction, name)
+
+        @self.tree.command(name="alert",
+                      description="Alert the bot. Purely for testing purposes")
+        async def alert(interaction):
+            await interaction.response.send_message('''
+                Alert! <:ALERT:1033044801714671727>
+                ''')
+            
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
