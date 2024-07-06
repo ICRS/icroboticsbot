@@ -15,7 +15,7 @@ from discord.ext import commands
 from src.bot_commands import (
     register_user, induct_member, validate_shortcode, whois)
 
-from src.utils.api import change_valid
+from src.utils.api import deregister_discord_id
 
 __all__ = ["DiscordBot"]
 
@@ -135,7 +135,7 @@ class DiscordBot(commands.Bot):
             The member that left the server
         """
         try:
-            change_valid(member.id, 0)
+            deregister_discord_id(member.id)
         except KeyError:
             logging.error(f"Error in changing membership for {member.id}")
 
