@@ -34,7 +34,7 @@ async def quote_person(interaction, name):
     
     file = discord.File(temp, filename="quote.png")
 
-    await interaction.response.send_message(embed=quote_msg(q[0], q[1]), file=file)
+    await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)
 
 
 async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
