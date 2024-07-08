@@ -17,6 +17,7 @@ from src.commands.register import register_user
 from src.commands.whois import whois
 from src.commands.help import get_help
 from src.commands.quote import quote_person
+from src.commands.stats import stats_card
 from src.utils.api import deregister_discord_id
 
 __all__ = ["DiscordBot"]
@@ -90,6 +91,11 @@ class DiscordBot(commands.Bot):
                       description="List all the Snazzy Commands we have")
         async def help_cmd(interaction):
             await get_help(interaction, self.tree)
+
+        @self.tree.command(name="stats",
+                      description="Get your 3D printing stats")
+        async def stats(interaction):
+            await stats_card(interaction)
             
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
