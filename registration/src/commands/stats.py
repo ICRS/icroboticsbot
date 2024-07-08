@@ -1,7 +1,6 @@
 import io
 import logging
 import os
-from venv import logger
 
 from PIL import Image, ImageDraw, ImageFont
 from colorthief import ColorThief
