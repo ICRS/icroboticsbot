@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# mypy: ignore-errors
-
-"""
-Utility functions used by the bot
-"""
 import io
 import logging
 import os
@@ -14,9 +6,10 @@ from PIL import Image, ImageDraw, ImageFont
 from colorthief import ColorThief
 
 import requests  # type: ignore
-
-
+import discord
 from dotenv import load_dotenv
+
+info_color = 0x297bff
 
 
 __all__ = ["generate_stat_card"]
@@ -31,6 +24,29 @@ SERVER_IP = os.getenv("SERVER_IP")
 
 DEFAULT_AVATAR = "https://assets-global.website-files.com/5f9072399b2640f14d6a2bf4/619442eb8b3fab3eda4c29eb_Author-Wumpus-Webflow.png"  # noqa: E501
 
+async def stats_card(interaction: discord.Interaction):
+    """
+    stats_card generates a card with 3d printer usage stats for that user
+
+    Parameters
+    ----------
+    interaction : Discord.interaction
+        Discord context
+    """
+    user = interaction.user
+    embed = discord.Embed(title=f"3D Printing Stats for {user.name}", color=info_color)
+    
+    
+    try:
+        card = generate_stat_card(user)
+    except Exception as e:
+        logging.error(f"Could not generate stats {e}")
+    with io.BytesIO() as image_binary:
+        card.save(image_binary, 'PNG')
+        image_binary.seek(0)
+        file = discord.File(image_binary, filename="image.png")
+        embed.set_image(url=f"attachment://{file.filename}")
+        await interaction.response.send_message(file=file, embed=embed)
 
 def generate_stat_card(user) -> Image.Image:
     """
@@ -106,7 +122,7 @@ def generate_stat_card(user) -> Image.Image:
         total_time = sum([i[2] for i in data])
         printers = {}
         names = list(set([i[-1] for i in data]))
-        logging.info(total_filament, total_time, names)
+        # logging.info(str(total_filament), str(total_time), names)
 
         for name in names:
             printers[name] = sum([1 for i in data if i[-1] == name])
@@ -132,8 +148,9 @@ def generate_stat_card(user) -> Image.Image:
 
     temp.seek(0)
     pic = ColorThief(temp)
-    accent_colour = pic.get_color(quality=1)
+    accent_colour = pic.get_color(quality=10)
     logging.info(accent_colour)
+
     pic = Image.open(temp).convert("RGBA")
     pic = pic.resize((60, 60))
 
