@@ -1,5 +1,11 @@
 import discord
 
+__all__ = [
+    "not_on_guild_msg",
+    "how_to_msg",
+    "quote_msg"
+]
+
 info_color = 0x297bff
 
 
@@ -24,9 +30,9 @@ def how_to_msg():
 
 
 def quote_msg(title, message, file):
-    embed =  discord.Embed(title=title,
+    embed = discord.Embed(title=title,
                           description=message,
                           color=info_color)
     embed.set_image(url=f"attachment://{file.filename}.png")
-    
+
     return embed

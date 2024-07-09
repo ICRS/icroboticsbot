@@ -1,14 +1,14 @@
 import logging
 
-from src.utils.api import *
-from src.utils.validation import *
-from src.utils.success_msg import *
-from src.utils.error_msg import *
+from src.utils import *
+
 
 async def whois(interaction, user):
     try:
         author = interaction.user
-        if not ("committee" in [y.name.lower() for y in author.roles]):
+        roles = [r for r in author.roles if r is not None]
+        logging.info(f"Author: {author}, Roles: {roles}")
+        if not ("committee" in [y.name.lower() for y in roles]):
             return await interaction.response.send_message(
                 embed=not_committee())
 
@@ -60,4 +60,3 @@ async def whois(interaction, user):
 
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
-

@@ -2,6 +2,15 @@ import discord
 
 success_color = 0x46fa64
 
+__all__ = [
+    "success_induction_msg",
+    "is_inducted_msg",
+    "show_discord_stats",
+    "success_msg",
+    "reverified_msg"
+]
+
+
 def success_induction_msg():
     embed = discord.Embed(
         title="Verified!",
@@ -9,12 +18,14 @@ def success_induction_msg():
         color=success_color)
     return embed
 
+
 def is_inducted_msg():
     embed = discord.Embed(
         title="Yep",
         description=("They are a member"),
         color=success_color)
     return embed
+
 
 def show_discord_stats(data):
     embed = discord.Embed(

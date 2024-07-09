@@ -8,8 +8,9 @@ import io
 from PIL import Image
 
 from src.utils.info_msg import quote_msg
-from src.utils.error_msg import *
+from src.utils.error_messages import *
 from src.utils.quote_utils import generate
+
 
 async def quote_person(interaction, name):
     """
@@ -26,12 +27,12 @@ async def quote_person(interaction, name):
     temp = io.BytesIO()
     q, img = await random_quote(interaction, name)
 
-    if(q == None):
+    if (q == None):
         return
 
     img.save(temp, format="PNG")
     temp.seek(0)
-    
+
     file = discord.File(temp, filename="quote.png")
 
     await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)
@@ -60,10 +61,9 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
     backgrounds = [os.path.relpath('assets/background_images/'+image)
                    for image in image_list if image.startswith(
                        author)]
-    if(len(backgrounds) == 0):
+    if (len(backgrounds) == 0):
         await interaction.response.send_message(embed=quote_not_found())
         return None, None
-
 
     logging.info(f"Backgrounds: {backgrounds}")
     background = random.choice(backgrounds)
@@ -82,11 +82,10 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])     # noqa
     choice = random.choice(choices[author])
-    logging.info(f"Quote: {choice} Author: {author} Background: {background} Font: {font}")
-    
+    logging.info(
+        f"Quote: {choice} Author: {author} Background: {background} Font: {font}")
+
     img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)
 
     return (author.capitalize(), choice), img
-
-
