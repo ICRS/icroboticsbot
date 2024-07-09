@@ -2,7 +2,10 @@ import os
 import discord
 import requests
 
-from src.utils import *
+from src.utils import (not_on_guild_msg, user_not_member_msg,
+                       code_already_used_msg, how_to_msg, success_msg,
+                       error_msg
+                       )
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 
@@ -23,7 +26,8 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
 
     try:
         member = interaction.user
-        role = discord.utils.get(interaction.guild.roles, name="Verified Member")
+        role = discord.utils.get(
+            interaction.guild.roles, name="Verified Member")
 
         if not member:
             return await interaction.response.send_message(

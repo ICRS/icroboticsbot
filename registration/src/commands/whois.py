@@ -1,6 +1,11 @@
 import logging
 
-from src.utils import *
+from src.utils import (not_committee, is_discord_id, is_shortcode,
+                       invalid_discord_id, get_stats_from_discord,
+                       cant_find_discord_user, get_member_perms,
+                       format_discord_id, get_stats_from_shortcode,
+                       get_discord_from_shortcode, error_msg,
+                       show_discord_stats)
 
 
 async def whois(interaction, user):
