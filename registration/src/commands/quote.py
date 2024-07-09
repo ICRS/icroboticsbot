@@ -6,8 +6,8 @@ from typing import Dict, List
 import io
 from PIL import Image
 
-from src.utils.info_msg import quote_msg
-from src.utils.error_msg import *
+from src.utils.msg.info_msg import quote_msg
+from src.utils.msg.error_msg import *
 from src.utils.quote_utils import generate
 
 async def quote_person(interaction, name):
