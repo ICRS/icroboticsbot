@@ -1,7 +1,7 @@
 from src.utils.api import *
 from src.utils.validation import *
-from src.utils.success_msg import *
-from src.utils.error_msg import *
+from src.utils.msg.success_msg import *
+from src.utils.msg.error_msg import *
 
 async def whois(interaction, user):
     try:

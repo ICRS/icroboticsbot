@@ -2,9 +2,9 @@ import os
 import discord
 import requests
 
-from src.utils.success_msg import *
-from src.utils.error_msg import *
-from src.utils.info_msg import *
+from src.utils.msg.success_msg import *
+from src.utils.msg.error_msg import *
+from src.utils.msg.info_msg import *
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 

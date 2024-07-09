@@ -12,7 +12,7 @@ import os
 
 import requests
 
-from src.utils.error_msg import *
+from src.utils.msg.error_msg import *
 
 SERVER_IP = os.getenv("SERVER_IP")
 BASIC_AUTH_TOKEN = os.getenv("BASIC_AUTH_TOKEN")
