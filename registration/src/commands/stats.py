@@ -50,7 +50,7 @@ async def stats_card(interaction: discord.Interaction):
         await interaction.response.send_message(file=file, embed=embed)
 
 
-def generate_stat_card(user) -> Image.Image:
+def generate_stat_card(user: discord.User) -> Image.Image:
     """
     Generate a stats card for the user
 

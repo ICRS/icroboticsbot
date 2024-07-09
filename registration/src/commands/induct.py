@@ -1,10 +1,12 @@
+import discord
 from src.utils import (not_committee, invalid_shortcode, invalid_UID,
                        add_induction_to_member, is_shortcode, format_uid,
                        success_induction_msg, server_error_msg, error_msg,
                        is_uid)
 
 
-async def induct_member(interaction, shortcode, uid):
+async def induct_member(interaction: discord.Interaction,
+                        shortcode: str, uid: str):
     """
     register_on_dm Register message when user tries to register on DM
 

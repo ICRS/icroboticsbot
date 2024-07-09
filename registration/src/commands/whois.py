@@ -1,5 +1,7 @@
 import logging
 
+import discord
+
 from src.utils import (not_committee, is_discord_id, is_shortcode,
                        invalid_discord_id, get_stats_from_discord,
                        cant_find_discord_user, get_member_perms,
@@ -8,7 +10,7 @@ from src.utils import (not_committee, is_discord_id, is_shortcode,
                        show_discord_stats)
 
 
-async def whois(interaction, user):
+async def whois(interaction: discord.Interaction, user: str):
     try:
         author = interaction.user
         roles = [r for r in author.roles if r is not None]

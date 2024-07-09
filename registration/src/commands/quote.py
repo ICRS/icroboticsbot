@@ -10,7 +10,7 @@ from PIL import Image
 from src.utils import quote_msg, quote_not_found, generate
 
 
-async def quote_person(interaction, name):
+async def quote_person(interaction: discord.Interaction, name: str):
     """
     quote_person Generate a quote image from the stored quotes
 
@@ -36,19 +36,18 @@ async def quote_person(interaction, name):
     await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)  # noqa: E501
 
 
-async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
+async def random_quote(
+        interaction: discord.Interaction,
+        author: str) -> tuple[str, Image.Image]:
     """
-    random_quote generates a random quote image for a given author
+    Generate a random quote image for a given author
 
-    Parameters
-    ----------
-    author : str
-        Author of the quote
+    Args:
+        interaction (discord.Interaction): interaction
+        author (str): author that requested random quote
 
-    Returns
-    -------
-    tuple
-        A tuple containing the quote and the PIL Image object
+    Returns:
+        tuple[str, Image.Image]: quote and image
     """
     image_list = os.listdir(os.path.relpath('assets/background_images'))
     logging.info(f"Images: {image_list}")
