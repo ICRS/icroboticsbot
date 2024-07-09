@@ -23,5 +23,3 @@ __all__.extend(info_msg.__all__)
 __all__.extend(quote_utils.__all__)
 __all__.extend(success_messages.__all__)
 __all__.extend(validation.__all__)
-
-print(__all__)

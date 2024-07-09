@@ -160,7 +160,6 @@ async def get_discord_from_shortcode(interaction: discord.Interaction,
             embed=error_msg("Couldn't get Discord User"), ephemeral=True)
         return {"discord_id": None}
 
-    # pylint: disable=broad-except
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
 
