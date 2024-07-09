@@ -38,16 +38,17 @@ spec:
               configMapKeyRef:
                 name: database-config
                 key: endpoint-url
-          - name: BASIC_AUTH_TOKEN
+          - name: DATABASE_ADAPTER_USER
             valueFrom:
               secretKeyRef:
-                name: database-adapter-secret
-                key: basic-auth-token
-          - name: API_KEY
+                name: access-server-secret
+                key: username
+          - name: DATABASE_ADAPTER_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: imperial-secret 
-                key: api_key
+                name: access-server-secret
+                key: secret
+
         volumeMounts:
           - name: discord-bot-secret
             mountPath: /app/settings.json
