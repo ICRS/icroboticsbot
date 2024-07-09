@@ -1,4 +1,3 @@
-import logging
 import discord
 import os
 import random
@@ -22,7 +21,6 @@ async def quote_person(interaction, name):
     name : str
         Name of the person to quote
     """
-    logging.info(f"{interaction.user} requested a quote")
     temp = io.BytesIO()
     q, img = await random_quote(interaction, name)
 
@@ -52,9 +50,6 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
         A tuple containing the quote and the PIL Image object
     """
     image_list = os.listdir(os.path.relpath('assets/background_images'))
-    logging.info(f"Images: {image_list}")
-    logging.info(f"Author: {author}")
-
     author = author.replace(" ", "").lower()
 
     backgrounds = [os.path.relpath('assets/background_images/'+image)
@@ -65,11 +60,9 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
         return None, None
 
 
-    logging.info(f"Backgrounds: {backgrounds}")
     background = random.choice(backgrounds)
     fonts = os.listdir(os.path.relpath('assets/fonts'))
     font = os.path.relpath('assets/fonts/'+random.choice(fonts))
-    logging.info(f"Background: {background} Font: {font}")
     with open(os.path.relpath('assets/quotes.json'), 'r',
               encoding="utf-8") as f:
         quotes = f.readlines()
@@ -82,7 +75,6 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])     # noqa
     choice = random.choice(choices[author])
-    logging.info(f"Quote: {choice} Author: {author} Background: {background} Font: {font}")
     
     img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)
