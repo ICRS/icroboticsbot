@@ -12,7 +12,10 @@ from dotenv import load_dotenv
 info_color = 0x297bff
 
 
-__all__ = ["generate_stat_card"]
+__all__ = [
+    "stats_card",
+    "generate_stat_card"
+]
 
 # ===== Constants =====
 load_dotenv()
@@ -200,7 +203,3 @@ def generate_stat_card(user: discord.User) -> Image.Image:
         a.text((40, 40+idx*35), f"{i[3]}g", font=item_font, fill=accent_colour)
     card.paste(window, (586, 125))
     return card
-
-
-if __name__ == '__main__':
-    pass

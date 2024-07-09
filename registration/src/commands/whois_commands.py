@@ -1,16 +1,10 @@
-from src.utils.api import *
-from src.utils.validation import *
-from src.utils.msg.success_msg import *
-from src.utils.msg.error_msg import *
 import discord
+from src.utils import *  
 
-from src.utils import (not_committee, is_discord_id, is_shortcode,
-                       invalid_discord_id, get_stats_from_discord,
-                       cant_find_discord_user, get_member_perms,
-                       format_discord_id, get_stats_from_shortcode,
-                       get_discord_from_shortcode, error_msg,
-                       show_discord_stats)
 
+__all__ = [
+    "whois"
+]
 
 async def whois(interaction: discord.Interaction, user: str):
     try:

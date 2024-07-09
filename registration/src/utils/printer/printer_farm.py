@@ -10,11 +10,11 @@ import time
 
 from discord.ext import commands
 
-from src.utils.printer.PrinterListener import Command, PrinterListener    # noqa  #pylint: disable=import-error
+from src.utils.printer.printer_listener import *
 
-
-__all__ = ["PrinterFarm"]
-
+__all__ = [
+    "PrinterFarm"
+]
 
 class PrinterFarm:
     def __init__(self, bot: commands.Bot = None,

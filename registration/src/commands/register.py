@@ -2,11 +2,14 @@ import os
 import discord
 import requests
 
-from src.utils.msg.success_msg import *
-from src.utils.msg.error_msg import *
-from src.utils.msg.info_msg import *
+from src.utils import *
+
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
+
+__all__ = [
+    "register_user"
+]
 
 
 async def register_user(interaction: discord.Interaction, shortcode: str):
