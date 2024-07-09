@@ -9,10 +9,9 @@ Utility functions used by the bot
 
 import os
 
+import discord
 import requests
 from requests.auth import HTTPBasicAuth
-
-from src.utils.msg.error_msg import error_msg
 
 from src.utils.msg.error_msg import *
 
@@ -23,13 +22,17 @@ DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
 BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 __all__ = [
-    "add_induction_to_member", "get_member_perms",
-    "get_stats_from_discord", "get_discord_from_shortcode",
-    "get_stats_from_shortcode"
+    "add_induction_to_member",
+    "deregister_discord_id",
+    "get_member_perms",
+    "get_stats_from_discord",
+    "get_stats_from_shortcode",
+    "get_discord_from_shortcode"
 ]
 
 
-async def add_induction_to_member(interaction, shortcode, uid) -> bool:
+async def add_induction_to_member(interaction: discord.Interaction,
+                                  shortcode: str, uid: str) -> bool:
     try:
         res = requests.request(
             "POST",
@@ -51,7 +54,7 @@ async def add_induction_to_member(interaction, shortcode, uid) -> bool:
         await interaction.response.send_message(embed=error_msg(e))
 
 
-def deregister_discord_id(userid) -> bool:
+def deregister_discord_id(userid: int) -> bool:
     result = requests.post(
         SERVER_IP + "/discord-id/deregister",
         params={
@@ -60,7 +63,7 @@ def deregister_discord_id(userid) -> bool:
     return result == 200
 
 
-async def get_member_perms(interaction, shortcode):
+async def get_member_perms(interaction: discord.Interaction, shortcode: str):
     try:
         res = requests.request(
             "GET", url=SERVER_IP + "/member/permissions/shortcode",
@@ -80,7 +83,8 @@ async def get_member_perms(interaction, shortcode):
         return False
 
 
-async def get_stats_from_discord(interaction, discord_id):
+async def get_stats_from_discord(interaction: discord.Interaction,
+                                 discord_id: str):
     try:
         res = requests.request(
             "GET", url=SERVER_IP + "/print-metrics/member/stats/discord",
@@ -103,7 +107,8 @@ async def get_stats_from_discord(interaction, discord_id):
         return False
 
 
-async def get_stats_from_shortcode(interaction, shortcode):
+async def get_stats_from_shortcode(interaction: discord.Interaction,
+                                   shortcode: str):
     try:
         res = requests.request(
             "GET",
@@ -127,7 +132,8 @@ async def get_stats_from_shortcode(interaction, shortcode):
         return False
 
 
-async def get_discord_from_shortcode(interaction, shortcode):
+async def get_discord_from_shortcode(interaction: discord.Interaction,
+                                     shortcode: str):
     try:
         res = requests.request(
             "GET",
@@ -144,7 +150,6 @@ async def get_discord_from_shortcode(interaction, shortcode):
             embed=error_msg("Couldn't get Discord User"), ephemeral=True)
         return {"discord_id": None}
 
-    # pylint: disable=broad-except
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
 

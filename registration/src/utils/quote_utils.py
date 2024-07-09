@@ -2,8 +2,14 @@ import os
 import io
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
+__all__ = [
+    "generate",
+    "convert"
+]
+
+
 def generate(IMAGE_PATH, author, quote,
-             font=("assets/fonts/Precious.ttf")) -> Image.Image: # noqa
+             font=("assets/fonts/Precious.ttf")) -> Image.Image:  # noqa
     """
     generate a quote image from a given image and quote
 
@@ -23,7 +29,6 @@ def generate(IMAGE_PATH, author, quote,
     PIL.Image.Image
         PIL Image Object
     """  # noqa ignore
-    
     image = Image.open(os.path.relpath(IMAGE_PATH))
     grayscale = image.convert("L")
     width, height = grayscale.size
@@ -34,15 +39,15 @@ def generate(IMAGE_PATH, author, quote,
     grayscale.save(temp, format="PNG")
 
     img = convert(
-            quote=quote,
-            author=author,
-            fg="white",
-            image=temp,
-            border_color="black",
-            font_size=40,
-            font_file=font,
-            width=400,
-            height=400)
+        quote=quote,
+        author=author,
+        fg="white",
+        image=temp,
+        border_color="black",
+        font_size=40,
+        font_file=font,
+        width=400,
+        height=400)
 
     return img
 

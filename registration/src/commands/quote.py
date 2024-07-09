@@ -10,7 +10,7 @@ from src.utils.msg.info_msg import quote_msg
 from src.utils.msg.error_msg import *
 from src.utils.quote_utils import generate
 
-async def quote_person(interaction, name):
+async def quote_person(interaction: discord.Interaction, name: str):
     """
     quote_person Generate a quote image from the stored quotes
 
@@ -24,30 +24,29 @@ async def quote_person(interaction, name):
     temp = io.BytesIO()
     q, img = await random_quote(interaction, name)
 
-    if(q == None):
+    if q is None:
         return
 
     img.save(temp, format="PNG")
     temp.seek(0)
-    
+
     file = discord.File(temp, filename="quote.png")
 
-    await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)
+    await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)  # noqa: E501
 
 
-async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
+async def random_quote(
+        interaction: discord.Interaction,
+        author: str) -> tuple[str, Image.Image]:
     """
-    random_quote generates a random quote image for a given author
+    Generate a random quote image for a given author
 
-    Parameters
-    ----------
-    author : str
-        Author of the quote
+    Args:
+        interaction (discord.Interaction): interaction
+        author (str): author that requested random quote
 
-    Returns
-    -------
-    tuple
-        A tuple containing the quote and the PIL Image object
+    Returns:
+        tuple[str, Image.Image]: quote and image
     """
     image_list = os.listdir(os.path.relpath('assets/background_images'))
     author = author.replace(" ", "").lower()
@@ -55,11 +54,15 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
     backgrounds = [os.path.relpath('assets/background_images/'+image)
                    for image in image_list if image.startswith(
                        author)]
-    if(len(backgrounds) == 0):
+    if (len(backgrounds) == 0):
         await interaction.response.send_message(embed=quote_not_found())
         return None, None
 
+<<<<<<< HEAD
 
+=======
+    logging.info(f"Backgrounds: {backgrounds}")
+>>>>>>> origin/registration_formatting
     background = random.choice(backgrounds)
     fonts = os.listdir(os.path.relpath('assets/fonts'))
     font = os.path.relpath('assets/fonts/'+random.choice(fonts))
@@ -73,12 +76,18 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
     if not author:
         author = random.choice(list(choices.keys()))
     for quote in quotes:
-        choices[quote['author'].lower()].append(quote['quote'])     # noqa
+        choices[quote['author'].lower()].append(quote['quote'])
     choice = random.choice(choices[author])
+<<<<<<< HEAD
     
     img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)
+=======
+    logging.info(
+        f"Quote: {choice} Author: {author} Background: {background} Font: {font}")  # noqa: E501
+
+    img = generate(background, quote=choice,
+                   author=author.capitalize(), font=font)
+>>>>>>> origin/registration_formatting
 
     return (author.capitalize(), choice), img
-
-

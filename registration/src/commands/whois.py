@@ -2,11 +2,21 @@ from src.utils.api import *
 from src.utils.validation import *
 from src.utils.msg.success_msg import *
 from src.utils.msg.error_msg import *
+import discord
 
-async def whois(interaction, user):
+from src.utils import (not_committee, is_discord_id, is_shortcode,
+                       invalid_discord_id, get_stats_from_discord,
+                       cant_find_discord_user, get_member_perms,
+                       format_discord_id, get_stats_from_shortcode,
+                       get_discord_from_shortcode, error_msg,
+                       show_discord_stats)
+
+
+async def whois(interaction: discord.Interaction, user: str):
     try:
         author = interaction.user
-        if not ("committee" in [y.name.lower() for y in author.roles]):
+        roles = [r for r in author.roles if r is not None]
+        if not ("committee" in [y.name.lower() for y in roles]):
             return await interaction.response.send_message(
                 embed=not_committee())
 
@@ -55,4 +65,3 @@ async def whois(interaction, user):
 
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
-

@@ -25,7 +25,8 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
 
     try:
         member = interaction.user
-        role = discord.utils.get(interaction.guild.roles, name="Verified Member")
+        role = discord.utils.get(
+            interaction.guild.roles, name="Verified Member")
 
         if not member:
             return await interaction.response.send_message(

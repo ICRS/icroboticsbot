@@ -24,6 +24,7 @@ SERVER_IP = os.getenv("SERVER_IP")
 
 DEFAULT_AVATAR = "https://assets-global.website-files.com/5f9072399b2640f14d6a2bf4/619442eb8b3fab3eda4c29eb_Author-Wumpus-Webflow.png"  # noqa: E501
 
+
 async def stats_card(interaction: discord.Interaction):
     """
     stats_card generates a card with 3d printer usage stats for that user
@@ -34,9 +35,9 @@ async def stats_card(interaction: discord.Interaction):
         Discord context
     """
     user = interaction.user
-    embed = discord.Embed(title=f"3D Printing Stats for {user.name}", color=info_color)
-    
-    
+    embed = discord.Embed(
+        title=f"3D Printing Stats for {user.name}", color=info_color)
+
     try:
         card = generate_stat_card(user)
     except Exception as e:
@@ -48,7 +49,8 @@ async def stats_card(interaction: discord.Interaction):
         embed.set_image(url=f"attachment://{file.filename}")
         await interaction.response.send_message(file=file, embed=embed)
 
-def generate_stat_card(user) -> Image.Image:
+
+def generate_stat_card(user: discord.User) -> Image.Image:
     """
     Generate a stats card for the user
 
