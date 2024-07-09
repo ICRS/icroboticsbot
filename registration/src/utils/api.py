@@ -13,7 +13,7 @@ import os
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.utils.error_msg import error_msg
+from .error_messages import error_msg
 
 
 SERVER_IP = os.getenv("SERVER_IP")
@@ -23,9 +23,12 @@ DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
 BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 __all__ = [
-    "add_induction_to_member", "get_member_perms",
-    "get_stats_from_discord", "get_discord_from_shortcode",
-    "get_stats_from_shortcode"
+    "add_induction_to_member",
+    "deregister_discord_id",
+    "get_member_perms",
+    "get_stats_from_discord",
+    "get_stats_from_shortcode",
+    "get_discord_from_shortcode"
 ]
 
 

@@ -12,12 +12,8 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from src.commands.induct import induct_member
-from src.commands.register import register_user
-from src.commands.whois import whois
-from src.commands.help import get_help
-from src.commands.quote import quote_person
-from src.commands.stats import stats_card
+from src.commands import (induct_member, register_user,
+                          whois, get_help, quote_person, stats_card)
 from src.utils.api import deregister_discord_id
 
 __all__ = ["DiscordBot"]
@@ -34,6 +30,7 @@ default_guild_info = {
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
 }
+
 
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
@@ -76,27 +73,26 @@ class DiscordBot(commands.Bot):
             await whois(interaction, user)
 
         @self.tree.command(name="quote",
-                      description="Generate a quote image from the stored quotes by either Peter or Baig")
-        async def quote(interaction, name:str|None=""):
+                           description="Generate a quote image from the stored quotes by either Peter or Baig")
+        async def quote(interaction, name: str | None = ""):
             await quote_person(interaction, name)
 
         @self.tree.command(name="alert",
-                      description="Alert the bot. Purely for testing purposes")
+                           description="Alert the bot. Purely for testing purposes")
         async def alert(interaction):
             await interaction.response.send_message('''
                 Alert! <:ALERT:1033044801714671727>
                 ''')
-            
+
         @self.tree.command(name="help",
-                      description="List all the Snazzy Commands we have")
+                           description="List all the Snazzy Commands we have")
         async def help_cmd(interaction):
             await get_help(interaction, self.tree)
 
         @self.tree.command(name="stats",
-                      description="Get your 3D printing stats")
+                           description="Get your 3D printing stats")
         async def stats(interaction):
             await stats_card(interaction)
-            
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

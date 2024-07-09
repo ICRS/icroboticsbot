@@ -1,11 +1,8 @@
-import logging
 import os
 import discord
 import requests
 
-from src.utils.success_msg import *
-from src.utils.error_msg import *
-from src.utils.info_msg import *
+from src.utils import *
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 
