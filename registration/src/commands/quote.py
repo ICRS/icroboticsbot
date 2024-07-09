@@ -7,9 +7,7 @@ from typing import Dict, List
 import io
 from PIL import Image
 
-from src.utils.info_msg import quote_msg
-from src.utils.error_messages import *
-from src.utils.quote_utils import generate
+from src.utils import quote_msg, quote_not_found, generate
 
 
 async def quote_person(interaction, name):
@@ -27,7 +25,7 @@ async def quote_person(interaction, name):
     temp = io.BytesIO()
     q, img = await random_quote(interaction, name)
 
-    if (q == None):
+    if q is None:
         return
 
     img.save(temp, format="PNG")
@@ -35,7 +33,7 @@ async def quote_person(interaction, name):
 
     file = discord.File(temp, filename="quote.png")
 
-    await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)
+    await interaction.response.send_message(embed=quote_msg(q[0], q[1], file), file=file)  # noqa: E501
 
 
 async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
@@ -80,12 +78,12 @@ async def random_quote(interaction, author: str) -> tuple[str, Image.Image]:
     if not author:
         author = random.choice(list(choices.keys()))
     for quote in quotes:
-        choices[quote['author'].lower()].append(quote['quote'])     # noqa
+        choices[quote['author'].lower()].append(quote['quote'])
     choice = random.choice(choices[author])
     logging.info(
-        f"Quote: {choice} Author: {author} Background: {background} Font: {font}")
+        f"Quote: {choice} Author: {author} Background: {background} Font: {font}")  # noqa: E501
 
-    img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
-                             author=author.capitalize(), font=font)
+    img = generate(background, quote=choice,
+                   author=author.capitalize(), font=font)
 
     return (author.capitalize(), choice), img

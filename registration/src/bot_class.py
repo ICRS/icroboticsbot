@@ -73,12 +73,12 @@ class DiscordBot(commands.Bot):
             await whois(interaction, user)
 
         @self.tree.command(name="quote",
-                           description="Generate a quote image from the stored quotes by either Peter or Baig")
+                           description="Generate a quote image from the stored quotes by either Peter or Baig")  # noqa: E501
         async def quote(interaction, name: str | None = ""):
             await quote_person(interaction, name)
 
         @self.tree.command(name="alert",
-                           description="Alert the bot. Purely for testing purposes")
+                           description="Alert the bot. Purely for testing purposes")  # noqa: E501
         async def alert(interaction):
             await interaction.response.send_message('''
                 Alert! <:ALERT:1033044801714671727>
@@ -126,7 +126,7 @@ class DiscordBot(commands.Bot):
         """
         embed = discord.Embed(
             title=f"Welcome {member.name} to the ICRS server!",
-            description=(f"Remember to verify using /register"
+            description=("Remember to verify using /register"
                          " in the bot channel to gain full access"
                          " to the server"),
             color=0x3a88fe)
