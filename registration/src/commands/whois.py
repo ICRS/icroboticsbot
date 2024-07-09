@@ -1,5 +1,3 @@
-import logging
-
 from src.utils.api import *
 from src.utils.validation import *
 from src.utils.success_msg import *
@@ -43,9 +41,6 @@ async def whois(interaction, user):
         shortcode = last_print[0]
 
         perms = await get_member_perms(interaction, shortcode)
-
-        logging.debug(last_print)
-        logging.debug(totals)
 
         data = {
             "perms": perms,

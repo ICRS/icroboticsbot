@@ -8,7 +8,6 @@ Utility functions used by the bot
 """
 
 import json
-import logging
 import os
 
 import requests
@@ -44,12 +43,10 @@ async def add_induction_to_member(interaction, shortcode, uid) -> bool:
         if res.status_code == 200:
             return True
 
-        logging.error(f"Error in inducting user: {res.reason}")
         await interaction.response.send_message(
             embed=error_msg(str(res.reason), "Bad Response"))
         return False
     except Exception as e:
-        logging.error(f"Error in inducting user: {e}")
         await interaction.response.send_message(embed=error_msg(e))
 
 
@@ -75,14 +72,12 @@ async def get_member_perms(interaction, shortcode):
         if res.status_code == 200:
             return res.json()
 
-        logging.error(f"Error getting member: {res.reason}")
         await interaction.response.send_message(
             embed=error_msg(str(res.reason), "Bad Response"))
         return False
 
     # pylint: disable=broad-except
     except Exception as e:
-        logging.error(f"Exception in getting member: {e}")
         await interaction.response.send_message(embed=error_msg(e))
 
         return False
@@ -104,14 +99,12 @@ async def get_stats_from_discord(interaction, discord_id):
         if res.status_code == 200:
             return res.json()
 
-        logging.error(f"Error getting stats: {res.reason}")
         await interaction.response.send_message(
             embed=error_msg(str(res.reason), "Bad Response"))
         return False
 
     # pylint: disable=broad-except
     except Exception as e:
-        logging.error(f"Exception in getting stats: {e}")
         await interaction.response.send_message(embed=error_msg(e))
 
         return False
@@ -134,14 +127,12 @@ async def get_stats_from_shortcode(interaction, shortcode):
         if res.status_code == 200:
             return res.json()
 
-        logging.error(f"Error getting stats: {res.reason}")
         await interaction.response.send_message(
             embed=error_msg(str(res.reason)))
         return False
 
     # pylint: disable=broad-except
     except Exception as e:
-        logging.error(f"Exception in getting stats: {e}")
         await interaction.response.send_message(embed=error_msg(e))
 
         return False
