@@ -15,13 +15,16 @@ import requests
 from PIL import Image
 from bambulabs_api import GcodeState
 
+__all__ = [
+    "get_env_bool",
+    "Command",
+    "PrinterListener"
+]
+
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv()
-
-__all__ = ['PrinterListener', 'Command']
-
 
 def get_env_bool(var: str, default: bool = False) -> bool:
     """
@@ -51,7 +54,6 @@ class Command(Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.NOTIFY
-
 
 class PrinterListener:
     def __init__(self, printer_name: str,

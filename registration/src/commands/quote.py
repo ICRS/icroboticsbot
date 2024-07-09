@@ -6,9 +6,13 @@ from typing import Dict, List
 import io
 from PIL import Image
 
-from src.utils.msg.info_msg import quote_msg
-from src.utils.msg.error_msg import *
-from src.utils.quote_utils import generate
+from src.utils import *
+
+__all__ = [
+    "quote_person",
+    "random_quote"
+]
+
 
 async def quote_person(interaction: discord.Interaction, name: str):
     """
@@ -58,11 +62,6 @@ async def random_quote(
         await interaction.response.send_message(embed=quote_not_found())
         return None, None
 
-<<<<<<< HEAD
-
-=======
-    logging.info(f"Backgrounds: {backgrounds}")
->>>>>>> origin/registration_formatting
     background = random.choice(backgrounds)
     fonts = os.listdir(os.path.relpath('assets/fonts'))
     font = os.path.relpath('assets/fonts/'+random.choice(fonts))
@@ -78,16 +77,9 @@ async def random_quote(
     for quote in quotes:
         choices[quote['author'].lower()].append(quote['quote'])
     choice = random.choice(choices[author])
-<<<<<<< HEAD
-    
     img = generate(background, quote=choice,              # noqa  # pylint: disable=unused-variable
                              author=author.capitalize(), font=font)
-=======
-    logging.info(
-        f"Quote: {choice} Author: {author} Background: {background} Font: {font}")  # noqa: E501
-
     img = generate(background, quote=choice,
                    author=author.capitalize(), font=font)
->>>>>>> origin/registration_formatting
 
     return (author.capitalize(), choice), img

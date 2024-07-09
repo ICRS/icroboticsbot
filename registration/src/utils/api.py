@@ -13,7 +13,7 @@ import discord
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.utils.msg.error_msg import *
+from src.utils import (error_msg)  
 
 SERVER_IP = os.getenv("SERVER_IP")
 DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")

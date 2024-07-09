@@ -1,6 +1,20 @@
-from src.commands.induct import induct_member
-from src.commands.register import register_user
-from src.commands.whois import whois
-from src.commands.help import get_help
-from src.commands.quote import quote_person
-from src.commands.stats import stats_card
+from .induct import *
+from .register import *
+from .whois_commands import *
+from .help import *
+from .quote import *
+from .stats import *
+from .printer_commands import *
+from .printer_status_commands import *
+
+__all__ = []
+__all__.extend(help.__all__)
+__all__.extend(induct.__all__)
+__all__.extend(printer_commands.__all__)
+__all__.extend(printer_status_commands.__all__)
+
+__all__.extend(quote.__all__)
+__all__.extend(register.__all__)
+__all__.extend(stats.__all__)
+__all__.extend(whois_commands.__all__)
+
