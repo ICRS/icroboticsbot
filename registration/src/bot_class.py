@@ -1,24 +1,19 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# mypy: ignore-errors
-
-"""
-Discord Bot class. It handles all the commands and events.
-"""
 import logging
 import json
 import asyncio
 import discord
 from discord.ext import commands
 
+from src.commands.printer_status import printer_status
 from src.commands.induct import induct_member
 from src.commands.register import register_user
 from src.commands.whois import whois
 from src.commands.help import get_help
 from src.commands.quote import quote_person
+from src.commands.printer_buttons import printer_buttons
 from src.commands.stats import stats_card
 from src.utils.api import deregister_discord_id
+from src.utils.printer.PrinterFarm import PrinterFarm           
 
 __all__ = ["DiscordBot"]
 
@@ -38,7 +33,9 @@ default_guild_info = {
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
     def __init__(self, token, intents,
-                 guild_info=default_guild_info):
+                 guild_info=default_guild_info,
+                 printer_names=[],
+                 printer_suffix=None):
         super().__init__(intents=intents,
                          command_prefix=guild_info['PREFIX'],
                          case_insensitive=True,
@@ -47,6 +44,8 @@ class DiscordBot(commands.Bot):
         self.guild_info = guild_info
 
         self.add_commands()
+        self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
+
 
         @self.event
         async def on_ready():
@@ -96,6 +95,16 @@ class DiscordBot(commands.Bot):
                       description="Get your 3D printing stats")
         async def stats(interaction):
             await stats_card(interaction)
+
+        @self.tree.command(name="printers",
+                      description="List and interact with all the printers")   # noqa
+        async def printers_cmd(interaction):
+            await printer_buttons(self, interaction)
+
+        @self.tree.command(name="bounds",
+                      description="List all the printers and the users bound to them")
+        async def bounds(interaction):
+            await printer_status(self, interaction)
             
 
     async def on_message(self, message):  # pylint: disable=arguments-differ

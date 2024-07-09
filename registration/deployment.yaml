@@ -48,6 +48,15 @@ spec:
               secretKeyRef:
                 name: imperial-secret 
                 key: api_key
+        volumeMounts:
+          - name: discord-bot-secret
+            mountPath: /app/settings.json
+            subPath: settings.json
+            readOnly: true
+          - name: printer-config
+            mountPath: /app/printer_settings.json
+            subPath: printer_settings.json
+            readOnly: true
       volumes:
         - name: postgres-ini 
           secret:
@@ -58,3 +67,9 @@ spec:
             items:
               - key: discord_settings
                 path: settings.json
+        - name: printer-config
+          configMap:
+            name: printer-config
+            items:
+              - key: printer_config
+                path: printer_settings.json
