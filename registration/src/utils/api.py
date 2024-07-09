@@ -7,15 +7,20 @@
 Utility functions used by the bot
 """
 
-import json
 import os
 
 import requests
+from requests.auth import HTTPBasicAuth
+
+from src.utils.msg.error_msg import error_msg
 
 from src.utils.msg.error_msg import *
 
 SERVER_IP = os.getenv("SERVER_IP")
-BASIC_AUTH_TOKEN = os.getenv("BASIC_AUTH_TOKEN")
+DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")
+DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
+
+BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 __all__ = [
     "add_induction_to_member", "get_member_perms",
@@ -26,19 +31,15 @@ __all__ = [
 
 async def add_induction_to_member(interaction, shortcode, uid) -> bool:
     try:
-        payload = json.dumps({
-            "id": uid,
-            "shortcode": shortcode,
-            "canPrint:": True,
-            "canLaserCut": False
-        })
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
-        }
-
-        res = requests.request("POST", url=SERVER_IP +
-                               "/member/add", headers=headers, data=payload)
+        res = requests.request(
+            "POST",
+            url=SERVER_IP + "/member/add",
+            json={
+                "id": uid,
+                "shortcode": shortcode,
+                "canPrint:": True,
+                "canLaserCut": False
+            }, auth=BASIC_AUTH)
 
         if res.status_code == 200:
             return True
@@ -61,13 +62,9 @@ def deregister_discord_id(userid) -> bool:
 
 async def get_member_perms(interaction, shortcode):
     try:
-        headers = {
-            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
-        }
-
         res = requests.request(
             "GET", url=SERVER_IP + "/member/permissions/shortcode",
-            params={"shortcode": shortcode}, headers=headers)
+            params={"shortcode": shortcode}, auth=BASIC_AUTH)
 
         if res.status_code == 200:
             return res.json()
@@ -85,16 +82,12 @@ async def get_member_perms(interaction, shortcode):
 
 async def get_stats_from_discord(interaction, discord_id):
     try:
-        headers = {
-            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
-        }
-
         res = requests.request(
             "GET", url=SERVER_IP + "/print-metrics/member/stats/discord",
             params={
                 "discord_id": str(discord_id),
             },
-            headers=headers)
+            auth=BASIC_AUTH)
 
         if res.status_code == 200:
             return res.json()
@@ -112,17 +105,13 @@ async def get_stats_from_discord(interaction, discord_id):
 
 async def get_stats_from_shortcode(interaction, shortcode):
     try:
-        headers = {
-            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
-        }
-
         res = requests.request(
             "GET",
             url=SERVER_IP + "/print-metrics/member/stats/shortcode",
             params={
                 "shortcode": str(shortcode)
             },
-            headers=headers)
+            auth=BASIC_AUTH)
 
         if res.status_code == 200:
             return res.json()
@@ -140,15 +129,13 @@ async def get_stats_from_shortcode(interaction, shortcode):
 
 async def get_discord_from_shortcode(interaction, shortcode):
     try:
-        headers = {
-            'Authorization': 'Basic ' + BASIC_AUTH_TOKEN
-        }
-
         res = requests.request(
             "GET",
-            url=SERVER_IP + "/shortcode/discord-id?shortcode=" +
-            str(shortcode),
-            headers=headers)
+            url=SERVER_IP + "/shortcode/discord-id",
+            params={
+                "shortcode": str(shortcode),
+            },
+            auth=BASIC_AUTH)
 
         if res.status_code == 200:
             return res.json()
