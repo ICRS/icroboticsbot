@@ -14,7 +14,7 @@ from discord.ext import commands
 
 from src.commands import (induct_member, register_user,
                           whois, get_help, quote_person, stats_card)
-from src.utils.api import deregister_discord_id
+from src.utils import deregister_discord_id
 
 __all__ = ["DiscordBot"]
 
@@ -134,7 +134,7 @@ class DiscordBot(commands.Bot):
             text="Go back to the server: https://discord.gg/3YKPjgskS3")
         await member.send(embed=embed)
 
-    async def on_member_remove(self, member):
+    async def on_member_remove(self, member: discord.Member):
         """
         on_member_remove is called when a member leaves the server
 
