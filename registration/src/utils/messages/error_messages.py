@@ -3,6 +3,21 @@ import discord
 
 error_color = 0xfa4646
 
+__all__ = [
+    "code_already_used_msg",
+    "user_not_member_msg",
+    "invalid_UID",
+    "server_error_msg",
+    "not_committee",
+    "cant_find_discord_user",
+    "invalid_shortcode",
+    "invalid_discord_id",
+    "quote_not_found",
+    "is_not_inducted_msg",
+    "error_msg"
+]
+
+
 def code_already_used_msg():
     embed = discord.Embed(
         title="Error",
@@ -15,6 +30,7 @@ def code_already_used_msg():
     return embed.set_footer(
         text=("You'll find committee members here: "
               "https://discord.gg/3YKPjgskS3"))
+
 
 def user_not_member_msg():
     embed = discord.Embed(
@@ -34,30 +50,39 @@ def user_not_member_msg():
         text=("You'll find committee members here: "
               "https://discord.gg/3YKPjgskS3"))
 
+
 def invalid_UID():
-    return error_msg("Please ensure the UID (8-14 digit hex, eg. AB12FC23) is valid")
+    return error_msg("Please ensure the UID (8-14 digit hex, eg. AB12FC23) is valid")  # noqa: E501
+
 
 def server_error_msg():
-    return error_msg("THE SERVER HATES YOU, AND YOU HAVE UPSET THE KUBERNETES GODS", "THEIR WRATH IS COMING")
+    return error_msg("THE SERVER HATES YOU, AND YOU HAVE UPSET THE KUBERNETES GODS", "THEIR WRATH IS COMING")  # noqa: E501
+
 
 def not_committee():
     return error_msg("Sorry Only @committee can run that command", "Nah")
 
+
 def cant_find_discord_user():
-    return error_msg("Couldn't find them in the BD", "nooope")
+    return error_msg("Couldn't find them in the DB", "nooope")
+
 
 def invalid_shortcode():
-    return error_msg("Please ensure the short code (eg: ab123) is valid", "hmmmmm")
+    return error_msg("Please ensure the short code (eg: ab123) is valid", "hmmmmm")  # noqa: E501
+
 
 def invalid_discord_id():
-    return error_msg("Please ensure the discord ID/user or shortcode is valid", "Thats not right")
+    return error_msg("Please ensure the discord ID/user or shortcode is valid", "Thats not right")  # noqa: E501
+
 
 def quote_not_found():
     return error_msg("Oh no, we cant find a quote from that person", "404 :(")
 
+
 def is_not_inducted_msg():
     return error_msg("Not a member", "Nope")
 
-def error_msg(msg,title="Error"):
+
+def error_msg(msg, title="Error"):
     logging.error(f"Error: {msg}")
     return discord.Embed(title=title, description=(msg), color=error_color)

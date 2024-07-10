@@ -1,14 +1,16 @@
-import logging
+import discord
+from src.utils import *  
 
-from src.utils.api import *
-from src.utils.validation import *
-from src.utils.success_msg import *
-from src.utils.error_msg import *
 
-async def whois(interaction, user):
+__all__ = [
+    "whois"
+]
+
+async def whois(interaction: discord.Interaction, user: str):
     try:
         author = interaction.user
-        if not ("committee" in [y.name.lower() for y in author.roles]):
+        roles = [r for r in author.roles if r is not None]
+        if not ("committee" in [y.name.lower() for y in roles]):
             return await interaction.response.send_message(
                 embed=not_committee())
 
@@ -44,9 +46,6 @@ async def whois(interaction, user):
 
         perms = await get_member_perms(interaction, shortcode)
 
-        logging.debug(last_print)
-        logging.debug(totals)
-
         data = {
             "perms": perms,
             "last_print": last_print,
@@ -60,4 +59,3 @@ async def whois(interaction, user):
 
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
-

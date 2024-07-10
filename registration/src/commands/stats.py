@@ -12,7 +12,10 @@ from dotenv import load_dotenv
 info_color = 0x297bff
 
 
-__all__ = ["generate_stat_card"]
+__all__ = [
+    "stats_card",
+    "generate_stat_card"
+]
 
 # ===== Constants =====
 load_dotenv()
@@ -24,6 +27,7 @@ SERVER_IP = os.getenv("SERVER_IP")
 
 DEFAULT_AVATAR = "https://assets-global.website-files.com/5f9072399b2640f14d6a2bf4/619442eb8b3fab3eda4c29eb_Author-Wumpus-Webflow.png"  # noqa: E501
 
+
 async def stats_card(interaction: discord.Interaction):
     """
     stats_card generates a card with 3d printer usage stats for that user
@@ -34,9 +38,9 @@ async def stats_card(interaction: discord.Interaction):
         Discord context
     """
     user = interaction.user
-    embed = discord.Embed(title=f"3D Printing Stats for {user.name}", color=info_color)
-    
-    
+    embed = discord.Embed(
+        title=f"3D Printing Stats for {user.name}", color=info_color)
+
     try:
         card = generate_stat_card(user)
     except Exception as e:
@@ -48,7 +52,8 @@ async def stats_card(interaction: discord.Interaction):
         embed.set_image(url=f"attachment://{file.filename}")
         await interaction.response.send_message(file=file, embed=embed)
 
-def generate_stat_card(user) -> Image.Image:
+
+def generate_stat_card(user: discord.User) -> Image.Image:
     """
     Generate a stats card for the user
 
@@ -112,7 +117,6 @@ def generate_stat_card(user) -> Image.Image:
     if res.status_code != 200:
         return False
     data = res.json()
-    logging.info(data)
     username = user.name
     avatar = user.avatar
     if not avatar:
@@ -122,7 +126,6 @@ def generate_stat_card(user) -> Image.Image:
         total_time = sum([i[2] for i in data])
         printers = {}
         names = list(set([i[-1] for i in data]))
-        # logging.info(str(total_filament), str(total_time), names)
 
         for name in names:
             printers[name] = sum([1 for i in data if i[-1] == name])
@@ -140,7 +143,6 @@ def generate_stat_card(user) -> Image.Image:
         fav_no = 0
         print_no = 1
         display_no = 0
-    logging.info(avatar)
     r = requests.get(avatar, timeout=60)
 
     temp = io.BytesIO()
@@ -149,12 +151,9 @@ def generate_stat_card(user) -> Image.Image:
     temp.seek(0)
     pic = ColorThief(temp)
     accent_colour = pic.get_color(quality=10)
-    logging.info(accent_colour)
 
     pic = Image.open(temp).convert("RGBA")
     pic = pic.resize((60, 60))
-
-    logging.info("Creating card")
 
     card = Image.new('RGBA', (825, 350))
     d = ImageDraw.Draw(card)
@@ -169,8 +168,6 @@ def generate_stat_card(user) -> Image.Image:
     d.text((795, 52), str(display_no), font=name_font,
            fill=(255, 255, 255), anchor='ra')
     d.text((649, 28), "Total Prints", font=sub_font, fill=(181, 181, 181))
-
-    logging.info("Adding stats")
 
     window = generate_card("Filament Used", "{:,}".format(
         total_filament)+"g", accent_colour=accent_colour)
@@ -206,7 +203,3 @@ def generate_stat_card(user) -> Image.Image:
         a.text((40, 40+idx*35), f"{i[3]}g", font=item_font, fill=accent_colour)
     card.paste(window, (586, 125))
     return card
-
-
-if __name__ == '__main__':
-    pass

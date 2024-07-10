@@ -1,7 +1,0 @@
-﻿urllib3==1.26.6
-discord
-python-dotenv
-Pillow
-requests
-colorthief
-bambulabs-api>=2.3.1
