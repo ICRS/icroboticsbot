@@ -13,7 +13,7 @@ import discord
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.utils import (error_msg)  
+from src.utils import error_msg
 
 SERVER_IP = os.getenv("SERVER_IP")
 DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")
@@ -27,7 +27,8 @@ __all__ = [
     "get_member_perms",
     "get_stats_from_discord",
     "get_stats_from_shortcode",
-    "get_discord_from_shortcode"
+    "get_discord_from_shortcode",
+    "SERVER_IP"
 ]
 
 
