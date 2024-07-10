@@ -39,7 +39,6 @@ class DiscordBot(commands.Bot):
         self.add_commands()
         self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
 
-
         @self.event
         async def on_ready():
             await self.tree.sync()
@@ -68,7 +67,7 @@ class DiscordBot(commands.Bot):
             await whois(interaction, user)
 
         @self.tree.command(name="quote",
-                           description="Generate a quote image from the stored quotes by either Peter or Baig")  # noqa: E501
+                           description="Generate a quote image from the stored quotes")  # noqa: E501
         async def quote(interaction, name: str | None = ""):
             await quote_person(interaction, name)
 
@@ -95,10 +94,10 @@ class DiscordBot(commands.Bot):
             await printer_buttons(self, interaction)
 
         @self.tree.command(name="bounds",
-                      description="List all the printers and the users bound to them")
+                           description="List all the printers and the users bound to them")  # noqa: E501
         async def bounds(interaction):
             await printer_status(self, interaction)
-            
+
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
         on_message is called when a message is sent in the server

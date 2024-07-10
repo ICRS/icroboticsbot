@@ -11,6 +11,12 @@ services:
   icrs-bot:
     build:
       context: .
+    develop:
+      watch:
+        - action: rebuild
+          path: ./src
+          target: /app
+
     # ports:
     #   - 8000:8000
 
