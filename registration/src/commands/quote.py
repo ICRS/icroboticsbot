@@ -3,7 +3,6 @@ import logging
 import discord
 import os
 import io
-from PIL import Image
 import requests
 
 from src.utils import error_msg, quote_msg
@@ -46,15 +45,10 @@ async def quote_person(interaction: discord.Interaction, name: str):
         logging.warning("No Image received!")
         return
 
-    img = Image.open(io.BytesIO(
+    img = io.BytesIO(
         base64.decodebytes(bytes(data["data"], "utf-8")))
-    )
 
-    temp = io.BytesIO()
-    img.save(temp, format="PNG")
-    temp.seek(0)
-
-    file = discord.File(temp, filename="quote.png")
+    file = discord.File(img, filename="quote.jpeg")
 
     await interaction.response.send_message(embed=quote_msg(
         data.get("name", ""),

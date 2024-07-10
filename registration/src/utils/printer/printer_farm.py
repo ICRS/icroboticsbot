@@ -10,11 +10,12 @@ import time
 
 from discord.ext import commands
 
-from src.utils.printer.printer_listener import *
+from src.utils.printer.printer_listener import Command, PrinterListener
 
 __all__ = [
     "PrinterFarm"
 ]
+
 
 class PrinterFarm:
     def __init__(self, bot: commands.Bot = None,
