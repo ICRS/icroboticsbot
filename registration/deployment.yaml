@@ -18,15 +18,6 @@ spec:
         ports:
         - containerPort: 5000  # Port your Python application is listening on
         imagePullPolicy: "Always"
-        volumeMounts:
-          - name: postgres-ini 
-            mountPath: /app/postgres.ini
-            subPath: postgres.ini
-            readOnly: true
-          - name: discord-bot-secret
-            mountPath: /app/settings.json
-            subPath: settings.json
-            readOnly: true
         env:
           - name: DISCORD_TOKEN
             valueFrom:
@@ -48,8 +39,11 @@ spec:
               secretKeyRef:
                 name: access-server-secret
                 key: secret
-
         volumeMounts:
+          - name: postgres-ini 
+            mountPath: /app/postgres.ini
+            subPath: postgres.ini
+            readOnly: true
           - name: discord-bot-secret
             mountPath: /app/settings.json
             subPath: settings.json
@@ -58,6 +52,7 @@ spec:
             mountPath: /app/printer_settings.json
             subPath: printer_settings.json
             readOnly: true
+
       volumes:
         - name: postgres-ini 
           secret:
