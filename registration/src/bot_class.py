@@ -3,14 +3,22 @@ import json
 import asyncio
 import discord
 from discord.ext import commands
+from discord import app_commands
+import requests
 
-from src.commands import *
-from src.utils import *
+from src.commands.stats import SERVER_IP
+from src.commands import (get_help, induct_member, printer_buttons,
+                          printer_status, quote_person, register_user,
+                          stats_card, whois)
+from src.utils import PrinterFarm, deregister_discord_id
 
 __all__ = ["DiscordBot"]
 
 settings = json.load(open("settings.json",
                           "r", encoding="utf-8"))
+
+result = requests.get(SERVER_IP + "/meme/names")
+names = result.json()
 
 PREFIX = settings['PREFIX']
 GUILD = settings['DISCORD_GUILD_ID']
@@ -66,8 +74,13 @@ class DiscordBot(commands.Bot):
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
 
+        quote_choices = [
+            app_commands.Choice(name=n, value=n) for n in names]
+        quote_choices.append(app_commands.Choice(name="random", value=""))
+
         @self.tree.command(name="quote",
                            description="Generate a quote image from the stored quotes")  # noqa: E501
+        @app_commands.choices(name=quote_choices)
         async def quote(interaction, name: str | None = ""):
             await quote_person(interaction, name)
 
