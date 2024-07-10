@@ -15,14 +15,16 @@ import requests
 from PIL import Image
 from bambulabs_api import GcodeState
 
+__all__ = [
+    "get_env_bool",
+    "Command",
+    "PrinterListener"
+]
+
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv()
-
-
-__all__ = ['PrinterListener', 'Command']
-
 
 def get_env_bool(var: str, default: bool = False) -> bool:
     """
@@ -52,7 +54,6 @@ class Command(Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.NOTIFY
-
 
 class PrinterListener:
     def __init__(self, printer_name: str,
@@ -99,7 +100,6 @@ class PrinterListener:
         -------
         set[discord.User]: The users in the command.
         """
-        logging.info(f"{self.printer_name} Getting users in {comm}")  # noqa  # pylint: disable=logging-fstring-interpolation
         return self.__users[Command(comm)]
 
     def add_user(self, user: discord.User, comm: Command) -> bool:
@@ -115,7 +115,6 @@ class PrinterListener:
         -------
         bool: True if the user was added, False otherwise.
         """
-        logging.info(f"{self.printer_name} Adding user {user} to {comm}")  # noqa  # pylint: disable=logging-fstring-interpolation
         self.__users[Command(comm)].add(user)
         return True
 
@@ -132,7 +131,6 @@ class PrinterListener:
         -------
         bool: True if the user was removed, False otherwise.
         """
-        logging.info(f"{self.printer_name} Removing user {user} from {comm}")  # noqa  # pylint: disable=logging-fstring-interpolation
         self.__users[Command(comm)].discard(user)
         return True
 
@@ -149,7 +147,6 @@ class PrinterListener:
         -------
         bool: True if the user is in the command, False otherwise.
         """
-        logging.info(f"{self.printer_name} Checking if user {user} is in {comm}")  # noqa  # pylint: disable=logging-fstring-interpolation
         return user in self.__users[Command(comm)]
 
     async def clear_users(self, comm: Command) -> bool:
@@ -164,7 +161,6 @@ class PrinterListener:
         -------
         bool: True if the users were cleared, False otherwise.
         """
-        logging.info(f"{self.printer_name} Clearing users in {comm}")  # noqa  # pylint: disable=logging-fstring-interpolation
         self.__users[Command(comm)].clear()
         return len(self.__users[Command(comm)]) == 0
 
@@ -180,10 +176,8 @@ class PrinterListener:
         -------
         bool: True if the users were notified, False otherwise.
         """
-        logging.info(f"{self.printer_name} Notifying users in {comm}")  # noqa  # pylint: disable=logging-fstring-interpolation
         for user in self.__users[Command(comm)]:
             try:
-                logging.info(f"{self.printer_name} Sending message to {user}")  # noqa  # pylint: disable=logging-fstring-interpolation
                 await user.send(f"Printer {self.printer_name} is finished.")
             except Exception as e:
                 logging.error(f"{self.printer_name} Error sending message: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
@@ -193,7 +187,6 @@ class PrinterListener:
         """
         Starts the timelapse process.
         """
-        logging.info(f"{self.printer_name} Starting timelapse")  # noqa  # pylint: disable=logging-fstring-interpolation
         self.__timelapsed = True
         return True
 
@@ -201,7 +194,6 @@ class PrinterListener:
         """
         Stops the timelapse process.
         """
-        logging.info(f"{self.printer_name} Stopping timelapse")  # noqa  # pylint: disable=logging-fstring-interpolation
         self.__timelapsed = False
         self.__timelapse_frames.clear()
         return False
@@ -218,7 +210,6 @@ class PrinterListener:
         -------
         bool: True if timelapse was enabled, False otherwise.
         """
-        logging.info(f"{self.printer_name} Enabling timelapse for {user}")  # noqa  # pylint: disable=logging-fstring-interpolation
         self.__timelapsed = True
         if not self.user_in(user, Command.TIMELAPSE):
             self.add_user(user, Command.TIMELAPSE)
@@ -236,7 +227,6 @@ class PrinterListener:
         -------
         bool: True if timelapse was disabled, False otherwise.
         """
-        logging.info(f"{self.printer_name} Disabling timelapse for {user}")  # noqa  # pylint: disable=logging-fstring-interpolation
         if self.user_in(user, Command.TIMELAPSE):
             self.remove_user(user, Command.TIMELAPSE)
         return False
@@ -259,7 +249,6 @@ class PrinterListener:
         -------
         bytes | None: The timelapse bytes, or None if an error occurred.
         """
-        logging.info(f"{self.printer_name} Creating timelapse")  # noqa  # pylint: disable=logging-fstring-interpolation
         im: list[Image.Image] = []
         for frame in self.__timelapse_frames:
             im.append(Image.open(frame))
@@ -288,7 +277,6 @@ class PrinterListener:
         time (str): The time the timelapse was created.
         """
         filename = f"{self.printer_name}_timelapse_{time}.gif"
-        logging.info(f"{self.printer_name} Sending {filename} to users: {len(self.__users[Command.TIMELAPSE])}") # noqa  # pylint: disable=logging-fstring-interpolation
         for user in self.__users[Command.TIMELAPSE]:
             try:
                 with BytesIO(timelapse) as timelapse:
@@ -311,7 +299,6 @@ class PrinterListener:
         Updates the printer state.
         """
         self.__printer_state.append(self.__get_state())
-        logging.info(f"{self.printer_name} {', '.join(state.value for state in self.__printer_state[-5:])}") # noqa  # pylint: disable=logging-fstring-interpolation
 
     def is_starting(self) -> bool:
         """

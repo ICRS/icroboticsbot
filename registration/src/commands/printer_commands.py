@@ -1,28 +1,22 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# mypy: ignore-errors
-
-"""
-Discord Bot helper functions
-"""
-
 import os
 import discord
 from discord.ui import View, Button
 
-from src.PrinterFarm import PrinterFarm                    # noqa #pylint: disable=import-error
-from src.PrinterListener import PrinterListener, Command   # noqa #pylint: disable=import-error
+from src.utils import *
+
+__all__ = [
+    "PrinterButton",
+    "PrinterCommandPage",
+    "PrintersMainPage",
+    "printer_buttons"
+]
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv(override=True)
 
-__all__ = ["printer_buttons", "printer_status"]  # noqa
 
-
-# https://github.com/Rapptz/discord.py/tree/master/examples/views
 class PrinterButton(Button):
     def __init__(self, printer: PrinterListener, **kwargs):
         super().__init__(**kwargs)
@@ -115,7 +109,7 @@ class PrintersMainPage(View):
                                         style=discord.ButtonStyle.green))
 
 
-async def printer_buttons(bot, ctx):
+async def printer_buttons(bot, interaction: discord.Interaction):
     """
     printer_buttons sends a message with buttons to the user
 
@@ -123,10 +117,11 @@ async def printer_buttons(bot, ctx):
     ----------
     bot : DiscordBot
         Discord bot instance
-    ctx : Discord.Context
-        Discord context
+    interaction : Discord.interaction
+        Discord interaction
     """
     printer_farm: PrinterFarm = bot.printer_farm
+
     message_embed = discord.Embed(
         title="Select a printer",
         description="",
@@ -136,45 +131,8 @@ async def printer_buttons(bot, ctx):
             name=name,
             value=f"Status: {listener.get_state()}",
             inline=False)
-    await ctx.message.channel.send(embed=message_embed,
+    await interaction.response.send_message(embed=message_embed,
                                    view=PrintersMainPage(
                                        printer_farm=printer_farm),
-                                   delete_after=120)
+                                   ephemeral=True)
 
-
-async def printer_status(bot, ctx):
-    """
-    printer_status sends a message with the users bound to the printers
-
-    Parameters
-    ----------
-    bot : DiscordBot
-        Discord bot instance
-    ctx : Discord.Context
-        Discord context
-    """
-    author = ctx.message.author
-    printer_farm: PrinterFarm = bot.printer_farm
-    message_embed = discord.Embed(
-        title="Printers & Notifications bound to you:",
-        color=discord.Color.red())
-
-    no_commands = True
-    for name, listener in printer_farm.printers.items():
-        commands = ""
-        for command in Command:
-            users = listener.get_users(command)
-            if author in users:
-                commands += f"* {command.value.get('name')}\n"
-                no_commands = False
-        if commands != "":
-            message_embed.add_field(
-                name=name,
-                value=commands,
-                inline=False)
-
-    if no_commands:
-        message_embed.description = "No commands found"
-
-    await author.send(embed=message_embed,
-                      delete_after=120)

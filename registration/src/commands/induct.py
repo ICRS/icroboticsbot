@@ -1,9 +1,12 @@
-from src.utils.api import *
-from src.utils.validation import *
-from src.utils.success_msg import *
-from src.utils.error_msg import *
+from src.utils import *
+import discord
 
-async def induct_member(interaction, shortcode, uid):
+__all__ = [
+    "induct_member"
+]
+
+async def induct_member(interaction: discord.Interaction,
+                        shortcode: str, uid: str):
     """
     register_on_dm Register message when user tries to register on DM
 

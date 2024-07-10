@@ -1,13 +1,15 @@
-import logging
 import os
 import discord
 import requests
 
-from src.utils.success_msg import *
-from src.utils.error_msg import *
-from src.utils.info_msg import *
+from src.utils import *
+
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
+
+__all__ = [
+    "register_user"
+]
 
 
 async def register_user(interaction: discord.Interaction, shortcode: str):
@@ -26,7 +28,8 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
 
     try:
         member = interaction.user
-        role = discord.utils.get(interaction.guild.roles, name="Verified Member")
+        role = discord.utils.get(
+            interaction.guild.roles, name="Verified Member")
 
         if not member:
             return await interaction.response.send_message(

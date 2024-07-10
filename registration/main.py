@@ -26,6 +26,15 @@ GUILD = int(settings['DISCORD_GUILD_ID'])
 ADMIN_ID = int(settings['ADMIN_ID'])
 PREFIX = settings['PREFIX']
 
+# ======= Get the printer settings ========
+printer_settings = json.load(
+    open("printer_settings.json", "r", encoding="utf-8"))
+
+PRINTER_NAMES = list(printer_settings["PRINTER_NAMES"])
+PRINTER_GATEWAY_ENDPOINT_SUFFIX = str(
+    printer_settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"])
+# =========================================
+
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -38,7 +47,9 @@ guild_info = {
 
 client = DiscordBot(token=TOKEN,
                     intents=intents,
-                    guild_info=guild_info)
+                    guild_info=guild_info,
+                    printer_names=PRINTER_NAMES,
+                    printer_suffix=PRINTER_GATEWAY_ENDPOINT_SUFFIX)
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
