@@ -1,14 +1,10 @@
 import base64
 import logging
 import discord
-import os
 import io
 import requests
 
-from src.utils import error_msg, quote_msg
-
-
-DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
+from src.utils import error_msg, quote_msg, SERVER_IP
 
 
 __all__ = [
@@ -27,7 +23,7 @@ async def quote_person(interaction: discord.Interaction, name: str):
     name : str
         Name of the person to quote
     """
-    result = requests.get(DATABASE_ADAPTER_IP + "/meme/random", params={
+    result = requests.get(SERVER_IP + "/meme/random", params={
         "name": name
     })
 
@@ -43,13 +39,16 @@ async def quote_person(interaction: discord.Interaction, name: str):
     img_str = data.get("data")
     if img_str is None:
         logging.warning("No Image received!")
-        return
+        return await interaction.response.send_message(embed=error_msg(
+            f"Did not get image for {name}"))
 
     img = io.BytesIO(
         base64.decodebytes(bytes(data["data"], "utf-8")))
 
     file = discord.File(img, filename="quote.jpeg")
 
-    await interaction.response.send_message(embed=quote_msg(
-        data.get("name", ""),
-        data.get("quote", ""), file), file=file)  # noqa: E501
+    await interaction.response.send_message(
+        embed=quote_msg(
+            data.get("name", ""),
+            data.get("quote", ""), file),
+        file=file)
