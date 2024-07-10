@@ -13,7 +13,7 @@ __all__ = [
 
 SHORTCODE_REGEX = r'^[a-z]{2,3}[0-9]{2,4}$'
 UID_REGEX = r'^[0-9A-F]{8,14}$'
-DISCORD_ID_REGEX = r'^<@[0-9]{18}>$'
+DISCORD_ID_REGEX = r'^<@[0-9]{18,19}>$'
 
 
 def is_shortcode(message: str) -> bool:

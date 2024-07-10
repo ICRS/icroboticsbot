@@ -1,4 +1,5 @@
 import discord
+import logging
 from src.utils import *  
 
 
@@ -14,7 +15,9 @@ async def whois(interaction: discord.Interaction, user: str):
             return await interaction.response.send_message(
                 embed=not_committee())
 
+        logging.info(f"User: {user}")
         if not (is_discord_id(user)) and not (is_shortcode(user)):
+            logging.info(f"Discord User invalid: {user}")
             return await interaction.response.send_message(
                 embed=invalid_discord_id(), ephemeral=True)
 
