@@ -1,11 +1,12 @@
 import discord
 import logging
-from src.utils import *  
+from src.utils import *
 
 
 __all__ = [
     "whois"
 ]
+
 
 async def whois(interaction: discord.Interaction, user: str):
     try:
