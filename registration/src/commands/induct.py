@@ -5,6 +5,7 @@ __all__ = [
     "induct_member"
 ]
 
+
 async def induct_member(interaction: discord.Interaction,
                         shortcode: str, uid: str):
     """

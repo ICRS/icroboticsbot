@@ -2,7 +2,7 @@ import os
 import discord
 from discord.ui import View, Button
 
-from src.utils import *
+import src.utils as utils
 
 __all__ = [
     "PrinterButton",
@@ -18,7 +18,7 @@ if DEBUG:
 
 
 class PrinterButton(Button):
-    def __init__(self, printer: PrinterListener, **kwargs):
+    def __init__(self, printer: utils.PrinterListener, **kwargs):
         super().__init__(**kwargs)
         self.printer = printer
 
@@ -37,7 +37,7 @@ class PrinterButton(Button):
             description="Choose an action",
             color=discord.Color.green())
 
-        for command in Command:
+        for command in utils.Command:
             message_embed.add_field(
                 name=command.value.get("name", "Unknown"),
                 value=command.value.get("description", "Unknown"),
@@ -51,10 +51,10 @@ class PrinterButton(Button):
 
 class PrinterCommandPage(View):
     def __init__(self, *, timeout=180,
-                 printer: PrinterListener):
+                 printer: utils.PrinterListener):
 
         super().__init__(timeout=timeout)
-        self.printer: PrinterListener = printer
+        self.printer: utils.PrinterListener = printer
 
     @discord.ui.button(label="Notify", style=discord.ButtonStyle.green)
     async def notify(self, interaction: discord.Interaction,
@@ -70,7 +70,7 @@ class PrinterCommandPage(View):
             Discord button
         """
         button.style = discord.ButtonStyle.gray
-        self.printer.add_user(interaction.user, Command.NOTIFY)
+        self.printer.add_user(interaction.user, utils.Command.NOTIFY)
         await interaction.response.edit_message(
             content="All set!",
             view=None,
@@ -101,7 +101,7 @@ class PrinterCommandPage(View):
 
 class PrintersMainPage(View):
     def __init__(self, *, timeout=180,
-                 printer_farm: PrinterFarm = PrinterFarm()):
+                 printer_farm: utils.PrinterFarm = utils.PrinterFarm()):
         super().__init__(timeout=timeout)
         for name, listener in printer_farm.printers.items():
             self.add_item(PrinterButton(printer=listener,
@@ -120,7 +120,7 @@ async def printer_buttons(bot, interaction: discord.Interaction):
     interaction : Discord.interaction
         Discord interaction
     """
-    printer_farm: PrinterFarm = bot.printer_farm
+    printer_farm: utils.PrinterFarm = bot.printer_farm
 
     message_embed = discord.Embed(
         title="Select a printer",
@@ -132,7 +132,6 @@ async def printer_buttons(bot, interaction: discord.Interaction):
             value=f"Status: {listener.get_state()}",
             inline=False)
     await interaction.response.send_message(embed=message_embed,
-                                   view=PrintersMainPage(
-                                       printer_farm=printer_farm),
-                                   ephemeral=True)
-
+                                            view=PrintersMainPage(
+                                                printer_farm=printer_farm),
+                                            ephemeral=True)

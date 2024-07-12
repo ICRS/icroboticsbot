@@ -33,6 +33,6 @@ def quote_msg(title, message, file):
     embed = discord.Embed(title=title,
                           description=message,
                           color=info_color)
-    embed.set_image(url=f"attachment://{file.filename}.png")
+    embed.set_image(url="attachment://quote.jpeg")
 
     return embed

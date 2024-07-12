@@ -2,8 +2,10 @@ import base64
 import logging
 import discord
 import io
-import requests
+import aiohttp
 
+import discord.ext
+import discord.ext.commands as commands
 from src.utils import error_msg, quote_msg, SERVER_IP
 
 
@@ -12,7 +14,8 @@ __all__ = [
 ]
 
 
-async def quote_person(interaction: discord.Interaction, name: str):
+async def quote_person(ctx: commands.Context | discord.Interaction,
+                       name: str):
     """
     quote_person Generate a quote image from the stored quotes
 
@@ -23,23 +26,30 @@ async def quote_person(interaction: discord.Interaction, name: str):
     name : str
         Name of the person to quote
     """
-    result = requests.get(SERVER_IP + "/meme/random", params={
-        "name": name
-    })
+    if isinstance(ctx, discord.Interaction):
+        ctx = ctx.response
 
-    if result.status_code == 204:
-        return await interaction.response.send_message(embed=error_msg(
+    await ctx.defer()
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(SERVER_IP + "/meme/random", params={
+            "name": name
+        }) as response:
+            status_code = response.status
+            data = await response.json()
+
+    if status_code == 204:
+        return await ctx.send(embed=error_msg(
             f"Name {name} not found!"))
-    elif result.status_code != 200:
-        logging.warning(f"Bad Request {result.status_code}: {result.reason}")
-        return await interaction.response.send_message(embed=error_msg(
-            f"Bad Request: {result.status_code}"))
+    elif status_code != 200:
+        logging.warning(f"Bad Request: {status_code}")
+        return await ctx.send(embed=error_msg(
+            f"Bad Request: {status_code}"))
 
-    data = result.json()
     img_str = data.get("data")
     if img_str is None:
         logging.warning("No Image received!")
-        return await interaction.response.send_message(embed=error_msg(
+        return await ctx.send(embed=error_msg(
             f"Did not get image for {name}"))
 
     img = io.BytesIO(
@@ -47,7 +57,7 @@ async def quote_person(interaction: discord.Interaction, name: str):
 
     file = discord.File(img, filename="quote.jpeg")
 
-    await interaction.response.send_message(
+    await ctx.send(
         embed=quote_msg(
             data.get("name", ""),
             data.get("quote", ""), file),
