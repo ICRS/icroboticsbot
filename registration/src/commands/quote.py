@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-async def quote_person(ctx: commands.Context | discord.InteractionResponse,
+async def quote_person(ctx: commands.Context | discord.Interaction,
                        name: str):
     """
     quote_person Generate a quote image from the stored quotes
@@ -26,6 +26,9 @@ async def quote_person(ctx: commands.Context | discord.InteractionResponse,
     name : str
         Name of the person to quote
     """
+    if isinstance(ctx, discord.Interaction):
+        ctx = ctx.response
+
     await ctx.defer()
 
     async with aiohttp.ClientSession() as session:
