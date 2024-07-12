@@ -78,11 +78,12 @@ class DiscordBot(commands.Bot):
             app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))
 
-        @self.tree.command(name="quote",
-                           description="Generate a quote image from the stored quotes")  # noqa: E501
+        @self.hybrid_command(name="quote",
+                             description="Generate a quote image from the stored quotes")  # noqa: E501
         @app_commands.choices(name=quote_choices)
-        async def quote(interaction, name: str | None = ""):
-            await quote_person(interaction, name)
+        async def quote(ctx, name: str | None = ""):
+            # logging.info(f"Latency: {self.latency}")
+            await quote_person(ctx, name)
 
         @self.tree.command(name="alert",
                            description="Alert the bot. Purely for testing purposes")  # noqa: E501
