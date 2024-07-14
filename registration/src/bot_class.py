@@ -9,7 +9,7 @@ import requests
 from src.commands.stats import SERVER_IP
 from src.commands import (get_help, induct_member, printer_buttons,
                           printer_status, quote_person, register_user,
-                          stats_card, whois)
+                          stats_card, whois, get_timelapse)
 from src.utils import PrinterFarm, deregister_discord_id
 
 __all__ = ["DiscordBot"]
@@ -111,6 +111,11 @@ class DiscordBot(commands.Bot):
                            description="List all the printers and the users bound to them")  # noqa: E501
         async def bounds(interaction):
             await printer_status(self, interaction)
+
+        @self.tree.command(name="timelapse",
+                           description="Get the last timelapse for a printer")
+        async def timelapse(interaction):
+            await get_timelapse(interaction, self.printer_farm)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
