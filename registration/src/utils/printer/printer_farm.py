@@ -1,12 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# mypy: ignore-errors
-
-import asyncio                                              # noqa # pylint: disable=unused-import
+import asyncio
 import logging
 from threading import Thread
-import time
 
 from discord.ext import commands
 
@@ -45,29 +39,17 @@ class PrinterFarm:
                 # Perform the update state check
                 printer.update_state()
 
-                if printer.is_starting():
-                    # Start the timelapse
-                    printer.start_timelapse()
-
                 if printer.is_done():
                     # Check if timelapse was enabled and create/send it
-                    if printer.is_timelapsed():
-                        timelapse = printer.create_timelapse()
-                        if timelapse:
-                            time_str = time.strftime('%Y%m%d%H%M%S')
-                            await printer.send_timelapse(timelapse, time_str)
+                    # if printer.is_timelapsed():
+                    #     timelapse = printer.create_timelapse()
+                    #     if timelapse:
+                    #         time_str = time.strftime('%Y%m%d%H%M%S')
+                    #         await printer.send_timelapse(timelapse, time_str)
 
                     await printer.notify_users(Command.NOTIFY)
                     await printer.clear_users(Command.NOTIFY)
                     await printer.clear_users(Command.TIMELAPSE)
-
-                # Reset checks
-                if printer.is_reset():
-                    printer.stop_timelapse()
-
-                # Append frame for timelapse
-                if printer.is_timelapsed():
-                    printer.append_frame()
 
             # Wait before checking again
             await asyncio.sleep(10)
