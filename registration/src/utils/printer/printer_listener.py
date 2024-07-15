@@ -4,7 +4,6 @@
 # mypy: ignore-errors
 
 import os
-import base64
 import logging
 from enum import Enum
 from io import BytesIO
@@ -25,6 +24,7 @@ DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylin
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv()
+
 
 def get_env_bool(var: str, default: bool = False) -> bool:
     """
@@ -55,6 +55,7 @@ class Command(Enum):
     def _missing_(cls, value):
         return cls.NOTIFY
 
+
 class PrinterListener:
     def __init__(self, printer_name: str,
                  printer_url: str,
@@ -69,7 +70,6 @@ class PrinterListener:
         self.printer_name = printer_name
 
         self.__timelapse_speed: float = timelapse_speed
-        self.__timelapsed: bool = False
 
         self.__users: dict[Command, set[discord.User]] = {
             c: set() for c in Command
@@ -77,7 +77,6 @@ class PrinterListener:
 
         self.__default_image = Image.open("./src/no_image.jpg")
 
-        self.__timelapse_frames: list[BytesIO] = []
         self.__printer_state: deque[GcodeState] = deque(
             maxlen=max_printer_states)
 
@@ -183,64 +182,6 @@ class PrinterListener:
                 logging.error(f"{self.printer_name} Error sending message: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
         return True
 
-    def start_timelapse(self) -> bool:
-        """
-        Starts the timelapse process.
-        """
-        self.__timelapsed = True
-        return True
-
-    def stop_timelapse(self) -> bool:
-        """
-        Stops the timelapse process.
-        """
-        self.__timelapsed = False
-        self.__timelapse_frames.clear()
-        return False
-
-    def enable_timelapse(self, user: discord.User) -> bool:
-        """
-        Enables the timelapse process for a user.
-
-        Parameters
-        ----------
-        user (discord.User): The user to enable timelapse for.
-
-        Returns
-        -------
-        bool: True if timelapse was enabled, False otherwise.
-        """
-        self.__timelapsed = True
-        if not self.user_in(user, Command.TIMELAPSE):
-            self.add_user(user, Command.TIMELAPSE)
-        return True
-
-    def disable_timelapse(self, user: discord.User) -> bool:
-        """
-        Disables the timelapse process for a user.
-
-        Parameters
-        ----------
-        user (discord.User): The user to disable timelapse for.
-
-        Returns
-        -------
-        bool: True if timelapse was disabled, False otherwise.
-        """
-        if self.user_in(user, Command.TIMELAPSE):
-            self.remove_user(user, Command.TIMELAPSE)
-        return False
-
-    def is_timelapsed(self) -> bool:
-        """
-        Checks if the timelapse process is enabled.
-
-        Returns
-        -------
-        bool: True if the timelapse process is enabled, False otherwise.
-        """
-        return self.__timelapsed
-
     def create_timelapse(self) -> bytes | None:
         """
         Creates a timelapse of the printer.
@@ -267,55 +208,11 @@ class PrinterListener:
             logging.error(f"{self.printer_name} Error creating timelapse: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
             return None
 
-    async def send_timelapse(self, timelapse: bytes, time: str) -> None:
-        """
-        Sends the timelapse to users.
-
-        Parameters
-        ----------
-        timelapse (bytes): The timelapse bytes.
-        time (str): The time the timelapse was created.
-        """
-        filename = f"{self.printer_name}_timelapse_{time}.gif"
-        for user in self.__users[Command.TIMELAPSE]:
-            try:
-                with BytesIO(timelapse) as timelapse:
-                    await user.send(
-                        file=discord.File(
-                            fp=timelapse, filename=filename))
-            except Exception as e:
-                logging.error(f"{self.printer_name} Error sending timelapse: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
-
-    def append_frame(self):
-        """
-        Appends a frame to the timelapse.
-        """
-        frame = self.__get_frame()
-        if frame is not None:
-            self.__timelapse_frames.append(BytesIO(base64.b64decode(frame)))
-
     def update_state(self):
         """
         Updates the printer state.
         """
         self.__printer_state.append(self.__get_state())
-
-    def is_starting(self) -> bool:
-        """
-        Checks if the printer is starting.
-
-        Returns
-        -------
-        bool: True if the printer is starting, False otherwise.
-        """
-        if len(self.__printer_state) > 0:
-            if self.__printer_state[-1] == GcodeState.PREPARE:
-                return True
-            if self.__printer_state[-1] == GcodeState.RUNNING and \
-                    (self.__printer_state[-2] == GcodeState.IDLE or
-                     self.__printer_state[-2] == GcodeState.FINISH):
-                return True
-        return False
 
     def is_done(self) -> bool:
         """

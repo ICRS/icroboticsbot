@@ -47,6 +47,9 @@ class DiscordBot(commands.Bot):
         self.add_commands()
         self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
 
+        self.printer_names = printer_names
+        self.printer_suffix = printer_suffix
+
         @self.event
         async def on_ready():
             await self.tree.sync()
@@ -115,7 +118,10 @@ class DiscordBot(commands.Bot):
         @self.tree.command(name="timelapse",
                            description="Get the last timelapse for a printer")
         async def timelapse(interaction):
-            await get_timelapse(interaction, self.printer_farm)
+            await get_timelapse(
+                interaction,
+                printer_names=self.printer_names,
+                printer_suffix=self.printer_suffix)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

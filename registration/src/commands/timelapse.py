@@ -3,16 +3,18 @@ __all__ = ["get_timelapse"]
 
 import io
 import logging
+from typing import List
 import aiohttp
 import discord
 
 from discord.ui import View, Button
 
-from src.utils import PrinterFarm
 
-
-async def get_timelapse(interaction: discord.Interaction,
-                        printer_farm: PrinterFarm):
+async def get_timelapse(
+        interaction: discord.Interaction,
+        printer_suffix: str,
+        printer_names: List[str],
+):
     message_embed = discord.Embed(
         title="Select printer for timelapse.",
         description="Choose printer",
@@ -20,26 +22,37 @@ async def get_timelapse(interaction: discord.Interaction,
 
     await interaction.response.send_message(
         embed=message_embed,
-        view=TimelapseMainPage(printer_farm),
+        view=TimelapseMainPage(
+            printer_suffix=printer_suffix,
+            printer_names=printer_names
+        ),
         ephemeral=True
     )
 
 
 class TimelapseMainPage(View):
-    def __init__(self, printer_farm: PrinterFarm, timeout=180, ):
+    def __init__(
+        self,
+        printer_suffix: str,
+        printer_names: List[str],
+        timeout=180,
+    ):
         super().__init__(timeout=timeout)
-        for name in printer_farm.printers.keys():
+        for name in printer_names:
             self.add_item(
                 TimelapsePrinterButton(
                     printer_name=name,
+                    printer_suffix=printer_suffix,
                     style=discord.ButtonStyle.green,
-                    label=f"{name}"))
+                    label=f"{name}")
+            )
 
 
 class TimelapsePrinterButton(Button):
-    def __init__(self, printer_name, **kwargs) -> None:
+    def __init__(self, printer_name, printer_suffix, **kwargs) -> None:
         super().__init__(**kwargs)
         self.printer_name = printer_name
+        self.printer_url = printer_name + printer_suffix
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -49,7 +62,7 @@ class TimelapsePrinterButton(Button):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    "http://localhost:42000/timelapse",
+                    self.printer_url + "/timelapse",
                     params={
                         "name": self.printer_name,
                         "skip_frames": 10
