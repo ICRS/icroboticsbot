@@ -320,7 +320,7 @@ class PrinterListener:
                 f"http://{self.printer_url}/printer/status/state",
                 timeout=5)
         except Exception as e:
-            logging.error(f"{self.printer_name} Error getting state: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
+            logging.error(f"{self.printer_name} Error getting state: {e}")
         if response.status_code != 200:
             return GcodeState.UNKNOWN
         r: dict = response.json()

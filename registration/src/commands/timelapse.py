@@ -18,7 +18,8 @@ async def get_timelapse(
     message_embed = discord.Embed(
         title="Select printer for timelapse.",
         description="Choose printer",
-        color=discord.Color.green())
+        color=discord.Color.green()
+    )
 
     await interaction.response.send_message(
         embed=message_embed,
@@ -44,7 +45,7 @@ class TimelapseMainPage(View):
                     printer_name=name,
                     printer_suffix=printer_suffix,
                     style=discord.ButtonStyle.green,
-                    label=f"{name}")
+                    label=f"{name} ")
             )
 
 
@@ -52,7 +53,7 @@ class TimelapsePrinterButton(Button):
     def __init__(self, printer_name, printer_suffix, **kwargs) -> None:
         super().__init__(**kwargs)
         self.printer_name = printer_name
-        self.printer_url = printer_name + printer_suffix
+        self.printer_url = "http://" + printer_name + printer_suffix
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -62,13 +63,10 @@ class TimelapsePrinterButton(Button):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    self.printer_url + "/timelapse",
-                    params={
-                        "name": self.printer_name,
-                        "skip_frames": 10
-                    }) as response:
+                    self.printer_url + "/timelapse") as response:
                 status_code = response.status
                 data = await response.read()
+
         if status_code == 204:
             msg = f"No timelapse available yet for {self.printer_name}!"
             logging.info(msg)
@@ -90,8 +88,7 @@ class TimelapsePrinterButton(Button):
                 color=discord.Color.green()
             )
 
-            file = discord.File(data, filename="timelapse.gif")
-            message_embed.set_image(url="attachment://timelapse.gif")
+            file = discord.File(data, filename="timelapse.webm")
 
             await interaction.followup.send(
                 embed=message_embed,
