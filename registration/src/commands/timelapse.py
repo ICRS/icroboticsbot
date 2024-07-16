@@ -27,7 +27,8 @@ async def get_timelapse(
             printer_suffix=printer_suffix,
             printer_names=printer_names
         ),
-        ephemeral=True
+        ephemeral=True,
+        delete_after=10
     )
 
 
