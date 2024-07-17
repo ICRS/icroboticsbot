@@ -1,11 +1,12 @@
 import discord
-from src.utils import *  
+from src.utils import PrinterFarm, Command
 
 __all__ = [
     "printer_status"
 ]
 
-async def printer_status(bot, interaction):
+
+async def printer_status(bot, interaction: discord.Interaction):
     """
     printer_status sends a message with the users bound to the printers
 
@@ -21,7 +22,7 @@ async def printer_status(bot, interaction):
     message_embed = discord.Embed(
         title="Printers & Notifications bound to you:",
         color=discord.Color.red())
-    
+
     no_commands = True
     for name, listener in printer_farm.printers.items():
         commands = ""
@@ -36,10 +37,8 @@ async def printer_status(bot, interaction):
                 value=commands,
                 inline=False)
 
-
-    
-
     if no_commands:
         message_embed.description = "No Links found"
 
-    await interaction.response.send_message(embed=message_embed, ephemeral=True)
+    await interaction.response.send_message(
+        embed=message_embed, ephemeral=True)
