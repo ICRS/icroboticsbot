@@ -9,6 +9,7 @@ Utility functions used by the bot
 
 import os
 
+import aiohttp
 import discord
 import requests
 from requests.auth import HTTPBasicAuth
@@ -28,7 +29,8 @@ __all__ = [
     "get_stats_from_discord",
     "get_stats_from_shortcode",
     "get_discord_from_shortcode",
-    "SERVER_IP"
+    "SERVER_IP",
+    "get_current_user_printer",
 ]
 
 
@@ -155,6 +157,19 @@ async def get_discord_from_shortcode(interaction: discord.Interaction,
         await interaction.response.send_message(embed=error_msg(e))
 
         return False
+
+
+async def get_current_user_printer(printer_name: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+                f"{SERVER_IP}/printer/status/state"
+        ) as response:
+            status_code = response.status
+            data: dict = await response.json()
+    if status_code == 204:
+        return None
+    else:
+        return int(data)
 
 if __name__ == '__main__':
     pass
