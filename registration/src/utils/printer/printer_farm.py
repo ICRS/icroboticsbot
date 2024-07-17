@@ -40,16 +40,8 @@ class PrinterFarm:
                 printer.update_state()
 
                 if printer.is_done():
-                    # Check if timelapse was enabled and create/send it
-                    # if printer.is_timelapsed():
-                    #     timelapse = printer.create_timelapse()
-                    #     if timelapse:
-                    #         time_str = time.strftime('%Y%m%d%H%M%S')
-                    #         await printer.send_timelapse(timelapse, time_str)
-
                     await printer.notify_users(Command.NOTIFY)
                     await printer.clear_users(Command.NOTIFY)
-                    await printer.clear_users(Command.TIMELAPSE)
 
             # Wait before checking again
             await asyncio.sleep(10)
