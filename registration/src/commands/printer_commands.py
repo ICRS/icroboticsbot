@@ -77,27 +77,6 @@ class PrinterCommandPage(View):
             embed=None,
             delete_after=5)
 
-    @discord.ui.button(label="Timelapse", style=discord.ButtonStyle.green)
-    async def timelapse(self, interaction: discord.Interaction,
-                        button: discord.ui.Button):
-        """
-        timelapse is called when the timelapse button is clicked
-
-        Parameters
-        ----------
-        interaction : discord.Interaction
-            Discord interaction
-        button : discord.ui.Button
-            Discord button
-        """
-        button.style = discord.ButtonStyle.gray
-        self.printer.enable_timelapse(interaction.user)
-        await interaction.response.edit_message(
-            content="Await the timelapse in your DMs!",
-            view=None,
-            embed=None,
-            delete_after=5)
-
 
 class PrintersMainPage(View):
     def __init__(self, *, timeout=180,

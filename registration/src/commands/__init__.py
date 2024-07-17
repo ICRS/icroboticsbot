@@ -6,6 +6,7 @@ from .quote import *
 from .stats import *
 from .printer_commands import *
 from .printer_status_commands import *
+from .timelapse import *
 
 __all__ = []
 __all__.extend(help.__all__)
@@ -13,6 +14,7 @@ __all__.extend(induct.__all__)
 __all__.extend(printer_commands.__all__)
 __all__.extend(printer_status_commands.__all__)
 
+__all__.extend(timelapse.__all__)
 __all__.extend(quote.__all__)
 __all__.extend(register.__all__)
 __all__.extend(stats.__all__)

@@ -40,7 +40,7 @@ intents.members = True
 intents.message_content = True
 
 guild_info = {
-    'PREFIX': PREFIX,   
+    'PREFIX': PREFIX,
     'GUILD': GUILD,
     'ADMIN_ID': ADMIN_ID,
 }
@@ -51,12 +51,14 @@ client = DiscordBot(token=TOKEN,
                     printer_names=PRINTER_NAMES,
                     printer_suffix=PRINTER_GATEWAY_ENDPOINT_SUFFIX)
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S',
-                    handlers=[
-                        logging.StreamHandler()
-                    ])
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s [%(levelname)s]: %(message)s',
+    datefmt='%d-%b-%y %H:%M:%S',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 if __name__ == "__main__":
     client.start_loop()
