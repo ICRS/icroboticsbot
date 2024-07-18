@@ -162,14 +162,29 @@ async def get_discord_from_shortcode(interaction: discord.Interaction,
 async def get_current_user_printer(printer_name: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(
-                f"{SERVER_IP}/printer/status/state"
+                f"{SERVER_IP}/print-metrics/current/printer/shortcode",
+                params={
+                    "printer_name": printer_name
+                }
         ) as response:
             status_code = response.status
             data: dict = await response.json()
     if status_code == 204:
         return None
-    else:
-        return int(data)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+                f"{SERVER_IP}/shortcode/discord-id",
+                params={
+                    "shortcode": data
+                }
+        ) as response:
+            status_code = response.status
+            data: dict = await response.json()
+    if status_code == 204:
+        return None
+
+    return int(data.get("discord_id"))
 
 if __name__ == '__main__':
     pass
