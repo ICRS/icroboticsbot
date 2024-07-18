@@ -4,10 +4,12 @@ __all__ = ["PrinterController"]
 import asyncio
 import base64
 from io import BytesIO
+import logging
+from threading import Thread
 from PIL import Image
 from typing import Any
 import aiohttp
-from discord import ButtonStyle, File, Interaction, Embed, Color, Message, User
+from discord import ButtonStyle, Interaction, Embed, Color, Message, User
 from discord.ui import View, Button
 from bambulabs_api import GcodeState
 
@@ -36,52 +38,61 @@ class PrinterController:
 
         self.printer_state = GcodeState.UNKNOWN
 
-        asyncio.create_task(self.printer_control_task)
+        loop = asyncio.get_event_loop()
+        Thread(target=self.run_async_loop_in_thread,
+               args=[loop],
+               daemon=True).start()
+
+    def run_async_loop_in_thread(self, loop):
+        """Sets up and runs the asyncio event loop in a new thread."""
+        try:
+            asyncio.run_coroutine_threadsafe(self.printer_control_task(), loop)
+        except Exception as e:
+            logging.error(f"Error in Controller thread: {e}")
 
     async def printer_control_task(self):
         RUNNING_GCODE = (GcodeState.RUNNING, GcodeState.PAUSE)
-
         while True:
             self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501b
+            logging.debug(f"Printer State: {self.printer_state} {self.user}")
 
             if self.user and self.printer_state in RUNNING_GCODE:
-                image = self.printer_controller_interface.get_image()
-
-                with BytesIO() as image_binary:
-                    image.save(image_binary, 'PNG')
-                    image_binary.seek(0)
-                    image_bytes = image_binary.getbuffer().tobytes()
-
-                image_file = File(image_bytes, "attachments://image.png")
                 embed = Embed(
                     title=f"Printer {self.printer_name}",
                     description="Print Viewer and controller",
                     color=Color.blurple(),
                 )
+                logging.debug(f"Embed {embed}")
 
-                if not self.message:
+                if self.message is None:
+                    logging.debug("Sending Now")
                     self.message: Message = self.user.send(
                         embed=embed,
                         view=PrinterControllerMainPage(
                             self.printer_controller_interface
                         ),
-                        file=image_file
                     )
                 else:
                     self.message.edit(
                         embed=embed,
                         view=PrinterControllerMainPage(
                             self.printer_controller_interface),
-                        attachments=[image_file])
+                    )
+                logging.debug("Sending Done")
+
             else:
+                logging.debug(f"Message {self.message}")
                 if self.message is not None:
                     self.message.delete()
                     self.message = None
 
-                user_id = get_current_user_printer(
+                user_id = await get_current_user_printer(
                     printer_name=self.printer_name)
+                logging.debug(f"USER ID: {user_id}")
+
                 if user_id is not None:
                     self.user = User(id=user_id)
+                    logging.info(f"Discord User: {self.user}")
 
             await asyncio.sleep(self.timeout)
 
@@ -129,7 +140,7 @@ class PrinterControllerInterface:
     async def get_state(self):
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    f"http://{self.printer_url}/printer/status/state"
+                    f"{self.printer_url}/printer/status/state"
             ) as response:
                 status_code = response.status
                 data: dict = await response.json()
