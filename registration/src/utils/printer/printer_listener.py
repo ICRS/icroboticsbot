@@ -11,7 +11,7 @@ from collections import deque
 import discord
 from bambulabs_api import GcodeState
 
-from utils.api import get_state
+from src.utils.api import get_state
 
 __all__ = [
     "get_env_bool",

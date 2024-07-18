@@ -7,11 +7,13 @@ from io import BytesIO
 import logging
 from threading import Thread
 from PIL import Image
-from typing import Any, Callable
+from typing import Any
 import aiohttp
-from discord import ButtonStyle, Interaction, Embed, Color, Message, User
+from discord import ButtonStyle, DMChannel, Interaction, Embed, Color, Message
+from discord.ext.commands import Bot
 from discord.ui import View, Button
 from bambulabs_api import GcodeState
+import requests
 
 from src.utils import get_current_user_printer, get_state
 
@@ -21,16 +23,16 @@ class PrinterController:
             self,
             printer_name: str,
             printer_suffix: str,
-            get_user: Callable[[int], (User | None)],
+            bot: Bot,
             timeout: int = 10,
     ) -> None:
         self.printer_name = printer_name
         self.printer_suffix = printer_suffix
 
         self.timeout = timeout
-        self.get_user = get_user
+        self.bot = bot
 
-        self.user: User | None = None
+        self.dm_channel: DMChannel | None = None
         self.message = None
 
         self.printer_controller_interface = PrinterControllerInterface(
@@ -55,46 +57,44 @@ class PrinterController:
     async def printer_control_task(self):
         RUNNING_GCODE = (GcodeState.RUNNING, GcodeState.PAUSE)
         while True:
-            self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501b
-            logging.debug(f"Printer State: {self.printer_state} {self.user}")
+            self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
 
-            if self.user and self.printer_state in RUNNING_GCODE:
+            if self.dm_channel and self.printer_state in RUNNING_GCODE:
                 embed = Embed(
                     title=f"Printer {self.printer_name}",
                     description="Print Viewer and controller",
                     color=Color.blurple(),
                 )
-                logging.debug(f"Embed {embed}")
 
                 if self.message is None:
-                    logging.debug("Sending Now")
-                    self.message: Message = self.user.send(
+                    self.message: Message = await self.dm_channel.send(
                         embed=embed,
                         view=PrinterControllerMainPage(
                             self.printer_controller_interface
                         ),
                     )
                 else:
-                    self.message.edit(
+                    await self.message.edit(
                         embed=embed,
                         view=PrinterControllerMainPage(
                             self.printer_controller_interface),
                     )
-                logging.debug("Sending Done")
 
             else:
-                logging.debug(f"Message {self.message}")
                 if self.message is not None:
-                    self.message.delete()
+                    await self.message.delete()
                     self.message = None
 
                 user_id = await get_current_user_printer(
                     printer_name=self.printer_name)
-                logging.debug(f"USER ID: {user_id}")
 
-                if user_id is not None:
-                    self.user = self.get_user(id=user_id)
-                    logging.info(f"Discord User: {self.user}")
+                if user_id is not None and self.bot.is_ready():
+                    logging.info(f"Getting Discord User: {user_id}")
+                    try:
+                        user = self.bot.get_user(user_id)
+                        self.dm_channel: DMChannel = await user.create_dm()
+                    except Exception as e:
+                        logging.error(f"Error in getting user {e}")
 
             await asyncio.sleep(self.timeout)
 
@@ -104,22 +104,20 @@ class PrinterControllerInterface:
         self.printer_name = printer_name
         self.printer_url = f"http://{printer_name}{printer_suffix}"
 
-    async def pause_print(self):
+    def pause_print(self):
         return self.query_printer("/pause")
 
-    async def stop_print(self):
+    def stop_print(self):
         return self.query_printer("/stop")
 
-    async def resume_print(self):
+    def resume_print(self):
         return self.query_printer("/resume")
 
-    async def query_printer(self, endpoint):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                    f"{self.printer_url}/printer/print{endpoint}") as response:
-                status_code = response.status
+    def query_printer(self, endpoint):
+        response = requests.post(
+            f"{self.printer_url}/printer/print{endpoint}")
 
-        return status_code == 200
+        return response.status_code == 200
 
     async def get_image(self):
         async with aiohttp.ClientSession() as session:
