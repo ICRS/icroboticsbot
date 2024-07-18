@@ -7,7 +7,7 @@ from io import BytesIO
 import logging
 from threading import Thread
 from PIL import Image
-from typing import Any
+from typing import Any, Callable
 import aiohttp
 from discord import ButtonStyle, Interaction, Embed, Color, Message, User
 from discord.ui import View, Button
@@ -21,14 +21,16 @@ class PrinterController:
             self,
             printer_name: str,
             printer_suffix: str,
-            timeout: int = 10
+            get_user: Callable[[int], (User | None)],
+            timeout: int = 10,
     ) -> None:
         self.printer_name = printer_name
         self.printer_suffix = printer_suffix
 
         self.timeout = timeout
+        self.get_user = get_user
 
-        self.user = None
+        self.user: User | None = None
         self.message = None
 
         self.printer_controller_interface = PrinterControllerInterface(
@@ -91,7 +93,7 @@ class PrinterController:
                 logging.debug(f"USER ID: {user_id}")
 
                 if user_id is not None:
-                    self.user = User(id=user_id)
+                    self.user = self.get_user(id=user_id)
                     logging.info(f"Discord User: {self.user}")
 
             await asyncio.sleep(self.timeout)
