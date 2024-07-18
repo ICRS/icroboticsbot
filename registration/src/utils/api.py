@@ -1,27 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# mypy: ignore-errors
-
-"""
-Utility functions used by the bot
-"""
-
-import os
-
-import aiohttp
-import discord
-import requests
-from requests.auth import HTTPBasicAuth
-
-from src.utils import error_msg
-
-SERVER_IP = os.getenv("SERVER_IP")
-DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")
-DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
-
-BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
-
 __all__ = [
     "add_induction_to_member",
     "deregister_discord_id",
@@ -31,7 +7,32 @@ __all__ = [
     "get_discord_from_shortcode",
     "SERVER_IP",
     "get_current_user_printer",
+    "get_remaining_time",
+    "get_percentage",
+    "get_frame",
+    "get_state",
 ]
+
+"""
+Utility functions used by the bot
+"""
+
+import logging
+import os
+
+import aiohttp
+import discord
+import requests
+from requests.auth import HTTPBasicAuth
+from bambulabs_api import GcodeState
+
+from src.utils import error_msg
+
+SERVER_IP = os.getenv("SERVER_IP")
+DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")
+DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
+
+BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 
 async def add_induction_to_member(interaction: discord.Interaction,
@@ -185,6 +186,93 @@ async def get_current_user_printer(printer_name: str):
         return None
 
     return int(data.get("discord_id"))
+
+
+def get_remaining_time(printer_url) -> int:
+    """
+    Retrieves the remaining time for the printer.
+
+    Returns
+    -------
+    int: The remaining time, or -1 if an error occurred.
+    """
+    response: requests.Response = {}
+    try:
+        response = requests.get(
+            f"{printer_url}/printer/status/time",
+            timeout=30)
+    except Exception as e:
+        logging.error(f"{printer_url} Error getting time: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
+    if response.status_code != 200:
+        return -1
+    r: dict = dict(response.json())
+    return r.get("time", -1)
+
+
+def get_percentage(printer_url) -> int:
+    """
+    Retrieves the percentage of completion for the printer.
+
+    Returns:
+        int: The percentage of completion, or -1 if an error occurred.
+    """
+    response: requests.Response = {}
+    try:
+        response = requests.get(
+            f"{printer_url}/printer/status/percentage",
+            timeout=30)
+    except Exception as e:
+        logging.error(f"{printer_url} Error getting percentage: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
+    if response.status_code != 200:
+        return -1
+    r: dict = dict(response.json())
+    return r.get("percentage", -1)
+
+
+def get_frame(printer_url) -> str | None:
+    """
+    Retrieves a frame from the printer.
+
+    Returns
+    -------
+    str | None: The frame, or None if an error occurred.
+    """
+    response: requests.Response = requests.Response()
+    try:
+        response = requests.get(
+            f"{printer_url}/printer/camera",
+            timeout=5)
+    except Exception as e:
+        logging.error(f"{printer_url} Error getting frame: {e}")
+    if response.status_code != 200:
+        return None
+    r: dict[str, dict] = dict(response.json())
+    if "error" in r:
+        logging.error(f"{printer_url} Error getting frame: {r['error']}")
+        return None
+    return r.get("frame", {}).get("body", None)
+
+
+def get_state(printer_url) -> GcodeState:
+    """
+    Retrieves the state of the printer.
+
+    Returns
+    -------
+    State: The state of the printer.
+    """
+    response: requests.Response = requests.Response()
+    try:
+        response = requests.get(
+            f"{printer_url}/printer/status/state",
+            timeout=5)
+    except Exception as e:
+        logging.error(f"{printer_url} Error getting state: {e}")
+    if response.status_code != 200:
+        return GcodeState.UNKNOWN
+    r: dict = response.json()
+    return GcodeState(r.get("state", "IDLE"))
+
 
 if __name__ == '__main__':
     pass
