@@ -7,15 +7,17 @@ from io import BytesIO
 import logging
 from threading import Thread
 from PIL import Image
-from typing import Any
 import aiohttp
-from discord import ButtonStyle, DMChannel, Interaction, Embed, Color, Message
+from discord import (ButtonStyle, DMChannel, File,
+                     Interaction, Embed, Color, Message)
 from discord.ext.commands import Bot
 from discord.ui import View, Button
 from bambulabs_api import GcodeState
 import requests
 
 from src.utils import get_current_user_printer, get_state
+
+DEFAULT_IMAGE = Image.open("src/no_image.jpg")
 
 
 class PrinterController:
@@ -60,11 +62,23 @@ class PrinterController:
             self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
 
             if self.dm_channel and self.printer_state in RUNNING_GCODE:
+                image = await self.printer_controller_interface.get_image()
+
+                if image is None:
+                    image = BytesIO()
+                    DEFAULT_IMAGE.save(image, format='JPEG')
+                    image.seek(0)
+
+                image_file = File(
+                    fp=image, filename="image.jpeg")
+                image.close()
+
                 embed = Embed(
                     title=f"Printer {self.printer_name}",
                     description="Print Viewer and controller",
                     color=Color.blurple(),
                 )
+                embed.set_image(url="attachment://image.jpeg")
 
                 if self.message is None:
                     self.message: Message = await self.dm_channel.send(
@@ -72,12 +86,12 @@ class PrinterController:
                         view=PrinterControllerMainPage(
                             self.printer_controller_interface
                         ),
+                        file=image_file
                     )
                 else:
                     await self.message.edit(
                         embed=embed,
-                        view=PrinterControllerMainPage(
-                            self.printer_controller_interface),
+                        attachments=[image_file]
                     )
 
             else:
@@ -134,7 +148,9 @@ class PrinterControllerInterface:
             if frame is None:
                 return None
 
-            frame = Image.open(BytesIO(base64.b64decode(frame)))
+            frame = BytesIO(
+                base64.decodebytes(
+                    bytes(frame, "utf-8")))
             return frame
 
     async def get_state(self):
@@ -147,6 +163,7 @@ class PrinterControllerMainPage(View):
         printer_controller: PrinterControllerInterface
     ):
         super().__init__()
+        self.timeout = None
 
         self.printer_controller = printer_controller
 
@@ -180,6 +197,6 @@ class PrinterControlButton(Button):
         super().__init__(**kwargs)
         self.printer_callback = callback
 
-    async def callback(self, interaction: Interaction) -> Any:
+    async def callback(self, interaction: Interaction):
         self.printer_callback()
-        return await super().callback(interaction)
+        await interaction.response.defer()
