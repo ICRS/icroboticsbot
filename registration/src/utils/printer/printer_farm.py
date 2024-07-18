@@ -22,7 +22,9 @@ class PrinterFarm:
             name, name + printer_suffix) for name in printer_names}
 
         self.printer_controllers = {name: PrinterController(
-            printer_name=name, printer_suffix=printer_suffix
+            printer_name=name,
+            printer_suffix=printer_suffix,
+            get_user=bot.get_user
         ) for name in printer_names}
 
         # Thread to handle the continuous checking and notification
