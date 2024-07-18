@@ -13,7 +13,7 @@ from discord import ButtonStyle, Interaction, Embed, Color, Message, User
 from discord.ui import View, Button
 from bambulabs_api import GcodeState
 
-from src.utils import get_current_user_printer
+from src.utils import get_current_user_printer, get_state
 
 
 class PrinterController:
@@ -140,16 +140,7 @@ class PrinterControllerInterface:
             return frame
 
     async def get_state(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                    f"{self.printer_url}/printer/status/state"
-            ) as response:
-                status_code = response.status
-                data: dict = await response.json()
-        if status_code != 200:
-            return GcodeState.UNKNOWN
-
-        return GcodeState(data.get("state", "IDLE"))
+        return get_state(self.printer_url)
 
 
 class PrinterControllerMainPage(View):
