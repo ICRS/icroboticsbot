@@ -18,6 +18,7 @@ import requests
 from src.utils import get_current_user_printer, get_state
 
 DEFAULT_IMAGE = Image.open("src/no_image.jpg")
+RUNNING_GCODE = (GcodeState.RUNNING, GcodeState.PAUSE)
 
 
 class PrinterController:
@@ -57,7 +58,6 @@ class PrinterController:
             logging.error(f"Error in Controller thread: {e}")
 
     async def printer_control_task(self):
-        RUNNING_GCODE = (GcodeState.RUNNING, GcodeState.PAUSE)
         while True:
             self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
 
@@ -75,7 +75,7 @@ class PrinterController:
 
                 embed = Embed(
                     title=f"Printer {self.printer_name}",
-                    description="Print Viewer and controller",
+                    description=f"Printer: {self.printer_state.value}",
                     color=Color.blurple(),
                 )
                 embed.set_image(url="attachment://image.jpeg")
