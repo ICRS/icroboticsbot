@@ -4,6 +4,7 @@ from threading import Thread
 
 from discord.ext import commands
 
+from src.commands.printer_controller import PrinterController
 from src.utils.printer.printer_listener import Command, PrinterListener
 
 __all__ = [
@@ -19,6 +20,13 @@ class PrinterFarm:
         # Initialize printers with printer names and URLs
         self.printers = {name: PrinterListener(
             name, name + printer_suffix) for name in printer_names}
+
+        self.printer_controllers = {name: PrinterController(
+            printer_name=name,
+            printer_suffix=printer_suffix,
+            bot=bot
+        ) for name in printer_names}
+
         # Thread to handle the continuous checking and notification
         loop = asyncio.get_event_loop()
         Thread(target=self.__run_async_loop_in_thread,
@@ -40,16 +48,8 @@ class PrinterFarm:
                 printer.update_state()
 
                 if printer.is_done():
-                    # Check if timelapse was enabled and create/send it
-                    # if printer.is_timelapsed():
-                    #     timelapse = printer.create_timelapse()
-                    #     if timelapse:
-                    #         time_str = time.strftime('%Y%m%d%H%M%S')
-                    #         await printer.send_timelapse(timelapse, time_str)
-
                     await printer.notify_users(Command.NOTIFY)
                     await printer.clear_users(Command.NOTIFY)
-                    await printer.clear_users(Command.TIMELAPSE)
 
             # Wait before checking again
             await asyncio.sleep(10)
