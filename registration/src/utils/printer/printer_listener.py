@@ -6,13 +6,12 @@
 import os
 import logging
 from enum import Enum
-from io import BytesIO
 from collections import deque
 
 import discord
-import requests
-from PIL import Image
 from bambulabs_api import GcodeState
+
+from src.utils.api import get_state
 
 __all__ = [
     "get_env_bool",
@@ -20,7 +19,7 @@ __all__ = [
     "PrinterListener"
 ]
 
-DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
+DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']
 if DEBUG:
     from dotenv import load_dotenv
     load_dotenv()
@@ -48,8 +47,11 @@ DEBUG = get_env_bool('DEBUG', DEBUG)
 
 
 class Command(Enum):
-    NOTIFY = {"name": "Notify", "emoji": "🔔", "description": "Notifies you when the printer is done"}      # noqa
-    TIMELAPSE = {"name": "Timelapse", "emoji": "📷", "description": "Generates a timelapse of the print"}   # noqa
+    NOTIFY = {
+        "name": "Notify",
+        "emoji": "🔔",
+        "description": "Notifies you when the printer is done"
+    }
 
     @classmethod
     def _missing_(cls, value):
@@ -59,7 +61,6 @@ class Command(Enum):
 class PrinterListener:
     def __init__(self, printer_name: str,
                  printer_url: str,
-                 timelapse_speed: float = 1.0,
                  max_printer_states: int = 10):
         # Debugging purposes
         # print(requests.get(f"http://localhost:6000/printer/status/state").json()) if DEBUG else None  # noqa
@@ -69,13 +70,9 @@ class PrinterListener:
             self.printer_url = printer_url
         self.printer_name = printer_name
 
-        self.__timelapse_speed: float = timelapse_speed
-
         self.__users: dict[Command, set[discord.User]] = {
             c: set() for c in Command
         }
-
-        self.__default_image = Image.open("./src/no_image.jpg")
 
         self.__printer_state: deque[GcodeState] = deque(
             maxlen=max_printer_states)
@@ -182,37 +179,13 @@ class PrinterListener:
                 logging.error(f"{self.printer_name} Error sending message: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
         return True
 
-    def create_timelapse(self) -> bytes | None:
-        """
-        Creates a timelapse of the printer.
-
-        Returns
-        -------
-        bytes | None: The timelapse bytes, or None if an error occurred.
-        """
-        im: list[Image.Image] = []
-        for frame in self.__timelapse_frames:
-            im.append(Image.open(frame))
-
-        try:
-            with BytesIO() as buffer:
-                if len(im) == 0:
-                    im.append(self.__default_image)
-                im[0].save(buffer, format='GIF', save_all=True,
-                           append_images=im[1:], optimize=False,
-                           duration=int((1000 * 1/self.__timelapse_speed)/6),
-                           loop=0)
-                buffer.seek(0)
-                return buffer.getbuffer().tobytes()
-        except Exception as e:
-            logging.error(f"{self.printer_name} Error creating timelapse: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
-            return None
-
     def update_state(self):
         """
         Updates the printer state.
         """
-        self.__printer_state.append(self.__get_state())
+        self.__printer_state.append(
+            get_state(f"http://{self.printer_url}")
+        )
 
     def is_done(self) -> bool:
         """
@@ -243,85 +216,3 @@ class PrinterListener:
                 self.__printer_state[-1] == GcodeState.FINISH:
             return True
         return False
-
-    def __get_remaining_time(self) -> int:
-        """
-        Retrieves the remaining time for the printer.
-
-        Returns
-        -------
-        int: The remaining time, or -1 if an error occurred.
-        """
-        response: requests.Response = {}
-        try:
-            response = requests.get(
-                f"http://{self.printer_url}/printer/status/time",
-                timeout=30)
-        except Exception as e:
-            logging.error(f"{self.printer_name} Error getting time: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
-        if response.status_code != 200:
-            return -1
-        r: dict = dict(response.json())
-        return r.get("time", -1)
-
-    def __get_percentage(self) -> int:
-        """
-        Retrieves the percentage of completion for the printer.
-
-        Returns:
-            int: The percentage of completion, or -1 if an error occurred.
-        """
-        response: requests.Response = {}
-        try:
-            response = requests.get(
-                f"http://{self.printer_url}/printer/status/percentage",
-                timeout=30)
-        except Exception as e:
-            logging.error(f"{self.printer_name} Error getting percentage: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
-        if response.status_code != 200:
-            return -1
-        r: dict = dict(response.json())
-        return r.get("percentage", -1)
-
-    def __get_frame(self) -> str | None:
-        """
-        Retrieves a frame from the printer.
-
-        Returns
-        -------
-        str | None: The frame, or None if an error occurred.
-        """
-        response: requests.Response = requests.Response()
-        try:
-            response = requests.get(
-                f"http://{self.printer_url}/printer/camera",
-                timeout=5)
-        except Exception as e:
-            logging.error(f"{self.printer_name} Error getting frame: {e}")  # noqa  # pylint: disable=logging-fstring-interpolation
-        if response.status_code != 200:
-            return None
-        r: dict[str, dict] = dict(response.json())
-        if "error" in r:
-            logging.error(f"{self.printer_name} Error getting frame: {r['error']}")  # noqa  # pylint: disable=logging-fstring-interpolation
-            return None
-        return r.get("frame", {}).get("body", None)
-
-    def __get_state(self) -> GcodeState:
-        """
-        Retrieves the state of the printer.
-
-        Returns
-        -------
-        State: The state of the printer.
-        """
-        response: requests.Response = requests.Response()
-        try:
-            response = requests.get(
-                f"http://{self.printer_url}/printer/status/state",
-                timeout=5)
-        except Exception as e:
-            logging.error(f"{self.printer_name} Error getting state: {e}")
-        if response.status_code != 200:
-            return GcodeState.UNKNOWN
-        r: dict = response.json()
-        return GcodeState(r.get("state", "IDLE"))

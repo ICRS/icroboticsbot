@@ -1,0 +1,202 @@
+__all__ = ["PrinterController"]
+
+
+import asyncio
+import base64
+from io import BytesIO
+import logging
+from threading import Thread
+from PIL import Image
+import aiohttp
+from discord import (ButtonStyle, DMChannel, File,
+                     Interaction, Embed, Color, Message)
+from discord.ext.commands import Bot
+from discord.ui import View, Button
+from bambulabs_api import GcodeState
+import requests
+
+from src.utils import get_current_user_printer, get_state
+
+DEFAULT_IMAGE = Image.open("src/no_image.jpg")
+RUNNING_GCODE = (GcodeState.RUNNING, GcodeState.PAUSE)
+
+
+class PrinterController:
+    def __init__(
+            self,
+            printer_name: str,
+            printer_suffix: str,
+            bot: Bot,
+            timeout: int = 10,
+    ) -> None:
+        self.printer_name = printer_name
+        self.printer_suffix = printer_suffix
+
+        self.timeout = timeout
+        self.bot = bot
+
+        self.dm_channel: DMChannel | None = None
+        self.message = None
+
+        self.printer_controller_interface = PrinterControllerInterface(
+            printer_name=printer_name,
+            printer_suffix=printer_suffix
+        )
+
+        self.printer_state = GcodeState.UNKNOWN
+
+        loop = asyncio.get_event_loop()
+        Thread(target=self.run_async_loop_in_thread,
+               args=[loop],
+               daemon=True).start()
+
+    def run_async_loop_in_thread(self, loop):
+        """Sets up and runs the asyncio event loop in a new thread."""
+        try:
+            asyncio.run_coroutine_threadsafe(self.printer_control_task(), loop)
+        except Exception as e:
+            logging.error(f"Error in Controller thread: {e}")
+
+    async def printer_control_task(self):
+        while True:
+            self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
+
+            if self.dm_channel and self.printer_state in RUNNING_GCODE:
+                image = await self.printer_controller_interface.get_image()
+
+                if image is None:
+                    image = BytesIO()
+                    DEFAULT_IMAGE.save(image, format='JPEG')
+                    image.seek(0)
+
+                image_file = File(
+                    fp=image, filename="image.jpeg")
+                image.close()
+
+                embed = Embed(
+                    title=f"Printer {self.printer_name}",
+                    description=f"Printer: {self.printer_state.value}",
+                    color=Color.blurple(),
+                )
+                embed.set_image(url="attachment://image.jpeg")
+
+                if self.message is None:
+                    self.message: Message = await self.dm_channel.send(
+                        embed=embed,
+                        view=PrinterControllerMainPage(
+                            self.printer_controller_interface
+                        ),
+                        file=image_file
+                    )
+                else:
+                    await self.message.edit(
+                        embed=embed,
+                        attachments=[image_file]
+                    )
+
+            else:
+                if self.message is not None:
+                    await self.message.delete()
+                    self.message = None
+
+                user_id = await get_current_user_printer(
+                    printer_name=self.printer_name)
+
+                if user_id is not None and self.bot.is_ready():
+                    logging.info(f"Getting Discord User: {user_id}")
+                    try:
+                        user = self.bot.get_user(user_id)
+                        self.dm_channel: DMChannel = await user.create_dm()
+                    except Exception as e:
+                        logging.error(f"Error in getting user {e}")
+
+            await asyncio.sleep(self.timeout)
+
+
+class PrinterControllerInterface:
+    def __init__(self, printer_name: str, printer_suffix: str) -> None:
+        self.printer_name = printer_name
+        self.printer_url = f"http://{printer_name}{printer_suffix}"
+
+    def pause_print(self):
+        return self.query_printer("/pause")
+
+    def stop_print(self):
+        return self.query_printer("/stop")
+
+    def resume_print(self):
+        return self.query_printer("/resume")
+
+    def query_printer(self, endpoint):
+        response = requests.post(
+            f"{self.printer_url}/printer/print{endpoint}")
+
+        return response.status_code == 200
+
+    async def get_image(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f"{self.printer_url}/printer/camera") as response:
+                status_code = response.status
+                data = await response.json()
+        if status_code != 200:
+            return None
+        else:
+            frame = data['frame'].get(
+                "body", None) if 'frame' in data else None
+
+            if frame is None:
+                return None
+
+            frame = BytesIO(
+                base64.decodebytes(
+                    bytes(frame, "utf-8")))
+            return frame
+
+    async def get_state(self):
+        return get_state(self.printer_url)
+
+
+class PrinterControllerMainPage(View):
+    def __init__(
+        self,
+        printer_controller: PrinterControllerInterface
+    ):
+        super().__init__()
+        self.timeout = None
+
+        self.printer_controller = printer_controller
+
+        self.add_item(
+            PrinterControlButton(
+                self.printer_controller.stop_print,
+                style=ButtonStyle.red,
+                label="Stop"
+            ))
+
+        self.add_item(
+            PrinterControlButton(
+                self.printer_controller.pause_print,
+                style=ButtonStyle.green,
+                label="Pause"
+            ))
+
+        self.add_item(
+            PrinterControlButton(
+                self.printer_controller.resume_print,
+                style=ButtonStyle.green,
+                label="Resume"
+            ))
+
+
+class PrinterControlButton(Button):
+    def __init__(
+            self,
+            callback,
+            **kwargs):
+        super().__init__(**kwargs)
+        self.printer_callback = callback
+
+    async def callback(self, interaction: Interaction):
+        self.printer_callback()
+        await interaction.response.defer()

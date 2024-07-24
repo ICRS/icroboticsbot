@@ -6,7 +6,7 @@ from src.PrinterListener import PrinterListener, PrinterFarm
 
 __all__ = ["PrinterButton", "PrinterCommandPage", "PrinterMenu"]
 
-# https://github.com/Rapptz/discord.py/tree/master/examples/views
+
 class PrinterButton(Button):
     def __init__(self, printer: PrinterListener, **kwargs):
         super().__init__(**kwargs)
@@ -47,7 +47,7 @@ class PrinterCommandPage(View):
 
     @discord.ui.button(label="Release", style=discord.ButtonStyle.green)
     async def release(self, interaction: discord.Interaction,
-                     button: discord.ui.Button):
+                      button: discord.ui.Button):
         """
         release is called when the release button is clicked
 
