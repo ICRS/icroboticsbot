@@ -8,8 +8,8 @@ import logging
 from threading import Thread
 from PIL import Image
 import aiohttp
-from discord import (ButtonStyle, DMChannel, File,
-                     Interaction, Embed, Color, Message)
+from discord import (ButtonStyle, DMChannel, File, HTTPException,
+                     Interaction, Embed, Color, Message, User)
 from discord.ext.commands import Bot
 from discord.ui import View, Button
 from bambulabs_api import GcodeState
@@ -33,8 +33,12 @@ class PrinterController:
         self.printer_suffix = printer_suffix
 
         self.timeout = timeout
+
+        # Discord Bot Stuff
         self.bot = bot
 
+        # Discord User Stuff
+        self.user: User | None = None
         self.dm_channel: DMChannel | None = None
         self.message = None
 
@@ -59,27 +63,42 @@ class PrinterController:
 
     async def printer_control_task(self):
         while True:
-            self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
+            try:
+                await self.control_task_iteration_()
+            except Exception as e:
+                logging.error(("Something went wrong in the printer "
+                               f"controller loop: {e}"))
+            finally:
+                await asyncio.sleep(self.timeout)
 
-            if self.dm_channel and self.printer_state in RUNNING_GCODE:
-                image = await self.printer_controller_interface.get_image()
+    async def control_task_iteration_(self):
+        self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
 
-                if image is None:
-                    image = BytesIO()
-                    DEFAULT_IMAGE.save(image, format='JPEG')
-                    image.seek(0)
+        if self.user and self.printer_state in RUNNING_GCODE:
+            if self.dm_channel is None:
+                self.dm_channel: DMChannel = await self.user.create_dm()
 
-                image_file = File(
-                    fp=image, filename="image.jpeg")
-                image.close()
+            image = await self.printer_controller_interface.get_image()
 
-                embed = Embed(
-                    title=f"Printer {self.printer_name}",
-                    description=f"Printer: {self.printer_state.value}",
-                    color=Color.blurple(),
-                )
-                embed.set_image(url="attachment://image.jpeg")
+            if image is None:
+                logging.warning("No Image Retrieved!")
+                image = BytesIO()
+                DEFAULT_IMAGE.save(image, format='JPEG')
+                image.seek(0)
+                logging.warning("Using Default Image")
 
+            image_file = File(
+                fp=image, filename="image.jpeg")
+            image.close()
+
+            embed = Embed(
+                title=f"Printer {self.printer_name}",
+                description=f"Printer: {self.printer_state.value}",
+                color=Color.blurple(),
+            )
+            embed.set_image(url="attachment://image.jpeg")
+
+            try:
                 if self.message is None:
                     self.message: Message = await self.dm_channel.send(
                         embed=embed,
@@ -93,24 +112,28 @@ class PrinterController:
                         embed=embed,
                         attachments=[image_file]
                     )
+            except HTTPException as httpEx:
+                logging.warning(f"Discord Api Failed to send msg: {httpEx}")
 
-            else:
-                if self.message is not None:
-                    await self.message.delete()
-                    self.message = None
+        else:
+            if self.message is not None:
+                await self.message.delete()
+                self.message = None
+            if self.dm_channel is not None:
+                self.dm_channel = None
 
-                user_id = await get_current_user_printer(
-                    printer_name=self.printer_name)
+            user_id = await get_current_user_printer(
+                printer_name=self.printer_name)
 
-                if user_id is not None and self.bot.is_ready():
-                    logging.info(f"Getting Discord User: {user_id}")
-                    try:
-                        user = self.bot.get_user(user_id)
-                        self.dm_channel: DMChannel = await user.create_dm()
-                    except Exception as e:
-                        logging.error(f"Error in getting user {e}")
-
-            await asyncio.sleep(self.timeout)
+            if (user_id is not None
+                    and self.bot.is_ready()):
+                logging.info(f"Getting Discord User: {user_id}")
+                try:
+                    if self.user is None or (self.user and
+                                             self.user.id != user_id):
+                        self.user = self.bot.get_user(user_id)
+                except Exception as e:
+                    logging.error(f"Error in getting user {e}")
 
 
 class PrinterControllerInterface:
