@@ -73,7 +73,7 @@ class PrinterController:
 
     async def control_task_iteration_(self):
         self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
-
+        logging.info(f"{self.printer_name} in state {self.printer_state}")
         if self.user and self.printer_state in RUNNING_GCODE:
             if self.dm_channel is None:
                 self.dm_channel: DMChannel = await self.user.create_dm()
@@ -132,6 +132,7 @@ class PrinterController:
                     if self.user is None or (self.user and
                                              self.user.id != user_id):
                         self.user = self.bot.get_user(user_id)
+                        logging.info(f"Got user: {self.user}")
                 except Exception as e:
                     logging.error(f"Error in getting user {e}")
 

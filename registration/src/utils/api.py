@@ -169,9 +169,10 @@ async def get_current_user_printer(printer_name: str):
                 }
         ) as response:
             status_code = response.status
+            if status_code == 204:
+                return None
+
             data: dict = await response.json()
-    if status_code == 204:
-        return None
 
     async with aiohttp.ClientSession() as session:
         async with session.get(
@@ -181,9 +182,10 @@ async def get_current_user_printer(printer_name: str):
                 }
         ) as response:
             status_code = response.status
+            if status_code == 204:
+                return None
+
             data: dict = await response.json()
-    if status_code == 204:
-        return None
 
     return int(data.get("discord_id"))
 
