@@ -125,11 +125,13 @@ class PrinterController:
             user_id = await get_current_user_printer(
                 printer_name=self.printer_name)
 
-            if (user_id is not None and self.user.id != user_id
+            if (user_id is not None
                     and self.bot.is_ready()):
                 logging.info(f"Getting Discord User: {user_id}")
                 try:
-                    self.user = self.bot.get_user(user_id)
+                    if self.user is None or (self.user and
+                                             self.user.id != user_id):
+                        self.user = self.bot.get_user(user_id)
                 except Exception as e:
                     logging.error(f"Error in getting user {e}")
 
