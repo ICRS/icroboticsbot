@@ -135,6 +135,8 @@ class PrinterController:
                         logging.info(f"Got user: {self.user}")
                 except Exception as e:
                     logging.error(f"Error in getting user {e}")
+            elif user_id is None:
+                self.user = user_id
 
 
 class PrinterControllerInterface:
