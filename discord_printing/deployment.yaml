@@ -41,7 +41,10 @@ spec:
             mountPath: /app/database_settings.json
             subPath: database_settings.json
             readOnly: true
-          
+          - name: printer-config
+            mountPath: /app/printer_settings.json
+            subPath: settings.json
+            readOnly: true
       volumes:
         - name: discord-bot-secret
           secret:
@@ -61,3 +64,9 @@ spec:
             items:
               - key: endpoint
                 path: database_settings.json
+        - name: printer-config
+          configMap:
+            name: printer-config
+            items:
+              - key: printer_config
+                path: settings.json
