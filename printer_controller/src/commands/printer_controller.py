@@ -189,7 +189,7 @@ class PrinterControllerMainPage(View):
         printer_controller: PrinterControllerInterface
     ):
         super().__init__()
-        self.timeout = None
+        self.timeout = 30
 
         self.printer_controller = printer_controller
 
