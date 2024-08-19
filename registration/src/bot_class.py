@@ -74,7 +74,8 @@ class DiscordBot(commands.Bot):
         """
 
         @self.tree.command(
-            name="register", description="Link your dicsord profile to your shortcode"
+            name="register",
+            description="Link your discord profile to your shortcode"
         )
         async def register(interaction: discord.Interaction, shortcode: str):
             await register_user(interaction, shortcode)
@@ -187,7 +188,8 @@ class DiscordBot(commands.Bot):
             ),
             color=0x3A88FE,
         )
-        embed.set_footer(text="Go back to the server: https://discord.gg/3YKPjgskS3")
+        embed.set_footer(
+            text="Go back to the server: https://discord.gg/3YKPjgskS3")
         await member.send(embed=embed)
 
     async def on_member_remove(self, member: discord.Member):

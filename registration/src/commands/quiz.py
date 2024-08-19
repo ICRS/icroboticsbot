@@ -52,12 +52,10 @@ class QuizSelectList(Select):
         self.return_callback = return_callback
 
     async def callback(self, interaction):
-        print(interaction.data.values())
         v = interaction.data.values().mapping
         v = v.get("values", [])
 
         correct = (set(self.correct_options) == set(v))
-        print(set(self.correct_options).intersection(set(v)))
         await interaction.response.defer()
         await self.return_callback(correct)
 
@@ -85,6 +83,7 @@ class Quiz:
 
         self.num_correct = 0
         self.interaction = interaction
+        self.user_id = str(interaction.user.id)
 
         self.message: discord.Message | None = None
 
@@ -95,8 +94,16 @@ class Quiz:
 
     async def send_next_question(self):
         if self.index >= self.num_questions:
+            if self.num_correct == self.num_questions:
+                message = "Congrats! You've completed the induction!"
+                requests.post(
+                    SERVER_IP + "/induction/induct/discord-id",
+                    params={"id": str(self.user_id)})
+            else:
+                message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!"  # noqa: E501
+
             await self.message.edit(
-                content=f"Done: Num correct {self.num_correct}/{self.num_questions}",  # noqa: E501
+                content=message,
                 embed=None,
                 view=None,
                 )
