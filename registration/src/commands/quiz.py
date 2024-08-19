@@ -1,9 +1,15 @@
 from dataclasses import dataclass
 from typing import List
-import discord
 from discord.ui import View, Select
 
+import discord
 import random
+import requests
+
+from src.commands.stats import SERVER_IP
+
+result = requests.get(SERVER_IP + "/induction/quiz")
+questions = result.json()
 
 
 @dataclass
@@ -11,11 +17,14 @@ class Question:
     question: str
     correct_options: List[str]
     incorrect_options: List[str]
+    num_answers: int = 1
 
 
 questions: List[Question] = [
-    Question("Hello There?", ["yes"], ["no"]),
-    Question("1 + 1", ["2", "two"], ["one", "1"]),
+    Question(q["question"],
+             q["correct_options"],
+             q["incorrect_options"], q["num_answers"])
+    for q in questions
 ]
 
 
@@ -87,9 +96,10 @@ class Quiz:
     async def send_next_question(self):
         if self.index >= self.num_questions:
             await self.message.edit(
-                content=f"Done: Num correct {self.num_correct}/{self.num_questions}",
+                content=f"Done: Num correct {self.num_correct}/{self.num_questions}",  # noqa: E501
                 embed=None,
-                view=None)
+                view=None,
+                )
             return
 
         q = self.questions[self.index]
@@ -105,14 +115,13 @@ class Quiz:
         )
 
         if not self.index:
-            await self.interaction.response.defer()
-            self.message: discord.Message | None = await self.interaction.followup.send(
+            await self.interaction.response.send_message(  # noqa: E501
                 embed=q_embed,
                 view=question,
                 ephemeral=True
             )
+            self.message: discord.Message | None = await self.interaction.original_response()  # noqa: E501
         else:
-            assert self.message is not None
             await self.message.edit(
                 embed=q_embed,
                 view=question,
