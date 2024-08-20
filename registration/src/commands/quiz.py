@@ -95,10 +95,13 @@ class Quiz:
     async def send_next_question(self):
         if self.index >= self.num_questions:
             if self.num_correct == self.num_questions:
-                message = "Congrats! You've completed the induction!"
-                requests.post(
+                response = requests.post(
                     SERVER_IP + "/induction/induct/discord-id",
                     params={"id": str(self.user_id)})
+
+                message = "Congrats! You've completed the induction!"
+                if response.status_code == 200 and not response.json():
+                    message += "Make sure to register your card for 3D printing!"  # noqa: E501
             else:
                 message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!"  # noqa: E501
 
