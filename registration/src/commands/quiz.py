@@ -109,6 +109,7 @@ class Quiz:
                 content=message,
                 embed=None,
                 view=None,
+                delete_after=60,
                 )
             return
 
