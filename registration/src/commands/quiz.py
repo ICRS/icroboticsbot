@@ -84,6 +84,21 @@ class QuizQuestion(View):
                 single_choice=single_choice))
 
 
+class QuizReset(View):
+    def __init__(
+            self,
+            return_callback,
+            *, timeout: float | None = None):
+        super().__init__(timeout=timeout)
+
+        self.return_callback = return_callback
+
+    @discord.ui.button(style=discord.ButtonStyle.red, label='Reset',)
+    async def reset_quiz(self, interaction, button):
+        await interaction.response.defer()
+        await self.return_callback()
+
+
 class Quiz:
     def __init__(self, interaction: discord.Interaction) -> None:
         self.questions = questions
@@ -95,6 +110,11 @@ class Quiz:
         self.user_id = str(interaction.user.id)
 
         self.message: discord.Message | None = None
+
+    async def reset(self):
+        self.index = 0
+        self.num_correct = 0
+        await self.send_next_question()
 
     async def question_callback(self, correct: bool):
         self.num_correct += correct
@@ -111,15 +131,33 @@ class Quiz:
                 message = "Congrats! You've completed the induction!"
                 if response.status_code == 200 and not response.json():
                     message += "Make sure to register your card for 3D printing!"  # noqa: E501
+
+                q_embed = discord.Embed(
+                    title="Quiz Finished",
+                    description=message,
+                    color=discord.Color.green(),
+                )
+
+                await self.message.edit(
+                    embed=q_embed,
+                    view=None,
+                    delete_after=60,
+                )
+
             else:
                 message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!"  # noqa: E501
 
-            await self.message.edit(
-                content=message,
-                embed=None,
-                view=None,
-                delete_after=60,
-            )
+                q_embed = discord.Embed(
+                    title="Quiz Finished",
+                    description=message,
+                    color=discord.Color.red(),
+                )
+
+                await self.message.edit(
+                    embed=q_embed,
+                    view=QuizReset(self.reset),
+                    delete_after=60,
+                )
             return
 
         q = self.questions[self.index]
@@ -132,10 +170,10 @@ class Quiz:
         q_embed = discord.Embed(
             title=f"Question {self.index + 1}",
             description=q.question,
-            color=discord.Color.green(),
+            color=discord.Color.blue(),
         )
 
-        if not self.index:
+        if not self.index and not self.message:
             await self.interaction.response.send_message(  # noqa: E501
                 embed=q_embed,
                 view=question,
