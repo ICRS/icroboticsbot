@@ -18,12 +18,17 @@ class Question:
     correct_options: List[str]
     incorrect_options: List[str]
     num_answers: int = 1
+    single_choice: bool = False
 
 
 questions: List[Question] = [
-    Question(q["question"],
-             q["correct_options"],
-             q["incorrect_options"], q["num_answers"])
+    Question(
+        q["question"],
+        q["correct_options"],
+        q["incorrect_options"],
+        q["num_answers"],
+        q["single_choice"]
+    )
     for q in questions
 ]
 
@@ -34,10 +39,12 @@ class QuizSelectList(Select):
             correct_options: List[str],
             incorrect_options: List[str],
             return_callback=lambda x: None,
+            single_choice: bool = False,
             **kwargs):
         super().__init__(
             min_values=1,
-            max_values=len(incorrect_options) + len(correct_options),
+            max_values=1 if single_choice else len(
+                incorrect_options) + len(correct_options),
             **kwargs)
 
         self.correct_options = correct_options
@@ -66,13 +73,15 @@ class QuizQuestion(View):
             correct_options: List[str],
             incorrect_options: List[str],
             return_callback,
+            single_choice=False,
             *, timeout: float | None = None):
         super().__init__(timeout=timeout)
         self.add_item(
             QuizSelectList(
                 correct_options,
                 incorrect_options,
-                return_callback=return_callback))
+                return_callback=return_callback,
+                single_choice=single_choice))
 
 
 class Quiz:
@@ -110,14 +119,15 @@ class Quiz:
                 embed=None,
                 view=None,
                 delete_after=60,
-                )
+            )
             return
 
         q = self.questions[self.index]
         question = QuizQuestion(
             q.correct_options,
             q.incorrect_options,
-            return_callback=self.question_callback
+            return_callback=self.question_callback,
+            single_choice=q.single_choice
         )
         q_embed = discord.Embed(
             title=f"Question {self.index + 1}",
