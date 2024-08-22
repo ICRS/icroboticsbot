@@ -3,7 +3,7 @@ import json
 import asyncio
 import discord
 from discord.ext import commands
-from discord import app_commands
+from discord import Interaction, app_commands
 import requests
 
 from src.commands.quiz import launch_quiz
@@ -20,6 +20,7 @@ from src.commands import (
     get_timelapse,
 )
 from src.utils import PrinterFarm, deregister_discord_id
+from src.utils.messages.error_messages import error_color
 
 __all__ = ["DiscordBot"]
 
@@ -37,6 +38,20 @@ default_guild_info = {
     "GUILD": GUILD,
     "ADMIN_ID": ADMIN_ID,
 }
+
+
+def check_role(ctx: Interaction, item: str | int):
+    if ctx.guild is None:
+        raise commands.NoPrivateMessage()
+
+    # ctx.guild is None doesn't narrow ctx.author to Member
+    if isinstance(item, int):
+        role = ctx.user.get_role(item)  # type: ignore
+    else:
+        role = discord.utils.get(
+                ctx.user.roles, name=item)  # type: ignore
+    if role is None:
+        raise commands.MissingRole(item)
 
 
 class DiscordBot(commands.Bot):
@@ -82,12 +97,26 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(name="quiz", description="Launch induction quiz")
         async def quiz(interaction: discord.Interaction):
-            await launch_quiz(interaction)
+            try:
+                check_role(interaction, "Verified Member")
+                await launch_quiz(interaction)
+            except Exception as e:
+                logging.error(f"Quiz encountered {e}")
+                await interaction.response.send_message(
+                    embed=discord.Embed(
+                        title="Error",
+                        description=(
+                            "Role Not Found - make sure to get membership"),
+                        color=error_color),
+                    ephemeral=True
+                )
 
         @self.tree.command(
-            name="induct", description="ADMIN ONLY: induct a member to the space"
+            name="induct",
+            description="ADMIN ONLY: induct a member to the space"
         )
-        async def induct(interaction: discord.Interaction, shortcode: str, uid: str):
+        async def induct(
+                interaction: discord.Interaction, shortcode: str, uid: str):
             await induct_member(interaction, shortcode, uid)
 
         @self.tree.command(
@@ -101,7 +130,8 @@ class DiscordBot(commands.Bot):
         quote_choices.append(app_commands.Choice(name="random", value=""))
 
         @self.hybrid_command(
-            name="quote", description="Generate a quote image from the stored quotes"
+            name="quote",
+            description="Generate a quote image from the stored quotes"
         )  # noqa: E501
         @app_commands.choices(name=quote_choices)
         async def quote(ctx, name: str | None = ""):
@@ -109,7 +139,8 @@ class DiscordBot(commands.Bot):
             await quote_person(ctx, name)
 
         @self.tree.command(
-            name="alert", description="Alert the bot. Purely for testing purposes"
+            name="alert",
+            description="Alert the bot. Purely for testing purposes"
         )  # noqa: E501
         async def alert(interaction):
             await interaction.response.send_message("""
@@ -122,12 +153,15 @@ class DiscordBot(commands.Bot):
         async def help_cmd(interaction):
             await get_help(interaction, self.tree)
 
-        @self.tree.command(name="stats", description="Get your 3D printing stats")
+        @self.tree.command(
+            name="stats",
+            description="Get your 3D printing stats")
         async def stats(interaction):
             await stats_card(interaction)
 
         @self.tree.command(
-            name="printers", description="List and interact with all the printers"
+            name="printers",
+            description="List and interact with all the printers"
         )  # noqa
         async def printers_cmd(interaction):
             await printer_buttons(self, interaction)
@@ -140,7 +174,8 @@ class DiscordBot(commands.Bot):
             await printer_status(self, interaction)
 
         @self.tree.command(
-            name="timelapse", description="Get the last timelapse for a printer"
+            name="timelapse",
+            description="Get the last timelapse for a printer"
         )
         async def timelapse(interaction):
             await get_timelapse(

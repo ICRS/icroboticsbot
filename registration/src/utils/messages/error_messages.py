@@ -14,7 +14,8 @@ __all__ = [
     "invalid_discord_id",
     "quote_not_found",
     "is_not_inducted_msg",
-    "error_msg"
+    "error_msg",
+    "error_color"
 ]
 
 
