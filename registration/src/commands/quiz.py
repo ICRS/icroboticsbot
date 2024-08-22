@@ -88,7 +88,7 @@ class QuizReset(View):
     def __init__(
             self,
             return_callback,
-            *, timeout: float | None = None):
+            *, timeout: float | None = 60):
         super().__init__(timeout=timeout)
 
         self.return_callback = return_callback
@@ -110,15 +110,19 @@ class Quiz:
         self.user_id = str(interaction.user.id)
 
         self.message: discord.Message | None = None
+        self.incorrect_ind: List[int] = []
 
     async def reset(self):
         self.index = 0
         self.num_correct = 0
+        self.incorrect_ind.clear()
         await self.send_next_question()
 
     async def question_callback(self, correct: bool):
         self.num_correct += correct
-        print(self.num_correct)
+        if not correct:
+            self.incorrect_ind.append(self.index)
+
         await self.send_next_question()
 
     async def send_next_question(self):
@@ -145,8 +149,12 @@ class Quiz:
                 )
 
             else:
-                message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!"  # noqa: E501
-
+                print(self.incorrect_ind)
+                message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!\n\n"  # noqa: E501
+                message += "You got the following incorrect:\n"
+                message += "\n".join([
+                    "- " + self.questions[i - 1].question.strip()
+                    for i in self.incorrect_ind])
                 q_embed = discord.Embed(
                     title="Quiz Finished",
                     description=message,
