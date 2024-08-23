@@ -192,6 +192,7 @@ class Quiz:
             await self.message.edit(
                 embed=q_embed,
                 view=question,
+                delete_after=None,
             )
 
         self.index += 1
