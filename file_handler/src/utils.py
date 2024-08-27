@@ -30,6 +30,7 @@ load_dotenv()
 
 # ===== Get Slicer Configurations =====
 SLICER_PW = os.getenv('SLICER_PW')
+SLICER_USER = os.getenv('SLICER_USER')
 SLICER_ADDR = os.getenv('SLICER_ADDR')
 TARGET_PATH = str(os.getenv("TARGET_PATH"))
 # =========================================
@@ -47,7 +48,7 @@ def download_files(files) -> None:
         List of files to download
     """
     try:
-        ssh = create_sshclient(SLICER_ADDR, 22, 'member', SLICER_PW)
+        ssh = create_sshclient(SLICER_ADDR, 22, SLICER_USER, SLICER_PW)
         scp = SCPClient(ssh.get_transport())
         for file in files:
             url = file['url']
@@ -57,8 +58,8 @@ def download_files(files) -> None:
             file.write(r.content)
             file.seek(0)
             scp.putfo(file, TARGET_PATH+name)
-    except Exception:  # pylint: disable=broad-except
-        logging.error("Error downloading files")
+    except Exception as e:  # pylint: disable=broad-except
+        logging.error(f"Error downloading files: {e}")
 
 
 def create_sshclient(server, port, user, password) -> paramiko.SSHClient:
@@ -84,7 +85,7 @@ def create_sshclient(server, port, user, password) -> paramiko.SSHClient:
     client = paramiko.SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(server, port, user, password)
+    client.connect(hostname=server, port=port, username=user, password=password)
     return client
 
 
