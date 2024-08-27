@@ -1,10 +1,11 @@
+import logging
 import os
 import discord
 import requests
 from discord.ext import commands
 from discord import app_commands
 
-from registration.src.commands.quiz import launch_quiz
+from src.commands.quiz import launch_quiz
 from src.utils import *
 
 
@@ -39,8 +40,14 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
         # if already verified move on to the induction
         isVerified = check_role(interaction, "Verified Member")
 
+        logging.info(isVerified)        
+
+
         if not(isVerified):
-            addRoletoUser(interaction, shortcode, str(member.id))
+            roleWorked = await addRoletoUser(interaction, shortcode, member)
+
+            if not(roleWorked):
+                return
 
         isInducted = await isInduted(interaction, shortcode)
 
@@ -69,19 +76,21 @@ def check_role(ctx: discord.Interaction, item: str | int):
     if ctx.guild is None:
         raise commands.NoPrivateMessage()
 
-    # ctx.guild is None doesn't narrow ctx.author to Member
     if isinstance(item, int):
         role = ctx.user.get_role(item)  # type: ignore
     else:
         role = discord.utils.get(
                 ctx.user.roles, name=item)  # type: ignore
+    
+    logging.info(role)
+    
     if role is None:
         return False
     
     return True
 
 
-async def addRoletoUser(interaction: discord.Interaction, shortcode: str, memberId: str):
+async def addRoletoUser(interaction: discord.Interaction, shortcode: str, member):
     role = discord.utils.get(
     interaction.guild.roles, name="Verified Member")
 
@@ -89,7 +98,7 @@ async def addRoletoUser(interaction: discord.Interaction, shortcode: str, member
     DATABASE_ADAPTER_IP + "/discord-id/register",
     params={
         "shortcode": shortcode.strip().lower(),
-        "discord_id": memberId
+        "discord_id": str(member.id)
     })
 
 
@@ -108,4 +117,6 @@ async def addRoletoUser(interaction: discord.Interaction, shortcode: str, member
             embed=error_msg("Something went wrong on the server!"),
         )
     await member.add_roles(
-        role, reason="Membership verified using API")
+        role, reason="Membership verified using API")   
+    
+    return True
