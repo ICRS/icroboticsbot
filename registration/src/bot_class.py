@@ -3,9 +3,10 @@ import json
 import asyncio
 import discord
 from discord.ext import commands
-from discord import Interaction, app_commands
+from discord import app_commands
 import requests
 
+from src.commands.register import check_role
 from src.commands.quiz import launch_quiz
 from src.commands.stats import SERVER_IP
 from src.commands import (
@@ -38,6 +39,7 @@ default_guild_info = {
     "GUILD": GUILD,
     "ADMIN_ID": ADMIN_ID,
 }
+
 
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
@@ -94,6 +96,22 @@ class DiscordBot(commands.Bot):
         )
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
+
+        @self.tree.command(name="quiz", description="Launch induction quiz")
+        async def quiz(interaction: discord.Interaction):
+            try:
+                check_role(interaction, "Verified Member")
+                await launch_quiz(interaction)
+            except Exception as e:
+                logging.error(f"Quiz encountered {e}")
+                await interaction.response.send_message(
+                    embed=discord.Embed(
+                        title="Error",
+                        description=(
+                            "Role Not Found - make sure to get membership"),
+                        color=error_color),
+                    ephemeral=True
+                )
 
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))

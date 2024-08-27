@@ -195,6 +195,8 @@ class Quiz:
             description=q.question,
             color=discord.Color.blue(),
         )
+        if q.assets:
+            q_embed.set_image(url=q.assets[0].data)
 
         if not self.index and not self.message:
             await self.interaction.response.send_message(  # noqa: E501
