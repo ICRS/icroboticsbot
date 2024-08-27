@@ -106,7 +106,7 @@ class DiscordBot(commands.Bot):
                     embed=discord.Embed(
                         title="Error",
                         description=(
-                            "Role Not Found - make sure to get membership"),
+                            "Please use `/register` to verify your account before completing the quiz"),
                         color=error_color),
                     ephemeral=True
                 )
