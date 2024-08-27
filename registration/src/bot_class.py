@@ -39,21 +39,6 @@ default_guild_info = {
     "ADMIN_ID": ADMIN_ID,
 }
 
-
-def check_role(ctx: Interaction, item: str | int):
-    if ctx.guild is None:
-        raise commands.NoPrivateMessage()
-
-    # ctx.guild is None doesn't narrow ctx.author to Member
-    if isinstance(item, int):
-        role = ctx.user.get_role(item)  # type: ignore
-    else:
-        role = discord.utils.get(
-                ctx.user.roles, name=item)  # type: ignore
-    if role is None:
-        raise commands.MissingRole(item)
-
-
 class DiscordBot(commands.Bot):
     # pylint: disable=dangerous-default-value
     def __init__(
@@ -94,22 +79,6 @@ class DiscordBot(commands.Bot):
         )
         async def register(interaction: discord.Interaction, shortcode: str):
             await register_user(interaction, shortcode)
-
-        @self.tree.command(name="quiz", description="Launch induction quiz")
-        async def quiz(interaction: discord.Interaction):
-            try:
-                check_role(interaction, "Verified Member")
-                await launch_quiz(interaction)
-            except Exception as e:
-                logging.error(f"Quiz encountered {e}")
-                await interaction.response.send_message(
-                    embed=discord.Embed(
-                        title="Error",
-                        description=(
-                            "Role Not Found - make sure to get membership"),
-                        color=error_color),
-                    ephemeral=True
-                )
 
         @self.tree.command(
             name="induct",

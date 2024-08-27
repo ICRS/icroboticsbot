@@ -7,7 +7,8 @@ __all__ = [
     "is_inducted_msg",
     "show_discord_stats",
     "success_msg",
-    "reverified_msg"
+    "reverified_msg",
+    "already_inducted"
 ]
 
 
@@ -64,6 +65,15 @@ def success_msg():
         title="Verified!",
         description=("You have been verified and should have the ICRS Member "
                      "role"),
+        color=success_color)
+    embed.set_footer(
+        text="Check out our Insta too: https://linktr.ee/icrobotics")
+    return embed
+
+def already_inducted():
+    embed = discord.Embed(
+        title="Already Inducted!",
+        description=("You have already completed the induction"),
         color=success_color)
     embed.set_footer(
         text="Check out our Insta too: https://linktr.ee/icrobotics")
