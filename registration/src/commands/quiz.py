@@ -88,7 +88,7 @@ class QuizReset(View):
     def __init__(
             self,
             return_callback,
-            *, timeout: float | None = 60):
+            *, timeout: float | None = 120):
         super().__init__(timeout=timeout)
 
         self.return_callback = return_callback
