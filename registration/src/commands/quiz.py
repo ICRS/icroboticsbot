@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 from discord.ui import View, Select
 
@@ -13,24 +13,39 @@ questions = result.json()
 
 
 @dataclass
+class Asset:
+    media: str
+    type: str
+    data: str
+
+
+@dataclass
 class Question:
     question: str
     correct_options: List[str]
     incorrect_options: List[str]
     num_answers: int = 1
     single_choice: bool = False
+    assets: List[Asset] = field(default_factory=lambda: [])
 
 
-questions: List[Question] = [
-    Question(
-        q["question"],
-        q["correct_options"],
-        q["incorrect_options"],
-        q["num_answers"],
-        q["single_choice"]
-    )
-    for q in questions
-]
+def parse_questions(questions):
+    l: List[Question] = []
+    for q in questions:
+        l.append(Question(
+            q["question"],
+            q["correct_options"],
+            q["incorrect_options"],
+            q["num_answers"],
+            q["single_choice"],
+        ))
+
+        l[-1].assets += [Asset(**c) for c in q["assets"]]
+
+    return l
+
+
+questions: List[Question] = parse_questions(questions)
 
 
 class QuizSelectList(Select):
@@ -180,6 +195,8 @@ class Quiz:
             description=q.question,
             color=discord.Color.blue(),
         )
+        if q.assets:
+            q_embed.set_image(url=q.assets[0].data)
 
         if not self.index and not self.message:
             await self.interaction.response.send_message(  # noqa: E501
