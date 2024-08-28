@@ -100,17 +100,25 @@ class DiscordBot(commands.Bot):
         @self.tree.command(name="quiz", description="Launch induction quiz")
         async def quiz(interaction: discord.Interaction):
             try:
-                check_role(interaction, "Verified Member")
-                await launch_quiz(interaction)
+                if check_role(interaction, "Verified Member"):
+                    await launch_quiz(interaction)
+                else:
+                    await interaction.response.send_message(
+                            embed=discord.Embed(
+                                title="Error",
+                                description=(
+                                    "Role Not Found - make sure to get membership"),
+                                color=error_color),
+                            ephemeral=True
+                            )
             except Exception as e:
                 logging.error(f"Quiz encountered {e}")
                 await interaction.response.send_message(
                     embed=discord.Embed(
                         title="Error",
                         description=(
-                            "Role Not Found - make sure to get membership"),
+                            "Server error! Please contact committee"),
                         color=error_color),
-                    ephemeral=True
                 )
 
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
