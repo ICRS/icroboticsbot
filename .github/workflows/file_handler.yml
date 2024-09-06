@@ -17,4 +17,4 @@ jobs:
         run: |
           cd file_handler
           ./docker_build.sh ${GITHUB_SHA}
-          kubectl set image deployments/icrsbot-file-handler-deployment icrsbot-file-handler=localhost:32000/icrsbot:${GITHUB_SHA}
+          kubectl set image deployments/icrsbot-file-handler-deployment icrsbot-file-handler=localhost:32000/icrsbot-file-handler:${GITHUB_SHA}

@@ -17,4 +17,4 @@ jobs:
         run: |
           cd printer_handler
           ./docker_build.sh ${GITHUB_SHA}
-          kubectl set image deployments/icrsbot-printer-handler-deployment icrsbot-printer-handler=localhost:32000/icrsbot:${GITHUB_SHA}
+          kubectl set image deployments/icrsbot-printer-handler-deployment icrsbot-printer-handler=localhost:32000/icrsbot-printer-handler:${GITHUB_SHA}
