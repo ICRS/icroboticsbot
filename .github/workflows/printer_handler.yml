@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+    - master
+    paths:
+      - 'printer_handler/**'
+      - '.github/workflows/printer_handler.yml'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to remote server
+        run: |
+          cd printer_handler
+          ./docker_build.sh ${GITHUB_SHA}
+          kubectl set image deployments/icrsbot-printer-handler-deployment icrsbot-printer-handler=localhost:32000/icrsbot-printer-handler:${GITHUB_SHA}
