@@ -4,6 +4,7 @@ on:
     - master
     paths:
       - 'registration/**'
+      - '.github/workflows/registration.yml'
 
 jobs:
   build:
@@ -15,5 +16,5 @@ jobs:
       - name: Deploy to remote server
         run: |
           cd registration
-          ./docker_build ${GITHUB_SHA}
+          ./docker_build.sh ${GITHUB_SHA}
           kubectl set image deployment/icrsbot icrsbot=localhost:32000/icrsbot:${GITHUB_SHA}
