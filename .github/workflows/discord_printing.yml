@@ -17,4 +17,4 @@ jobs:
         run: |
           cd discord_printing
           ./docker_build.sh ${GITHUB_SHA}
-          kubectl set image deployments/icrsbot-discord-printing-deployment icrsbot-discord-printing=localhost:32000/icrsbot:${GITHUB_SHA}
+          kubectl set image deployments/icrsbot-discord-printing-deployment icrsbot-discord-printing=localhost:32000/icrsbot-discord-printing:${GITHUB_SHA}
