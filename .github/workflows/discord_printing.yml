@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+    - master
+    paths:
+      - 'discord_printing/**'
+      - '.github/workflows/discord_printing.yml'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to remote server
+        run: |
+          cd discord_printing
+          ./docker_build.sh ${GITHUB_SHA}
+          kubectl set image deployments/icrsbot-discord-printing-deployment icrsbot-discord-printing=localhost:32000/icrsbot-discord-printing:${GITHUB_SHA}

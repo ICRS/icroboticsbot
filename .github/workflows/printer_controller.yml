@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+    - master
+    paths:
+      - 'printer_controller/**'
+      - '.github/workflows/printer_controller.yml'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to remote server
+        run: |
+          cd printer_controller
+          ./docker_build.sh ${GITHUB_SHA}
+          kubectl set image deployments/printer-controller-deployment printer-controller=localhost:32000/printer-controller:${GITHUB_SHA}
