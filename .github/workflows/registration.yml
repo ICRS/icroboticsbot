@@ -17,4 +17,4 @@ jobs:
         run: |
           cd registration
           ./docker_build.sh ${GITHUB_SHA}
-          kubectl set image deployment/icrsbot icrsbot=localhost:32000/icrsbot:${GITHUB_SHA}
+          kubectl set image deployments/icrsbot-deployment icrsbot=localhost:32000/icrsbot:${GITHUB_SHA}
