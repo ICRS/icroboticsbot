@@ -23,10 +23,10 @@ def how_to_msg():
         description=("To get the membership role."
                      " Please reply to THIS message like this "
                      "format:\n```/register yourShortcodeHere``` \n"
-                     "Example:\n ```/register ab123```"),
+                     "Example:\n ```/register ab123```"
+                     "\n Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"),
         color=info_color)
-    return embed.set_footer(
-        text="Check out our Insta too: https://linktr.ee/icrobotics")
+    return embed
 
 
 def quote_msg(title, message, file):
