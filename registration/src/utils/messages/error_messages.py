@@ -36,20 +36,13 @@ def code_already_used_msg():
 def user_not_member_msg():
     embed = discord.Embed(
         title="No membership!",
-        description="We couldn't verify your membership.",
-        color=error_color)
-    embed.add_field(
-        name="To get a membership:",
-        value="https://linktr.ee/icrobotics",
-        inline=False)
-    embed.add_field(
-        name="If you already bought one:",
-        value="Please try again later or contact a committee member",
-        inline=False)
+        description="We couldn't verify your membership. If you already bought one contact a committee member"
+        "\nTo get a membership:"
+        "\nBuy it from the union website: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)",
+        color=error_color
+    )
 
-    return embed.set_footer(
-        text=("You'll find committee members here: "
-              "https://discord.gg/3YKPjgskS3"))
+    return embed
 
 
 def invalid_UID():
