@@ -15,7 +15,6 @@ __all__ = [
     "register_user"
 ]
 
-
 async def register_user(interaction: discord.Interaction, shortcode: str):
     """
     register_on_dm Register message when user tries to register on DM
@@ -33,44 +32,41 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
     try:
         member = interaction.user
 
+        logging.info("Register -" + member.name + " - " + shortcode)
+
         if not member:
             return await interaction.response.send_message(
                 embed=not_on_guild_msg(), ephemeral=True)
 
-        # if already verified move on to the induction
+        # if already verified move on to         the induction
         isVerified = check_role(interaction, "Verified Member")
-
-        logging.info(isVerified)        
-
-
         if not(isVerified):
             roleWorked = await addRoletoUser(interaction, shortcode, member)
 
             if not(roleWorked):
                 return
 
-        isInducted = await isInduted(interaction, shortcode)
-
-        if not(isInducted):
+        if not(await isInducted(interaction, shortcode)):
             await launch_quiz(interaction)
         else:
             return await interaction.response.send_message(
             embed=already_inducted(), ephemeral=True)
 
-
         return await interaction.response.send_message(
             embed=success_msg(), ephemeral=True)
-            
+
 
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
 
 
-async def isInduted(interaction: discord.Interaction, shortcode: str):
+async def isInducted(interaction: discord.Interaction, shortcode: str):
     perms = await get_member_perms(interaction, shortcode)
+    logging.info(perms)
+
+    if perms is None or perms == {}:
+        return False
     return perms["inducted"]
-
-
 
 def check_role(ctx: discord.Interaction, item: str | int):
     if ctx.guild is None:
@@ -81,12 +77,12 @@ def check_role(ctx: discord.Interaction, item: str | int):
     else:
         role = discord.utils.get(
                 ctx.user.roles, name=item)  # type: ignore
-    
+
     logging.info(role)
-    
+
     if role is None:
         return False
-    
+
     return True
 
 
@@ -117,6 +113,6 @@ async def addRoletoUser(interaction: discord.Interaction, shortcode: str, member
             embed=error_msg("Something went wrong on the server!"),
         )
     await member.add_roles(
-        role, reason="Membership verified using API")   
-    
+        role, reason="Membership verified using API")
+
     return True

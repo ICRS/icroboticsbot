@@ -63,27 +63,24 @@ def show_discord_stats(data):
 def success_msg():
     embed = discord.Embed(
         title="Verified!",
-        description=("You have been verified and should have the ICRS Member "
-                     "role"),
+        description=("You have been verified and should have the ICRS Member role"
+                     "\n You have already completed the induction"
+                     "\n Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"),
         color=success_color)
-    embed.set_footer(
-        text="Check out our Insta too: https://linktr.ee/icrobotics")
     return embed
 
 def already_inducted():
     embed = discord.Embed(
         title="Already Inducted!",
-        description=("You have already completed the induction"),
+        description=("You have already completed the induction"
+                     "\nCheck out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"),
         color=success_color)
-    embed.set_footer(
-        text="Check out our Insta too: https://linktr.ee/icrobotics")
     return embed
 
 
 def reverified_msg():
     embed = discord.Embed(
         title="Membership reverified",
-        description="Welcome back!",
+        description="Welcome back! Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)",
         color=success_color)
-    return embed.set_footer(
-        text="Check out our Insta too: https://linktr.ee/icrobotics")
+    return embed
