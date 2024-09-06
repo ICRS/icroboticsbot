@@ -77,7 +77,7 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="register",
-            description="Link your discord profile to your shortcode"
+            description="Register and complete the induction quiz"
         )
         async def register(interaction: discord.Interaction, shortcode: str):
             await register_user(interaction, shortcode)
