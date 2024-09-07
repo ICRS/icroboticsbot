@@ -12,10 +12,10 @@ __all__ = [
 ]
 
 
-def success_induction_msg():
+def success_induction_msg(shortcode, uuid):
     embed = discord.Embed(
-        title="Verified!",
-        description="Member has been inducted",
+        title="Card had been linked!",
+        description=f"shortcode: {shortcode}\Card ID: {uuid}",
         color=success_color)
     return embed
 
@@ -40,15 +40,7 @@ def show_discord_stats(data):
             "Can Print: " + str(data["perms"]["print"]) + "\n"
         ),
         inline=False)
-    embed.add_field(
-        name="Last Print",
-        value=(
-            "Printer: " + data["last_print"][4] + "\n" +
-            "Weight: " + str(data["last_print"][3]) + "g\n" +
-            "Time: " + str(round(data["last_print"][2]/60, 2)) + "min\n" +
-            "Started At: " + data["last_print"][1]
-        ),
-        inline=False)
+
     embed.add_field(
         name="Total Prints",
         value=(
@@ -57,6 +49,17 @@ def show_discord_stats(data):
             str(round(data["totals"][0]/60, 2)) + "min\n"
         ),
         inline=False)
+    if(data["last_print"]):
+        embed.add_field(
+            name="Last Print",
+            value=(
+                "Printer: " + data["last_print"][4] + "\n" +
+                "Weight: " + str(data["last_print"][3]) + "g\n" +
+                "Time: " + str(round(data["last_print"][2]/60, 2)) + "min\n" +
+                "Started At: " + data["last_print"][1]
+            ),
+            inline=False)
+
     return embed
 
 

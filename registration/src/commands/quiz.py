@@ -138,50 +138,13 @@ class Quiz:
         if not correct:
             self.incorrect_ind.append(self.index)
 
-        await self.send_next_question()
+        if self.index >= self.num_questions:
+            return await self.quiz_completed()
+        else:
+            await self.send_next_question()
 
     async def send_next_question(self):
-        if self.index >= self.num_questions:
-            if self.num_correct == self.num_questions:
-                response = requests.post(
-                    SERVER_IP + "/induction/induct/discord-id",
-                    params={"id": str(self.user_id)})
 
-                message = "Congrats! You've completed the induction!"
-                if response.status_code == 200 and not response.json():
-                    message += "Make sure to register your card for 3D printing!"  # noqa: E501
-
-                q_embed = discord.Embed(
-                    title="Quiz Finished",
-                    description=message,
-                    color=discord.Color.green(),
-                )
-
-                await self.message.edit(
-                    embed=q_embed,
-                    view=None,
-                    delete_after=60,
-                )
-
-            else:
-                print(self.incorrect_ind)
-                message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!\n\n"  # noqa: E501
-                message += "You got the following incorrect:\n"
-                message += "\n".join([
-                    "- " + self.questions[i - 1].question.strip()
-                    for i in self.incorrect_ind])
-                q_embed = discord.Embed(
-                    title="Quiz Finished",
-                    description=message,
-                    color=discord.Color.red(),
-                )
-
-                await self.message.edit(
-                    embed=q_embed,
-                    view=QuizReset(self.reset),
-                    delete_after=60,
-                )
-            return
 
         q = self.questions[self.index]
         question = QuizQuestion(
@@ -213,6 +176,55 @@ class Quiz:
             )
 
         self.index += 1
+
+    async def quiz_completed(self):
+        if self.num_correct == self.num_questions:
+            response = requests.post(
+            SERVER_IP + "/induction/induct/discord-id",
+                params={"id": str(self.user_id)})
+
+            if response.status_code == 200:
+                message = "Congrats! You've completed the induction!\n\n"
+                message += "If this is your first year  in ICRS please\n"  # noqa: E501
+                message += "**Register your card in person** for 3D printing and door access!\n\n"  # noqa: E501
+                message += "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
+
+
+                q_embed = discord.Embed(
+                    title="Quiz Passed!",
+                    description=message,
+                    color=discord.Color.green(),
+                )
+
+            else:
+                q_embed = discord.Embed(
+                    title="Error but Passed!",
+                    description="Server error, but you DID pass the quiz! Please show committee a screenshot of this message",
+                    color=discord.Color.red()
+                )
+
+            await self.message.edit(
+                embed=q_embed,
+                view=None,
+            )
+
+        else:
+            print(self.incorrect_ind)
+            message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!\n\n"  # noqa: E501
+            message += "You got the following incorrect:\n"
+            message += "\n".join([
+                "- " + self.questions[i - 1].question.strip()
+                for i in self.incorrect_ind])
+            q_embed = discord.Embed(
+                title="Quiz not passed!",
+                description=message,
+                color=discord.Color.red(),
+            )
+
+            await self.message.edit(
+                embed=q_embed,
+                view=QuizReset(self.reset),
+            )
 
 
 async def launch_quiz(interaction: discord.Interaction):

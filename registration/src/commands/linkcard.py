@@ -2,11 +2,11 @@ from src.utils import *
 import discord
 
 __all__ = [
-    "induct_member"
+    "link_card"
 ]
 
 
-async def induct_member(interaction: discord.Interaction,
+async def link_card(interaction: discord.Interaction,
                         shortcode: str, uid: str):
     """
     register_on_dm Register message when user tries to register on DM
@@ -36,12 +36,12 @@ async def induct_member(interaction: discord.Interaction,
 
         uid = format_uid(uid)
 
-        server_success = await add_induction_to_member(
+        server_success = await add_card_to_member(
             interaction, shortcode, uid)
 
         if server_success:
             return await interaction.response.send_message(
-                embed=success_induction_msg(), ephemeral=True)
+                embed=success_induction_msg(shortcode, uid), ephemeral=True)
 
         return await interaction.response.send_message(
             embed=server_error_msg())
