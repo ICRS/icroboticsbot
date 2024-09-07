@@ -1,4 +1,4 @@
-from .induct import *
+from .linkcard import *
 from .register import *
 from .whois_commands import *
 from .help import *
@@ -10,7 +10,7 @@ from .timelapse import *
 
 __all__ = []
 __all__.extend(help.__all__)
-__all__.extend(induct.__all__)
+__all__.extend(linkcard.__all__)
 __all__.extend(printer_commands.__all__)
 __all__.extend(printer_status_commands.__all__)
 
