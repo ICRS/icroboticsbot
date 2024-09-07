@@ -11,7 +11,7 @@ from src.commands.quiz import launch_quiz
 from src.commands.stats import SERVER_IP
 from src.commands import (
     get_help,
-    induct_member,
+    link_card,
     printer_buttons,
     printer_status,
     quote_person,
@@ -83,12 +83,12 @@ class DiscordBot(commands.Bot):
             await register_user(interaction, shortcode)
 
         @self.tree.command(
-            name="induct",
-            description="ADMIN ONLY: induct a member to the space"
+            name="link-card",
+            description="ADMIN ONLY: Link a members card to their shortcode"
         )
-        async def induct(
+        async def link_card_cmd(
                 interaction: discord.Interaction, shortcode: str, uid: str):
-            await induct_member(interaction, shortcode, uid)
+            await link_card(interaction, shortcode, uid)
 
         @self.tree.command(
             name="whois",

@@ -10,32 +10,40 @@ __all__ = [
 
 async def whois(interaction: discord.Interaction, user: str):
     try:
+        logging.info(f"User: {user}")
+
         author = interaction.user
         roles = [r for r in author.roles if r is not None]
         if not ("committee" in [y.name.lower() for y in roles]):
             return await interaction.response.send_message(
                 embed=not_committee())
 
-        logging.info(f"User: {user}")
         if not (is_discord_id(user)) and not (is_shortcode(user)):
-            logging.info(f"Discord User invalid: {user}")
+            logging.info(f"User invalid: {user}")
             return await interaction.response.send_message(
                 embed=invalid_discord_id(), ephemeral=True)
 
-        stats = []
+        shortcode = ""
+        discord_id = ""
         # allow shortcode or @user
         if (is_shortcode(user)):
-            stats = await get_stats_from_shortcode(interaction, user)
-            id = (await get_discord_from_shortcode(
+            discord_id = (await get_discord_from_shortcode(
                 interaction, user))["discord_id"]
-            id = id if id else "not on discord"
+            discord_id = discord_id if discord_id else "Not on discord"
+            shortcode = user
         else:
-            id = format_discord_id(user)
-            stats = await get_stats_from_discord(interaction, id)
+            discord_id = format_discord_id(user)
 
-        if (stats == []):
-            return await interaction.response.send_message(
-                embed=cant_find_discord_user(), ephemeral=True)
+            logging.info(f"Discord ID: {discord_id}")
+
+            shortcode = (await get_shortcode_from_discord(
+                interaction, discord_id))["shortcode"]
+
+            if not(shortcode):
+                return
+
+        perms = await get_member_perms  (interaction, shortcode)
+        stats = await get_stats_from_shortcode(interaction, shortcode)
 
         time_sum = 0
         weight_sum = 0
@@ -44,17 +52,15 @@ async def whois(interaction: discord.Interaction, user: str):
             time_sum += item[2]
             weight_sum += item[3]
 
-        last_print = stats[-1]
+        last_print = stats[-1] if stats else None
         totals = [time_sum, weight_sum]
-        shortcode = last_print[0]
 
-        perms = await get_member_perms(interaction, shortcode)
 
         data = {
             "perms": perms,
             "last_print": last_print,
             "totals": totals,
-            "discord_id": id,
+            "discord_id": discord_id,
             "short_code": shortcode
         }
 
