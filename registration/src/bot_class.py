@@ -97,29 +97,6 @@ class DiscordBot(commands.Bot):
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
 
-        @self.tree.command(name="quiz", description="Launch induction quiz")
-        async def quiz(interaction: discord.Interaction):
-            try:
-                if check_role(interaction, "Verified Member"):
-                    await launch_quiz(interaction)
-                else:
-                    await interaction.response.send_message(
-                            embed=discord.Embed(
-                                title="Error",
-                                description=(
-                                    "Role Not Found - make sure to get membership"),
-                                color=error_color),
-                            ephemeral=True
-                            )
-            except Exception as e:
-                logging.error(f"Quiz encountered {e}")
-                await interaction.response.send_message(
-                    embed=discord.Embed(
-                        title="Error",
-                        description=(
-                            "Server error! Please contact committee"),
-                        color=error_color),
-                )
 
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))
