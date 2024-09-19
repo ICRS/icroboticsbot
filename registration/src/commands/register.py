@@ -1,7 +1,5 @@
 import logging
-import os
 import discord
-import requests
 from discord.ext import commands
 
 from src.commands.quiz import launch_quiz
