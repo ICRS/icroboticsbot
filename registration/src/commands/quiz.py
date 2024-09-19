@@ -5,9 +5,11 @@ from discord.ui import View, Select
 import discord
 import random
 import requests
+from src.utils import *
 
 from src.commands.stats import SERVER_IP
 
+DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 result = requests.get(SERVER_IP + "/induction/quiz")
 questions = result.json()
 
@@ -115,7 +117,7 @@ class QuizReset(View):
 
 
 class Quiz:
-    def __init__(self, interaction: discord.Interaction) -> None:
+    def __init__(self, interaction: discord.Interaction, shortcode: str) -> None:
         self.questions = questions
         self.index = 0
         self.num_questions = len(self.questions)
@@ -123,6 +125,9 @@ class Quiz:
         self.num_correct = 0
         self.interaction = interaction
         self.user_id = str(interaction.user.id)
+        self.member = interaction.user
+
+        self.shortcode = shortcode
 
         self.message: discord.Message | None = None
         self.incorrect_ind: List[int] = []
@@ -183,7 +188,9 @@ class Quiz:
             SERVER_IP + "/induction/induct/discord-id",
                 params={"id": str(self.user_id)})
 
-            if response.status_code == 200:
+            roleWorked = await addRoletoUser(self.interaction, self.shortcode, self.member)
+
+            if response.status_code == 200 and roleWorked:
                 message = "Congrats! You've completed the induction!\n\n"
                 message += "If this is your first year  in ICRS please\n"  # noqa: E501
                 message += "**Register your card in person** for 3D printing and door access!\n\n"  # noqa: E501
@@ -194,6 +201,13 @@ class Quiz:
                     title="Quiz Passed!",
                     description=message,
                     color=discord.Color.green(),
+                )
+
+            elif not(roleWorked):
+                q_embed = discord.Embed(
+                    title="Quiz Semi Worked!",
+                    description="Server error, Quiz Semi Worked but the adding the discord role didn't. You DID pass the quiz! Please show committee a screenshot of this message",
+                    color=discord.Color.red()
                 )
 
             else:
@@ -227,6 +241,37 @@ class Quiz:
             )
 
 
-async def launch_quiz(interaction: discord.Interaction):
-    quiz = Quiz(interaction=interaction)
+async def launch_quiz(interaction: discord.Interaction, shortcode: str):
+    quiz = Quiz(interaction=interaction, shortcode=shortcode)
     return await quiz.send_next_question()
+
+
+async def addRoletoUser(interaction: discord.Interaction, shortcode: str, member):
+    role = discord.utils.get(
+        interaction.guild.roles, name="Verified Member")
+
+    result = requests.post(
+        DATABASE_ADAPTER_IP + "/discord-id/register",
+        params={
+            "shortcode": shortcode.strip().lower(),
+            "discord_id": str(member.id)
+        })
+
+    if result.status_code == 401:
+        return await interaction.response.send_message(
+            embed=user_not_member_msg(), ephemeral=True)
+    elif result.status_code == 304:
+        return await interaction.response.send_message(
+            embed=code_already_used_msg(), ephemeral=True)
+    elif result.status_code == 422:
+        return await interaction.response.send_message(
+            embed=how_to_msg(), ephemeral=True
+        )
+    elif result.status_code != 200:
+        return await interaction.response.send_message(
+            embed=error_msg("Something went wrong on the server!"),
+        )
+    await member.add_roles(
+        role, reason="Membership verified using API")
+
+    return True
