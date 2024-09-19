@@ -186,11 +186,12 @@ class Quiz:
 
     async def quiz_completed(self):
         if self.num_correct == self.num_questions:
+            roleWorked = await addRoletoUser(self.interaction, self.shortcode, self.member)
+
             response = requests.post(
             SERVER_IP + "/induction/induct/discord-id",
                 params={"id": str(self.user_id)})
 
-            roleWorked = await addRoletoUser(self.interaction, self.shortcode, self.member)
 
             if response.status_code == 200 and roleWorked:
                 message = "Congrats! You've completed the induction!\n\n"
