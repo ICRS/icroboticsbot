@@ -3,8 +3,8 @@ import discord
 from discord.ext import commands
 
 from src.commands.quiz import launch_quiz
-from src.utils import *
-
+# from src.utils import *
+import src.utils as util_msg
 
 
 __all__ = [
@@ -33,26 +33,26 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
 
         if not member:
             return await interaction.response.send_message(
-                embed=not_on_guild_msg(), ephemeral=True)
+                embed=util_msg.not_on_guild_msg(), ephemeral=True)
 
         # if already verified move on to the induction
         isVerified = check_role(interaction, "Verified Member")
         if isVerified:
             return await interaction.response.send_message(
-                embed=already_inducted(), ephemeral=True)
+                embed=util_msg.already_inducted(), ephemeral=True)
 
         if not await isInducted(interaction, shortcode):
             await launch_quiz(interaction, shortcode)
         else:
             return await interaction.response.send_message(
-                embed=already_inducted(), ephemeral=True)
+                embed=util_msg.already_inducted(), ephemeral=True)
 
     except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
+        await interaction.response.send_message(embed=util_msg.error_msg(e))
 
 
 async def isInducted(interaction: discord.Interaction, shortcode: str):
-    perms = await get_member_perms(interaction, shortcode)
+    perms = await util_msg.get_member_perms(interaction, shortcode)
     logging.info(perms)
 
     if perms is None or perms == {}:

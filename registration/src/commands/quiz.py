@@ -8,9 +8,10 @@ import os
 import discord
 import random
 import requests
-from src.utils import *
+import src.utils as util_msg
 
 from src.commands.stats import SERVER_IP
+
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
 result = requests.get(SERVER_IP + "/induction/quiz")
@@ -120,7 +121,10 @@ class QuizReset(View):
 
 
 class Quiz:
-    def __init__(self, interaction: discord.Interaction, shortcode: str) -> None:
+    def __init__(
+            self,
+            interaction: discord.Interaction,
+            shortcode: str) -> None:
         self.questions = questions
         self.index = 0
         self.num_questions = len(self.questions)
@@ -208,14 +212,19 @@ class Quiz:
             elif not (roleWorked):
                 q_embed = discord.Embed(
                     title="Quiz Semi Worked!",
-                    description="Server error, Quiz Semi Worked but the adding the discord role didn't. You DID pass the quiz! Please show committee a screenshot of this message",
+                    description=(
+                        "Server error, Quiz Semi Worked but the adding "
+                        "the discord role didn't. You DID pass the quiz! "
+                        "Please show committee a screenshot of this message"),
                     color=discord.Color.red()
                 )
 
             else:
                 q_embed = discord.Embed(
                     title="Error but Passed!",
-                    description="Server error, but you DID pass the quiz! Please show committee a screenshot of this message",
+                    description=(
+                        "Server error, but you DID pass the quiz! "
+                        "Please show committee a screenshot of this message"),
                     color=discord.Color.red()
                 )
 
@@ -264,20 +273,20 @@ async def addRoletoUser(
     if result.status_code == 401:
         logging.info(f"User is not member: {shortcode} - {member}")
         return await interaction.response.edit_message(
-            embed=user_not_member_msg(), ephemeral=True)
+            embed=util_msg.user_not_member_msg(), ephemeral=True)
     elif result.status_code == 304:
         logging.info(f"User already in db? : {shortcode} - {member}")
         return await interaction.response.edit_message(
-            embed=code_already_used_msg(), ephemeral=True)
+            embed=util_msg.code_already_used_msg(), ephemeral=True)
     elif result.status_code == 422:
         logging.info(f"How to msg: {shortcode} - {member}")
         return await interaction.response.edit_message(
-            embed=how_to_msg(), ephemeral=True
+            embed=util_msg.how_to_msg(), ephemeral=True
         )
     elif result.status_code != 200:
         logging.info(f"Server Error: {shortcode} - {member}")
         return await interaction.response.edit_message(
-            embed=error_msg("Something went wrong on the server!"),
+            embed=util_msg.error_msg("Something went wrong on the server!"),
         )
     await member.add_roles(
         role, reason="Membership verified using API")
