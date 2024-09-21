@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import logging
 from typing import List
 from discord.ui import View, Select
 import os
@@ -152,7 +153,6 @@ class Quiz:
 
     async def send_next_question(self):
 
-
         q = self.questions[self.index]
         question = QuizQuestion(
             q.correct_options,
@@ -186,12 +186,12 @@ class Quiz:
 
     async def quiz_completed(self):
         if self.num_correct == self.num_questions:
-            roleWorked = await addRoletoUser(self.interaction, self.shortcode, self.member)
+            roleWorked = await addRoletoUser(
+                self.interaction, self.shortcode, self.member)
 
             response = requests.post(
-            SERVER_IP + "/induction/induct/discord-id",
+                SERVER_IP + "/induction/induct/discord-id",
                 params={"id": str(self.user_id)})
-
 
             if response.status_code == 200 and roleWorked:
                 message = "Congrats! You've completed the induction!\n\n"
@@ -199,14 +199,13 @@ class Quiz:
                 message += "**Register your card in person** for 3D printing and door access!\n\n"  # noqa: E501
                 message += "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
 
-
                 q_embed = discord.Embed(
                     title="Quiz Passed!",
                     description=message,
                     color=discord.Color.green(),
                 )
 
-            elif not(roleWorked):
+            elif not (roleWorked):
                 q_embed = discord.Embed(
                     title="Quiz Semi Worked!",
                     description="Server error, Quiz Semi Worked but the adding the discord role didn't. You DID pass the quiz! Please show committee a screenshot of this message",
@@ -249,7 +248,9 @@ async def launch_quiz(interaction: discord.Interaction, shortcode: str):
     return await quiz.send_next_question()
 
 
-async def addRoletoUser(interaction: discord.Interaction, shortcode: str, member):
+async def addRoletoUser(
+        interaction: discord.Interaction,
+        shortcode: str, member: discord.Member):
     role = discord.utils.get(
         interaction.guild.roles, name="Verified Member")
 
@@ -261,17 +262,21 @@ async def addRoletoUser(interaction: discord.Interaction, shortcode: str, member
         })
 
     if result.status_code == 401:
-        return await interaction.response.send_message(
+        logging.info(f"User is not member: {shortcode} - {member}")
+        return await interaction.response.edit_message(
             embed=user_not_member_msg(), ephemeral=True)
     elif result.status_code == 304:
-        return await interaction.response.send_message(
+        logging.info(f"User already in db? : {shortcode} - {member}")
+        return await interaction.response.edit_message(
             embed=code_already_used_msg(), ephemeral=True)
     elif result.status_code == 422:
-        return await interaction.response.send_message(
+        logging.info(f"How to msg: {shortcode} - {member}")
+        return await interaction.response.edit_message(
             embed=how_to_msg(), ephemeral=True
         )
     elif result.status_code != 200:
-        return await interaction.response.send_message(
+        logging.info(f"Server Error: {shortcode} - {member}")
+        return await interaction.response.edit_message(
             embed=error_msg("Something went wrong on the server!"),
         )
     await member.add_roles(
