@@ -1,6 +1,6 @@
 import discord
 import logging
-from src.utils import *
+import src.utils as util_msg
 
 
 __all__ = [
@@ -16,34 +16,34 @@ async def whois(interaction: discord.Interaction, user: str):
         roles = [r for r in author.roles if r is not None]
         if not ("committee" in [y.name.lower() for y in roles]):
             return await interaction.response.send_message(
-                embed=not_committee())
+                embed=util_msg.not_committee())
 
-        if not (is_discord_id(user)) and not (is_shortcode(user)):
+        if not util_msg.is_discord_id(user) and not util_msg.is_shortcode(user):    # noqa: E501
             logging.info(f"User invalid: {user}")
             return await interaction.response.send_message(
-                embed=invalid_discord_id(), ephemeral=True)
+                embed=util_msg.invalid_discord_id(), ephemeral=True)
 
         shortcode = ""
         discord_id = ""
         # allow shortcode or @user
-        if (is_shortcode(user)):
-            discord_id = (await get_discord_from_shortcode(
+        if (util_msg.is_shortcode(user)):
+            discord_id = (await util_msg.get_discord_from_shortcode(
                 interaction, user))["discord_id"]
             discord_id = discord_id if discord_id else "Not on discord"
             shortcode = user
         else:
-            discord_id = format_discord_id(user)
+            discord_id = util_msg.format_discord_id(user)
 
             logging.info(f"Discord ID: {discord_id}")
 
-            shortcode = (await get_shortcode_from_discord(
+            shortcode = (await util_msg.get_shortcode_from_discord(
                 interaction, discord_id))["shortcode"]
 
-            if not(shortcode):
+            if not shortcode:
                 return
 
-        perms = await get_member_perms  (interaction, shortcode)
-        stats = await get_stats_from_shortcode(interaction, shortcode)
+        perms = await util_msg.get_member_perms(interaction, shortcode)
+        stats = await util_msg.get_stats_from_shortcode(interaction, shortcode)
 
         time_sum = 0
         weight_sum = 0
@@ -55,7 +55,6 @@ async def whois(interaction: discord.Interaction, user: str):
         last_print = stats[-1] if stats else None
         totals = [time_sum, weight_sum]
 
-
         data = {
             "perms": perms,
             "last_print": last_print,
@@ -65,7 +64,7 @@ async def whois(interaction: discord.Interaction, user: str):
         }
 
         return await interaction.response.send_message(
-            embed=show_discord_stats(data), ephemeral=True)
+            embed=util_msg.show_discord_stats(data), ephemeral=True)
 
     except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
+        await interaction.response.send_message(embed=util_msg.error_msg(e))

@@ -200,6 +200,7 @@ def generate_stat_card(user: discord.User) -> Image.Image:
     for idx, i in enumerate(data):
         a.text((12, 40+idx*35), f"{idx+1}.",
                font=item_font, fill=(255, 255, 255))
-        a.text((40, 40+idx*35), f"{i[3]}g", font=item_font, fill=(255, 255, 255))
+        a.text((40, 40+idx*35), f"{i[3]}g",
+               font=item_font, fill=(255, 255, 255))
     card.paste(window, (586, 125))
     return card

@@ -6,8 +6,6 @@ from discord.ext import commands
 from discord import app_commands
 import requests
 
-from src.commands.register import check_role
-from src.commands.quiz import launch_quiz
 from src.commands.stats import SERVER_IP
 from src.commands import (
     get_help,
@@ -21,7 +19,6 @@ from src.commands import (
     get_timelapse,
 )
 from src.utils import PrinterFarm, deregister_discord_id
-from src.utils.messages.error_messages import error_color
 
 __all__ = ["DiscordBot"]
 
@@ -96,7 +93,6 @@ class DiscordBot(commands.Bot):
         )
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
-
 
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))

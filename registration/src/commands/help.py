@@ -5,6 +5,7 @@ __all__ = [
     "get_help"
 ]
 
+
 async def get_help(interaction, tree):
     """
     get_help Get the help message with all the commands
