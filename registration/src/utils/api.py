@@ -37,13 +37,15 @@ BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 
 async def add_card_to_member(interaction: discord.Interaction,
-                                  shortcode: str, uid: str) -> bool:
+                             shortcode: str, uid: str) -> bool:
     try:
         logging.info(f"Adding card {uid} to shortcode {shortcode}")
 
         res = requests.request(
             "POST",
-            url=SERVER_IP + f"/member/register/card/shortcode?uuid={uid}&shortcode={shortcode}",
+            url=SERVER_IP +
+            "/member/register/card/shortcode?" +
+            f"uuid={uid}&shortcode={shortcode}",
             auth=BASIC_AUTH)
 
         if res.status_code == 200:
@@ -57,7 +59,7 @@ async def add_card_to_member(interaction: discord.Interaction,
 
 
 async def add_member_to_DB(interaction: discord.Interaction,
-                                  shortcode: str, uid: str) -> bool:
+                           shortcode: str, uid: str) -> bool:
     try:
         res = requests.request(
             "POST",
