@@ -1,13 +1,13 @@
-from src.utils import *
-import discord
-
 __all__ = [
     "link_card"
 ]
 
+import discord
+import src.utils as utils
+
 
 async def link_card(interaction: discord.Interaction,
-                        shortcode: str, uid: str):
+                    shortcode: str, uid: str):
     """
     register_on_dm Register message when user tries to register on DM
 
@@ -25,27 +25,28 @@ async def link_card(interaction: discord.Interaction,
     try:
         if "committee" not in [y.name.lower() for y in author.roles]:
             return await interaction.response.send_message(
-                embed=not_committee())
+                embed=utils.not_committee())
 
-        if not is_shortcode(shortcode):
+        if not utils.is_shortcode(shortcode):
             return await interaction.response.send_message(
-                embed=invalid_shortcode(), ephemeral=True)
-        elif not (is_uid(uid)):
+                embed=utils.invalid_shortcode(), ephemeral=True)
+        elif not utils.is_uid(uid):
             return await interaction.response.send_message(
-                embed=invalid_UID(), ephemeral=True)
+                embed=utils.invalid_UID(), ephemeral=True)
 
-        uid = format_uid(uid)
+        uid = utils.format_uid(uid)
 
-        server_success = await add_card_to_member(
+        server_success = await utils.add_card_to_member(
             interaction, shortcode, uid)
 
         if server_success:
             return await interaction.response.send_message(
-                embed=success_induction_msg(shortcode, uid), ephemeral=True)
+                embed=utils.success_induction_msg(shortcode, uid),
+                ephemeral=True)
 
         return await interaction.response.send_message(
-            embed=server_error_msg())
+            embed=utils.server_error_msg())
 
     # pylint: disable=broad-except
     except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
+        await interaction.response.send_message(embed=utils.error_msg(e))

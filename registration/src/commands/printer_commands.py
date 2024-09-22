@@ -1,15 +1,16 @@
-import os
-import discord
-from discord.ui import View, Button
-
-import src.utils as utils
-
 __all__ = [
     "PrinterButton",
     "PrinterCommandPage",
     "PrintersMainPage",
     "printer_buttons"
 ]
+
+import os
+import discord
+from discord.ui import View, Button
+
+import src.utils as utils
+
 
 DEBUG = str(os.getenv('DEBUG', False)).lower() in ['true', '1']  # noqa  # pylint: disable=invalid-envvar-default
 if DEBUG:
