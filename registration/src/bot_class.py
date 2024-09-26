@@ -10,15 +10,15 @@ from src.commands.stats import SERVER_IP
 from src.commands import (
     get_help,
     link_card,
-    printer_buttons,
-    printer_status,
     quote_person,
     register_user,
     stats_card,
     whois,
     get_timelapse,
+    induct_member
 )
-from src.utils import PrinterFarm, deregister_discord_id
+from src.utils import deregister_discord_id, format_uid
+
 
 __all__ = ["DiscordBot"]
 
@@ -58,7 +58,7 @@ class DiscordBot(commands.Bot):
         self.guild_info = guild_info
 
         self.add_commands()
-        self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
+        # self.printer_farm = PrinterFarm(self, printer_names, printer_suffix)
 
         self.printer_names = printer_names
         self.printer_suffix = printer_suffix
@@ -94,6 +94,17 @@ class DiscordBot(commands.Bot):
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
 
+        @self.tree.command(
+            name="induct",
+            description="ADMIN ONLY: induct short/discord",
+        )
+        async def induct_user(
+                interaction,
+                shortcode: str,
+                uid: str):
+            member: discord.User = self.get_user(format_uid(uid))
+            await induct_member(interaction, shortcode, member)
+
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))
 
@@ -127,19 +138,19 @@ class DiscordBot(commands.Bot):
         async def stats(interaction):
             await stats_card(interaction)
 
-        @self.tree.command(
-            name="printers",
-            description="List and interact with all the printers"
-        )  # noqa
-        async def printers_cmd(interaction):
-            await printer_buttons(self, interaction)
+        # @self.tree.command(
+        #     name="printers",
+        #     description="List and interact with all the printers"
+        # )  # noqa
+        # async def printers_cmd(interaction):
+        #     await printer_buttons(self, interaction)
 
-        @self.tree.command(
-            name="bounds",
-            description="List all the printers and the users bound to them",
-        )  # noqa: E501
-        async def bounds(interaction):
-            await printer_status(self, interaction)
+        # @self.tree.command(
+        #     name="bounds",
+        #     description="List all the printers and the users bound to them",
+        # )  # noqa: E501
+        # async def bounds(interaction):
+        #     await printer_status(self, interaction)
 
         @self.tree.command(
             name="timelapse",
