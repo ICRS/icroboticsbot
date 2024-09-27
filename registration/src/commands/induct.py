@@ -29,8 +29,10 @@ async def induct_member(
         SERVER_IP + "/induction/induct/discord-id",
         params={"id": str(member.id)})
 
+    await interaction.response.send_message()
+
     if result.status_code == 200 and reworked:
-        return await interaction.message.edit(
+        return await interaction.response.edit_message(
             embed=discord.Embed(
                 "Successfully inducted user",
                 color=discord.Color.green()
@@ -39,7 +41,7 @@ async def induct_member(
     elif result.status_code != 200:
         logging.warning(f"Induct Member Partially Failed: {member} - "
                         f"{shortcode}; {result.status_code}, {result.reason}")
-        return await interaction.message.edit(
+        return await interaction.response.edit_message(
             embed=discord.Embed(
                 "Could not update db for some reason",
                 color=discord.Color.red()
@@ -48,7 +50,7 @@ async def induct_member(
     elif not reworked:
         logging.warning(f"Induct Member Partially Failed: {member} - "
                         f"{shortcode}; Role update failed!")
-        return await interaction.message.edit(
+        return await interaction.response.edit_message(
             embed=discord.Embed(
                 "Did not rework user discord permissions...",
                 color=discord.Color.red()
@@ -57,7 +59,7 @@ async def induct_member(
     else:
         logging.warning(f"Induct Member Severe Failure: {member} - "
                         f"{shortcode}; {result.status_code}, {result.reason}")
-        return await interaction.message.edit(
+        return await interaction.response.edit_message(
             embed=discord.Embed(
                 "Something really bad happened, check the logs.",
                 color=discord.Color.red()
