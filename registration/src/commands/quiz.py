@@ -83,7 +83,7 @@ class QuizSelectList(Select):
         v = interaction.data.values().mapping
         v = v.get("values", [])
 
-        correct = (set(self.correct_options) == set(v))
+        correct = int(set(self.correct_options) == set(v))
         await interaction.response.defer()
         await self.return_callback(correct)
 
@@ -156,7 +156,6 @@ class Quiz:
             await self.send_next_question()
 
     async def send_next_question(self):
-
         q = self.questions[self.index]
         question = QuizQuestion(
             q.correct_options,
@@ -259,7 +258,8 @@ async def launch_quiz(interaction: discord.Interaction, shortcode: str):
 
 async def addRoletoUser(
         interaction: discord.Interaction,
-        shortcode: str, member: discord.Member):
+        shortcode: str,
+        member: discord.Member | discord.User):
     role = discord.utils.get(
         interaction.guild.roles, name="Verified Member")
 
