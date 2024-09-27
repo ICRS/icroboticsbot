@@ -99,12 +99,21 @@ class DiscordBot(commands.Bot):
             description="ADMIN ONLY: induct short/discord",
         )
         async def induct_user(
-                interaction,
+                interaction: discord.Interaction,
                 shortcode: str,
-                uid: str):
-            member: discord.User = self.get_user(format_discord_id(uid))
-            await induct_member(interaction, shortcode, member)
-
+                discord_user: str):
+            logging.info(f"Trying to induct user {shortcode}, {discord_user}")
+            member: discord.User = self.get_user(
+                format_discord_id(discord_user))
+            if member is not None:
+                await induct_member(interaction, shortcode, member)
+            else:
+                interaction.message.reply(
+                    embed=discord.Embed(
+                        description="Could not find user",
+                        color=discord.Color.red()
+                    )
+                )
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))
 
