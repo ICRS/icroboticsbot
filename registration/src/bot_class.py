@@ -105,10 +105,11 @@ class DiscordBot(commands.Bot):
             logging.info(f"Trying to induct user {shortcode}, {discord_user}")
             member: discord.User = self.get_user(
                 format_discord_id(discord_user))
+            logging.info(f"Member {member}")
             if member is not None:
                 await induct_member(interaction, shortcode, member)
             else:
-                interaction.message.reply(
+                await interaction.response.send_message(
                     embed=discord.Embed(
                         description="Could not find user",
                         color=discord.Color.red()
