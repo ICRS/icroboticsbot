@@ -17,7 +17,7 @@ from src.commands import (
     get_timelapse,
     induct_member
 )
-from src.utils import deregister_discord_id, format_uid
+from src.utils import deregister_discord_id, format_discord_id
 
 
 __all__ = ["DiscordBot"]
@@ -102,7 +102,7 @@ class DiscordBot(commands.Bot):
                 interaction,
                 shortcode: str,
                 uid: str):
-            member: discord.User = self.get_user(format_uid(uid))
+            member: discord.User = self.get_user(format_discord_id(uid))
             await induct_member(interaction, shortcode, member)
 
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
