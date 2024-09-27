@@ -104,7 +104,7 @@ class DiscordBot(commands.Bot):
                 discord_user: str):
             logging.info(f"Trying to induct user {shortcode}, {discord_user}")
             member: discord.User = self.get_user(
-                format_discord_id(discord_user))
+                int(format_discord_id(discord_user)))
             logging.info(f"Member {member}")
             if member is not None:
                 await induct_member(interaction, shortcode, member)
