@@ -273,15 +273,15 @@ async def addRoletoUser(
     if result.status_code == 401:
         logging.info(f"User is not member: {shortcode} - {member}")
         return await interaction.response.edit_message(
-            embed=util_msg.user_not_member_msg(), ephemeral=True)
+            embed=util_msg.user_not_member_msg())
     elif result.status_code == 304:
         logging.info(f"User already in db? : {shortcode} - {member}")
         return await interaction.response.edit_message(
-            embed=util_msg.code_already_used_msg(), ephemeral=True)
+            embed=util_msg.code_already_used_msg())
     elif result.status_code == 422:
         logging.info(f"How to msg: {shortcode} - {member}")
         return await interaction.response.edit_message(
-            embed=util_msg.how_to_msg(), ephemeral=True
+            embed=util_msg.how_to_msg()
         )
     elif result.status_code != 200:
         logging.info(f"Server Error: {shortcode} - {member}")

@@ -24,12 +24,11 @@ async def induct_member(
         return await interaction.response.send_message(
             embed=util_msg.not_committee())
 
+    await interaction.response.send_message(ephemeral=True)
     reworked = await addRoletoUser(interaction, shortcode, member)
     result = requests.post(
         SERVER_IP + "/induction/induct/discord-id",
         params={"id": str(member.id)})
-
-    await interaction.response.send_message()
 
     if result.status_code == 200 and reworked:
         return await interaction.response.edit_message(
