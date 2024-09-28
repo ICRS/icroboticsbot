@@ -36,13 +36,7 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
             return await interaction.response.send_message(
                 embed=util_msg.not_on_guild_msg(), ephemeral=True)
 
-        # if already verified move on to the induction
-        isVerified = check_role(interaction, "Verified Member")
-        if isVerified:
-            return await interaction.response.send_message(
-                embed=util_msg.already_inducted(), ephemeral=True)
-
-        if not await isInducted(interaction, shortcode):
+        if await isInducted(interaction, shortcode):
               return await interaction.response.send_message(
                 embed=util_msg.already_inducted(), ephemeral=True)
 
