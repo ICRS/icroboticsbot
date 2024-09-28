@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-import logging
 from typing import List
 from discord.ui import View, Select
 import os
@@ -8,9 +7,8 @@ import os
 import discord
 import random
 import requests
-import src.utils as util_msg
-
 from src.commands.stats import SERVER_IP
+from src.utils.induction_utils import fullInduction
 
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
@@ -189,52 +187,11 @@ class Quiz:
 
     async def quiz_completed(self):
         if self.num_correct == self.num_questions:
-            roleWorked = await addRoletoUser(
-                self.interaction, self.shortcode, self.member)
-
-            response = requests.post(
-                SERVER_IP + "/induction/induct/discord-id",
-                params={"id": str(self.user_id)})
-
-            if response.status_code == 200 and roleWorked:
-                message = "Congrats! You've completed the induction!\n\n"
-                message += "If this is your first year  in ICRS please\n"  # noqa: E501
-                message += "**Register your card in person** for 3D printing and door access!\n\n"  # noqa: E501
-                message += "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
-
-                q_embed = discord.Embed(
-                    title="Quiz Passed!",
-                    description=message,
-                    color=discord.Color.green(),
-                )
-
-            elif not (roleWorked):
-                q_embed = discord.Embed(
-                    title="Quiz Semi Worked!",
-                    description=(
-                        "Server error, Quiz Semi Worked but the adding "
-                        "the discord role didn't. You DID pass the quiz! "
-                        "Please show committee a screenshot of this message"),
-                    color=discord.Color.red()
-                )
-
-            else:
-                q_embed = discord.Embed(
-                    title="Error but Passed!",
-                    description=(
-                        "Server error, but you DID pass the quiz! "
-                        "Please show committee a screenshot of this message"),
-                    color=discord.Color.red()
-                )
-
-            await self.message.edit(
-                embed=q_embed,
-                view=None,
-            )
+            await fullInduction(self.interaction, self.shortcode, self.member)
 
         else:
             print(self.incorrect_ind)
-            message = f"You got: {self.num_correct}/{self.num_questions} correct. Please try again!\n\n"  # noqa: E501
+            message = f"{self.num_correct}/{self.num_questions} correct. Please try again!\n\n"  # noqa: E501
             message += "You got the following incorrect:\n"
             message += "\n".join([
                 "- " + self.questions[i - 1].question.strip()
@@ -254,41 +211,3 @@ class Quiz:
 async def launch_quiz(interaction: discord.Interaction, shortcode: str):
     quiz = Quiz(interaction=interaction, shortcode=shortcode)
     return await quiz.send_next_question()
-
-
-async def addRoletoUser(
-        interaction: discord.Interaction,
-        shortcode: str,
-        member: discord.Member | discord.User):
-    role = discord.utils.get(
-        interaction.guild.roles, name="Verified Member")
-
-    result = requests.post(
-        DATABASE_ADAPTER_IP + "/discord-id/register",
-        params={
-            "shortcode": shortcode.strip().lower(),
-            "discord_id": str(member.id)
-        })
-
-    if result.status_code == 401:
-        logging.info(f"User is not member: {shortcode} - {member}")
-        return await interaction.response.edit_message(
-            embed=util_msg.user_not_member_msg())
-    elif result.status_code == 304:
-        logging.info(f"User already in db? : {shortcode} - {member}")
-        return await interaction.response.edit_message(
-            embed=util_msg.code_already_used_msg())
-    elif result.status_code == 422:
-        logging.info(f"How to msg: {shortcode} - {member}")
-        return await interaction.response.edit_message(
-            embed=util_msg.how_to_msg()
-        )
-    elif result.status_code != 200:
-        logging.info(f"Server Error: {shortcode} - {member}")
-        return await interaction.response.edit_message(
-            embed=util_msg.error_msg("Something went wrong on the server!"),
-        )
-    await member.add_roles(
-        role, reason="Membership verified using API")
-
-    return True

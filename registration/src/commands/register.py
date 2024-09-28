@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 from src.commands.quiz import launch_quiz
+from src.utils.induction_utils import hasPaidForMembership
 # from src.utils import *
 import src.utils as util_msg
 
@@ -42,10 +43,32 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
                 embed=util_msg.already_inducted(), ephemeral=True)
 
         if not await isInducted(interaction, shortcode):
-            await launch_quiz(interaction, shortcode)
-        else:
-            return await interaction.response.send_message(
+              return await interaction.response.send_message(
                 embed=util_msg.already_inducted(), ephemeral=True)
+
+        membershipPaid = hasPaidForMembership(shortcode)
+        if membershipPaid.status_code != 200:
+            logging.warning(f"Union Member Failed: {member} - "
+                        f"{shortcode}; {membershipPaid.status_code}, {membershipPaid.reason}")
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="We had a tech issue",
+                    description=f"Union API Error: {membershipPaid.status_code} - {membershipPaid.reason}",
+                    color=discord.Color.red()
+                )
+            )
+
+        if not membershipPaid.json():
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="You have not paid for membership",
+                    description="Please pay £5 for membership before trying again \n here a link: [imperialcollegeunion.org/activities/a-to-z/robotics](https://www.imperialcollegeunion.org/activities/a-to-z/robotics)",
+                    color=discord.Color.red()
+                )
+            )
+
+        await launch_quiz(interaction, shortcode)
+
 
     except Exception as e:
         await interaction.response.send_message(embed=util_msg.error_msg(e))
