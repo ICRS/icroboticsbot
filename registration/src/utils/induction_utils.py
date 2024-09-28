@@ -47,7 +47,7 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
         )
         return False
 
-    description += "If this is your first year in ICRS please\n"  # noqa: E501
+    description = "If this is your first year in ICRS please\n"  # noqa: E501
     description += "**Register your card in person** for 3D printing access!\n\n"  # noqa: E501
     description += "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
 
@@ -98,6 +98,6 @@ async def addRoletoUser(
 def hasPaidForMembership(shortcode: str):
     logging.info(f"trying to check union: {shortcode}")
 
-    return requests.post(
-                SERVER_IP + "/member/check-union",
+    return requests.get(
+                SERVER_IP + "/member",
                 params={"shortcode": shortcode})
