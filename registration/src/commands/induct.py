@@ -24,7 +24,11 @@ async def induct_member(
         return await interaction.response.send_message(
             embed=util_msg.not_committee())
 
-    await interaction.response.send_message(ephemeral=True)
+    await interaction.response.send_message(
+        embed=discord.Embed(title="Waiting"),
+        ephemeral=True
+    )
+
     reworked = await addRoletoUser(interaction, shortcode, member)
     result = requests.post(
         SERVER_IP + "/induction/induct/discord-id",
