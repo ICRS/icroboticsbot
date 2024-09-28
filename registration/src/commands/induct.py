@@ -25,7 +25,7 @@ async def induct_member(
             embed=util_msg.not_committee())
 
     await interaction.response.send_message(
-        embed=discord.Embed("Waiting"),
+        embed=discord.Embed(description="Waiting"),
         color=discord.Color.yellow(),
         ephemeral=True
     )
