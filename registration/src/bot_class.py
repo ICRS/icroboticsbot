@@ -17,7 +17,7 @@ from src.commands import (
     get_timelapse,
     induct_member
 )
-from src.utils import deregister_discord_id, format_discord_id
+from src.utils import deregister_discord_id
 
 
 __all__ = ["DiscordBot"]
@@ -89,32 +89,21 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="whois",
-            description="ADMIN ONLY: check info of a shortcode/discord memer",
+            description="ADMIN ONLY: check info of a shortcode/discord member",
         )
         async def whois_cmd(interaction, user: str):
             await whois(interaction, user)
 
         @self.tree.command(
             name="induct",
-            description="ADMIN ONLY: induct short/discord",
+            description="ADMIN ONLY: induct member",
         )
         async def induct_user(
                 interaction: discord.Interaction,
                 shortcode: str,
-                discord_user: str):
-            logging.info(f"Trying to induct user {shortcode}, {discord_user}")
-            member: discord.User | None = self.get_user(
-                int(format_discord_id(discord_user)))
-            logging.info(f"Member {member}")
-            if member is not None:
-                return await induct_member(interaction, shortcode, member)
-            else:
-                return await interaction.response.send_message(
-                    embed=discord.Embed(
-                        description="Could not find user",
-                        color=discord.Color.red()
-                    )
-                )
+                discord_member: discord.Member, bypass: bool = False):
+            await induct_member(interaction, shortcode, discord_member, bypass)
+
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))
 
