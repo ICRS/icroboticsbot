@@ -96,11 +96,8 @@ async def get_member_perms(interaction: discord.Interaction, shortcode: str):
             "GET", url=SERVER_IP + "/member/permissions/shortcode",
             params={"shortcode": shortcode}, auth=BASIC_AUTH)
 
-        if res.status_code == 200 and res.json() != {}:
+        if res.status_code == 200:
             return res.json()
-
-        if res.json() == {}:
-            return False
 
         await interaction.response.send_message(
             embed=error_msg(str(res.reason), "Bad Response"))
