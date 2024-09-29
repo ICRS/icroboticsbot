@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from src.commands.quiz import launch_quiz
-from src.utils.induction_utils import hasPaidForMembership
+from src.utils.induction_utils import hasPaidForMembership, validatePreviousShortcode
 # from src.utils import *
 import src.utils as util_msg
 
@@ -35,6 +35,11 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
         if not member:
             return await interaction.response.send_message(
                 embed=util_msg.not_on_guild_msg(), ephemeral=True)
+
+        shortcodeState = validatePreviousShortcode(member.id, shortcode)
+        if shortcodeState == "invalid":
+            return await interaction.response.send_message(
+                embed=util_msg.different_link(), ephemeral=True)
 
         if await isInducted(interaction, shortcode):
               return await interaction.response.send_message(
