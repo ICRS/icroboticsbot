@@ -62,15 +62,9 @@ async def linkDiscordUser(
         message: discord.Message):
     logging.info(f"trying to link discord Member: {member_id}")
 
-    preShortcode =  requests.request(
-            "GET",
-            url=SERVER_IP + "/discord-id/shortcode",
-            params={
-                "id": member_id,
-            },
-            auth=BASIC_AUTH)
+    isShortValidState = validatePreviousShortcode(member_id, shortcode)
 
-    if(preShortcode.status_code != 200 or not preShortcode.json() or not preShortcode.json()["shortcode"]):
+    if(isShortValidState == "not found"):
         linkDiscordWorked = requests.post(
             SERVER_IP + "/discord-id/register",
             params={
@@ -92,7 +86,7 @@ async def linkDiscordUser(
             return False
         return True
 
-    if(preShortcode.json()["shortcode"] == shortcode):
+    if(isShortValidState == "valid"):
         return True
 
     await message.edit(
@@ -126,3 +120,44 @@ def hasPaidForMembership(shortcode: str):
     return requests.get(
                 SERVER_IP + "/member",
                 params={"shortcode": shortcode})
+
+def validatePreviousShortcode(member_id: str, shortcode: str):
+    # default not found if it makes it through the checks
+    preShortcode = requests.request(
+            "GET",
+            url=SERVER_IP + "/discord-id/shortcode",
+            params={
+                "id": member_id,
+            },
+            auth=BASIC_AUTH)
+
+
+    didPreShortcodeWork = preShortcode.status_code == 200 and preShortcode.json() and preShortcode.json()["shortcode"]
+
+    # check if previous shortcode is exists
+    if(didPreShortcodeWork):
+        logging.info(f"Previous shortcode: {preShortcode.json()}")
+        if(preShortcode.json()["shortcode"] == shortcode):
+            return "valid"
+        else:
+            return "invalid"
+
+
+    # check if previous discord
+    preDiscord = requests.request(
+            "GET",
+            url=SERVER_IP + "/shortcode/discord-id",
+            params={
+                "shortcode": shortcode,
+            },
+            auth=BASIC_AUTH)
+
+    didPreDiscordWork = preDiscord.status_code == 200 and preDiscord.json() and preDiscord.json()["discord_id"]
+    if(didPreDiscordWork):
+        logging.info(f"Previous discord: {preDiscord.json()}")
+        if(preDiscord.json()["discord_id"] == member_id):
+            return "valid"
+        else:
+            return "invalid"
+
+    return "not found"
