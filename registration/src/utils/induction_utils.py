@@ -2,16 +2,7 @@ import logging
 import os
 import discord
 import requests
-from src.commands.stats import SERVER_IP
-from requests.auth import HTTPBasicAuth
-
-
-SERVER_IP = os.getenv("SERVER_IP")
-DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")
-DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
-BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
-
-DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
+from src.utils.api import BASIC_AUTH, SERVER_IP
 
 async def fullInduction(interaction: discord.Interaction, shortcode: str, member: discord.Member):
     member_id = str(member.id)
@@ -75,11 +66,9 @@ async def linkDiscordUser(
             },
             auth=BASIC_AUTH)
 
-    logging.warning(f"prev shortcode: {preShortcode.json()}")
-
-    if(preShortcode.status_code != 200):
+    if(preShortcode.status_code != 200 or not preShortcode.json() or not preShortcode.json()["shortcode"]):
         linkDiscordWorked = requests.post(
-            DATABASE_ADAPTER_IP + "/discord-id/register",
+            SERVER_IP + "/discord-id/register",
             params={
                 "shortcode": shortcode,
                 "discord_id": member_id
