@@ -48,7 +48,7 @@ async def whois(interaction: discord.Interaction, user: str):
         stats = await util_msg.get_stats_from_shortcode(interaction, shortcode)
 
         if perms is None or perms == {}:
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
             embed=error_msg("Couldn't find user"))
 
         time_sum = 0
