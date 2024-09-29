@@ -100,8 +100,6 @@ async def get_member_perms(interaction: discord.Interaction, shortcode: str):
             return res.json()
 
         if res.json() == {}:
-            await interaction.response.send_message(
-                embed=error_msg("Couldn't find user"))
             return False
 
         await interaction.response.send_message(
