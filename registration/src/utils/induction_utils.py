@@ -2,25 +2,14 @@ import logging
 import os
 import discord
 import requests
-from src.commands.stats import SERVER_IP
-
-DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
+from src.utils.api import BASIC_AUTH, SERVER_IP
 
 async def fullInduction(interaction: discord.Interaction, shortcode: str, member: discord.Member):
     member_id = str(member.id)
     message = await interaction.original_response()
+    shortcode = shortcode.strip().lower()
 
-    linkDiscordWorked = linkDiscordUser(shortcode, member_id)
-    if linkDiscordWorked.status_code != 200:
-        logging.warning(f"Link discord failed: {member} - "
-                        f"{shortcode}; {linkDiscordWorked.status_code}, {linkDiscordWorked.reason}")
-        await message.edit(
-            embed=discord.Embed(
-                title="You passed, but we had a tech issue",
-                description=f"Link discord API Error: {linkDiscordWorked.status_code} - {linkDiscordWorked.reason}",
-                color=discord.Color.red()
-            )
-        )
+    if not await linkDiscordUser(shortcode, member_id, message):
         return False
 
     inductMemberWorked = inductMember(member_id)
@@ -63,18 +52,52 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
     return True
 
 
-def linkDiscordUser(
+async def linkDiscordUser(
         shortcode: str,
-        member_id: str):
+        member_id: str,
+        message: discord.Message):
     logging.info(f"trying to link discord Member: {member_id}")
 
+    preShortcode =  requests.request(
+            "GET",
+            url=SERVER_IP + "/discord-id/shortcode",
+            params={
+                "id": member_id,
+            },
+            auth=BASIC_AUTH)
 
-    return requests.post(
-        DATABASE_ADAPTER_IP + "/discord-id/register",
-        params={
-            "shortcode": shortcode.strip().lower(),
-            "discord_id": member_id
-        })
+    if(preShortcode.status_code != 200 or not preShortcode.json() or not preShortcode.json()["shortcode"]):
+        linkDiscordWorked = requests.post(
+            SERVER_IP + "/discord-id/register",
+            params={
+                "shortcode": shortcode,
+                "discord_id": member_id
+            })
+
+        if(linkDiscordWorked.status_code != 200):
+            logging.warning(f"Link discord failed:- "
+                            f"{shortcode}; {linkDiscordWorked.status_code}, {linkDiscordWorked.reason}")
+            await message.edit(
+                embed=discord.Embed(
+                    title="You passed, but we had a tech issue",
+                    description=f"Link discord API Error: {linkDiscordWorked.status_code} - {linkDiscordWorked.reason}",
+                    color=discord.Color.red()
+                )
+            )
+            return False
+        return True
+
+    if(preShortcode.json()["shortcode"] == shortcode):
+        return True
+
+    await message.edit(
+            embed=discord.Embed(
+                title="Thats odd...",
+                description=f"It seems someone already has a different discord link to your shortcode, contact a committee member",
+                color=discord.Color.red()
+            )
+        )
+    return False
 
 def inductMember(member_id: str):
     logging.info(f"trying to induct Member: {member_id}")
