@@ -15,7 +15,8 @@ __all__ = [
     "quote_not_found",
     "is_not_inducted_msg",
     "error_msg",
-    "error_color"
+    "error_color",
+    "different_link"
 ]
 
 
@@ -66,6 +67,8 @@ def cant_find_discord_user():
 def invalid_shortcode():
     return error_msg("Please ensure the short code (eg: ab123) is valid", "hmmmmm")  # noqa: E501
 
+def different_link():
+    return error_msg("It seems someone already has a different discord link to your shortcode, contact a committee member", "Thats odd...")
 
 def invalid_discord_id():
     return error_msg("Please ensure the discord ID/user or shortcode is valid", "Thats not right")  # noqa: E501
