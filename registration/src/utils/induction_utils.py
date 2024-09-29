@@ -1,8 +1,9 @@
 import logging
-import os
 import discord
 import requests
 from src.utils.api import BASIC_AUTH, SERVER_IP
+import src.utils as util_msg
+
 
 async def fullInduction(interaction: discord.Interaction, shortcode: str, member: discord.Member):
     member_id = str(member.id)
@@ -21,7 +22,8 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
                 title="You passed, but we had a tech issue",
                 description=f"Induct member API Error: {inductMemberWorked.status_code} - {inductMemberWorked.reason}",
                 color=discord.Color.red()
-            )
+            ),
+            view=None
         )
         return False
 
@@ -32,7 +34,8 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
                 title="You passed, but we had a tech issue",
                 description=f"add role API Error",
                 color=discord.Color.red()
-            )
+            ),
+            view=None
         )
         return False
 
@@ -47,7 +50,8 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
             title="Congrats! You've completed the induction!",
             description=description,
             color=discord.Color.green()
-        )
+        ),
+        view=None
     )
     return True
 
@@ -82,7 +86,8 @@ async def linkDiscordUser(
                     title="You passed, but we had a tech issue",
                     description=f"Link discord API Error: {linkDiscordWorked.status_code} - {linkDiscordWorked.reason}",
                     color=discord.Color.red()
-                )
+                ),
+                view=None
             )
             return False
         return True
@@ -91,11 +96,8 @@ async def linkDiscordUser(
         return True
 
     await message.edit(
-            embed=discord.Embed(
-                title="Thats odd...",
-                description=f"It seems someone already has a different discord link to your shortcode, contact a committee member",
-                color=discord.Color.red()
-            )
+            embed=util_msg.different_link(),
+            view=None
         )
     return False
 
