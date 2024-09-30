@@ -71,7 +71,7 @@ async def linkDiscordUser(
         shortcode: str,
         member_id: str,
         message: discord.Message):
-    logging.info(f"trying to link discord Member: {member_id}")
+    logging.info(f"trying to link discord Member: {member_id} - {shortcode}")
 
     isShortValidState = validatePreviousShortcode(member_id, shortcode)
 
