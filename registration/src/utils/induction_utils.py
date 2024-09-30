@@ -5,6 +5,12 @@ from src.utils.api import BASIC_AUTH, SERVER_IP
 import src.utils as util_msg
 
 
+SUCCESS_MSG = (
+    "If this is your first year in ICRS please\n"
+    "**Register your card in person** for 3D printing access!\n\n"
+    "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)")  # noqa: E501
+
+
 async def fullInduction(
         interaction: discord.Interaction,
         shortcode: str,
@@ -31,27 +37,29 @@ async def fullInduction(
         )
         return False
 
-    addRoleWorked = await addRoletoUser(interaction, member)
+    try:
+        addRoleWorked = await addRoletoUser(interaction, member)
+    except Exception as e:
+        addRoleWorked = False
+        logging.warning(f"Add role failed: {member}, {shortcode} - {e}")
+
     if not addRoleWorked:
         await message.edit(
             embed=discord.Embed(
                 title="You passed, but we had a tech issue",
-                description="Add role API Error",
+                description="Add role API Error: please ask @committee to "
+                "give you the correct discord role",
                 color=discord.Color.red()
             ),
             view=None
         )
         return False
 
-    description = "If this is your first year in ICRS please\n"  # noqa: E501
-    description += "**Register your card in person** for 3D printing access!\n\n"  # noqa: E501
-    description += "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
-
     logging.info(f"Success!! {member}, {shortcode}")
     await message.edit(
         embed=discord.Embed(
             title="Congrats! You've completed the induction!",
-            description=description,
+            description=SUCCESS_MSG,
             color=discord.Color.green()
         ),
         view=None
@@ -110,7 +118,6 @@ def inductMember(member_id: str):
 async def addRoletoUser(
         interaction: discord.Interaction,
         member: discord.Member):
-
     role = discord.utils.get(
         interaction.guild.roles, name="Verified Member")
 
