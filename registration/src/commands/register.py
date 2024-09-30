@@ -3,8 +3,9 @@ import discord
 from discord.ext import commands
 
 from src.commands.quiz import launch_quiz
-from src.utils.induction_utils import hasPaidForMembership, validatePreviousShortcode
-# from src.utils import *
+from src.utils.induction_utils import (
+    hasPaidForMembership,
+    validatePreviousShortcode)
 import src.utils as util_msg
 
 
@@ -42,17 +43,18 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
                 embed=util_msg.different_link(), ephemeral=True)
 
         if await isInducted(interaction, shortcode):
-              return await interaction.response.send_message(
+            return await interaction.response.send_message(
                 embed=util_msg.already_inducted(), ephemeral=True)
 
         membershipPaid = hasPaidForMembership(shortcode)
         if membershipPaid.status_code != 200:
             logging.warning(f"Union Member Failed: {member} - "
-                        f"{shortcode}; {membershipPaid.status_code}, {membershipPaid.reason}")
+                            f"{shortcode}; {membershipPaid.status_code}, "
+                            f"{membershipPaid.reason}")
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="We had a tech issue",
-                    description=f"Union API Error: {membershipPaid.status_code} - {membershipPaid.reason}",
+                    description=f"Union API Error: {membershipPaid.status_code} - {membershipPaid.reason}",  # noqa: E501
                     color=discord.Color.red()
                 ),
                 ephemeral=True
@@ -62,14 +64,13 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="You have not paid for membership",
-                    description="Please pay £5 for membership before trying again \n here a link: [imperialcollegeunion.org/activities/a-to-z/robotics](https://www.imperialcollegeunion.org/activities/a-to-z/robotics)",
+                    description="Please pay £5 for membership before trying again\n here a link: [imperialcollegeunion.org/activities/a-to-z/robotics](https://www.imperialcollegeunion.org/activities/a-to-z/robotics)",  # noqa: E501
                     color=discord.Color.red()
                 ),
                 ephemeral=True
             )
 
         await launch_quiz(interaction, shortcode)
-
 
     except Exception as e:
         await interaction.response.send_message(embed=util_msg.error_msg(e))
@@ -81,6 +82,8 @@ async def isInducted(interaction: discord.Interaction, shortcode: str):
 
     if perms is None or perms == {}:
         return False
+    if isinstance(perms, bool):
+        return perms
     return perms["inducted"]
 
 
