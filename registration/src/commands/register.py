@@ -54,7 +54,8 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
                     title="We had a tech issue",
                     description=f"Union API Error: {membershipPaid.status_code} - {membershipPaid.reason}",
                     color=discord.Color.red()
-                )
+                ),
+                ephemeral=True
             )
 
         if not membershipPaid.json():
@@ -63,7 +64,8 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
                     title="You have not paid for membership",
                     description="Please pay £5 for membership before trying again \n here a link: [imperialcollegeunion.org/activities/a-to-z/robotics](https://www.imperialcollegeunion.org/activities/a-to-z/robotics)",
                     color=discord.Color.red()
-                )
+                ),
+                ephemeral=True
             )
 
         await launch_quiz(interaction, shortcode)
