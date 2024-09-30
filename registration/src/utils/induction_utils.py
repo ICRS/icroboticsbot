@@ -5,7 +5,10 @@ from src.utils.api import BASIC_AUTH, SERVER_IP
 import src.utils as util_msg
 
 
-async def fullInduction(interaction: discord.Interaction, shortcode: str, member: discord.Member):
+async def fullInduction(
+        interaction: discord.Interaction,
+        shortcode: str,
+        member: discord.Member):
     member_id = str(member.id)
     message = await interaction.original_response()
     shortcode = shortcode.strip().lower()
@@ -16,11 +19,12 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
     inductMemberWorked = inductMember(member_id)
     if inductMemberWorked.status_code != 200:
         logging.warning(f"Induct Member Failed: {member} - "
-                        f"{shortcode}; {inductMemberWorked.status_code}, {inductMemberWorked.reason}")
+                        f"{shortcode}; {inductMemberWorked.status_code}, "
+                        f"{inductMemberWorked.reason}")
         await message.edit(
             embed=discord.Embed(
                 title="You passed, but we had a tech issue",
-                description=f"Induct member API Error: {inductMemberWorked.status_code} - {inductMemberWorked.reason}",
+                description=f"Induct member API Error: {inductMemberWorked.status_code} - {inductMemberWorked.reason}",  # noqa: E501
                 color=discord.Color.red()
             ),
             view=None
@@ -32,7 +36,7 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
         await message.edit(
             embed=discord.Embed(
                 title="You passed, but we had a tech issue",
-                description=f"add role API Error",
+                description="Add role API Error",
                 color=discord.Color.red()
             ),
             view=None
@@ -43,8 +47,7 @@ async def fullInduction(interaction: discord.Interaction, shortcode: str, member
     description += "**Register your card in person** for 3D printing access!\n\n"  # noqa: E501
     description += "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
 
-
-    logging.info("Success!!")
+    logging.info(f"Success!! {member}, {shortcode}")
     await message.edit(
         embed=discord.Embed(
             title="Congrats! You've completed the induction!",
@@ -64,7 +67,7 @@ async def linkDiscordUser(
 
     isShortValidState = validatePreviousShortcode(member_id, shortcode)
 
-    if(isShortValidState == "not found"):
+    if (isShortValidState == "not found"):
         linkDiscordWorked = requests.post(
             SERVER_IP + "/discord-id/register",
             params={
@@ -72,13 +75,13 @@ async def linkDiscordUser(
                 "discord_id": member_id
             })
 
-        if(linkDiscordWorked.status_code != 200):
+        if (linkDiscordWorked.status_code != 200):
             logging.warning(f"Link discord failed:- "
-                            f"{shortcode}; {linkDiscordWorked.status_code}, {linkDiscordWorked.reason}")
+                            f"{shortcode}; {linkDiscordWorked.status_code}, {linkDiscordWorked.reason}")  # noqa: E501
             await message.edit(
                 embed=discord.Embed(
                     title="You passed, but we had a tech issue",
-                    description=f"Link discord API Error: {linkDiscordWorked.status_code} - {linkDiscordWorked.reason}",
+                    description=f"Link discord API Error: {linkDiscordWorked.status_code} - {linkDiscordWorked.reason}",  # noqa: E501
                     color=discord.Color.red()
                 ),
                 view=None
@@ -86,7 +89,7 @@ async def linkDiscordUser(
             return False
         return True
 
-    if(isShortValidState == "valid"):
+    if (isShortValidState == "valid"):
         return True
 
     await message.edit(
@@ -95,12 +98,14 @@ async def linkDiscordUser(
         )
     return False
 
+
 def inductMember(member_id: str):
     logging.info(f"trying to induct Member: {member_id}")
 
     return requests.post(
                 SERVER_IP + "/induction/induct/discord-id",
                 params={"id": member_id})
+
 
 async def addRoletoUser(
         interaction: discord.Interaction,
@@ -114,12 +119,14 @@ async def addRoletoUser(
 
     return True
 
+
 def hasPaidForMembership(shortcode: str):
     logging.info(f"trying to check union: {shortcode}")
 
     return requests.get(
                 SERVER_IP + "/member",
                 params={"shortcode": shortcode})
+
 
 def validatePreviousShortcode(member_id: str, shortcode: str):
     # default not found if it makes it through the checks
@@ -131,17 +138,15 @@ def validatePreviousShortcode(member_id: str, shortcode: str):
             },
             auth=BASIC_AUTH)
 
-
-    didPreShortcodeWork = preShortcode.status_code == 200 and preShortcode.json() and preShortcode.json()["shortcode"]
+    didPreShortcodeWork = preShortcode.status_code == 200 and preShortcode.json() and preShortcode.json()["shortcode"]  # noqa: E501
 
     # check if previous shortcode is exists
-    if(didPreShortcodeWork):
+    if didPreShortcodeWork:
         logging.info(f"Previous shortcode: {preShortcode.json()}")
-        if(preShortcode.json()["shortcode"] == shortcode):
+        if preShortcode.json()["shortcode"] == shortcode:
             return "valid"
         else:
             return "invalid"
-
 
     # check if previous discord
     preDiscord = requests.request(
@@ -152,10 +157,10 @@ def validatePreviousShortcode(member_id: str, shortcode: str):
             },
             auth=BASIC_AUTH)
 
-    didPreDiscordWork = preDiscord.status_code == 200 and preDiscord.json() and preDiscord.json()["discord_id"]
-    if(didPreDiscordWork):
+    didPreDiscordWork = preDiscord.status_code == 200 and preDiscord.json() and preDiscord.json()["discord_id"]  # noqa: E501
+    if didPreDiscordWork:
         logging.info(f"Previous discord: {preDiscord.json()}")
-        if(preDiscord.json()["discord_id"] == member_id):
+        if preDiscord.json()["discord_id"] == member_id:
             return "valid"
         else:
             return "invalid"
