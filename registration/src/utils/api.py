@@ -101,13 +101,13 @@ async def get_member_perms(interaction: discord.Interaction, shortcode: str):
 
         await interaction.response.send_message(
             embed=error_msg(str(res.reason), "Bad Response"))
-        return False
+        return {}
 
     # pylint: disable=broad-except
     except Exception as e:
         await interaction.response.send_message(embed=error_msg(e))
 
-        return False
+        return {}
 
 
 async def get_stats_from_discord(interaction: discord.Interaction,
