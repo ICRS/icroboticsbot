@@ -10,6 +10,7 @@ from src.commands.stats import SERVER_IP
 from src.commands import (
     get_help,
     link_card,
+    unlink_card,
     quote_person,
     register_user,
     stats_card,
@@ -78,6 +79,14 @@ class DiscordBot(commands.Bot):
         )
         async def register(interaction: discord.Interaction, shortcode: str):
             await register_user(interaction, shortcode)
+
+        @self.tree.command(
+            name="link-card",
+            description="ADMIN ONLY: Link a members card to their shortcode"
+        )
+        async def unlink_card_cmd(
+                interaction: discord.Interaction, shortcode: str, uid: str):
+            await unlink_card(interaction, uid)
 
         @self.tree.command(
             name="link-card",
