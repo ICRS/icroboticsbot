@@ -1,5 +1,6 @@
 __all__ = [
     "add_card_to_member",
+    "unlink_card",
     "deregister_discord_id",
     "get_member_perms",
     "get_stats_from_discord",
@@ -47,6 +48,29 @@ async def add_card_to_member(interaction: discord.Interaction,
                  "/member/register/card/shortcode?"
                  f"uuid={uid}&shortcode={shortcode}"),
             auth=BASIC_AUTH)
+
+        if res.status_code == 200:
+            return True
+
+        await interaction.response.send_message(
+            embed=error_msg(str(res.reason), "Bad Response"))
+        return False
+    except Exception as e:
+        await interaction.response.send_message(embed=error_msg(e))
+
+
+async def unlink_card(
+        interaction: discord.Interaction,
+        uid: str) -> bool:
+    try:
+        logging.info(f"Removing card {uid} from db")
+
+        res = requests.delete(
+            SERVER_IP +
+            "/member/register/card",
+            params={"uuid": uid},
+            auth=BASIC_AUTH
+        )
 
         if res.status_code == 200:
             return True
