@@ -120,7 +120,7 @@ class DiscordBot(commands.Bot):
             name="alert",
             description="Alert the bot. Purely for testing purposes"
         )  # noqa: E501
-        async def alert(interaction):
+        async def alert(interaction: discord.Interaction):
             await interaction.response.send_message("""
                 Alert! <:ALERT:1033044801714671727>
                 """)

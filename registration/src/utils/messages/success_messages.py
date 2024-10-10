@@ -1,7 +1,3 @@
-import discord
-
-success_color = 0x46fa64
-
 __all__ = [
     "success_induction_msg",
     "is_inducted_msg",
@@ -11,11 +7,19 @@ __all__ = [
     "already_inducted"
 ]
 
+import discord
+
+
+success_color = 0x46fa64
+
+
+INSTA_LINKTREE = "Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
+
 
 def success_induction_msg(shortcode, uuid):
     embed = discord.Embed(
         title="Card had been linked!",
-        description=f"shortcode: {shortcode}\Card ID: {uuid}",
+        description=f"shortcode: {shortcode}\\Card ID: {uuid}",
         color=success_color)
     return embed
 
@@ -51,7 +55,8 @@ def show_discord_stats(data):
             str(round(data["totals"][0]/60, 2)) + "min\n"
         ),
         inline=False)
-    if(data["last_print"]):
+
+    if data["last_print"]:
         embed.add_field(
             name="Last Print",
             value=(
@@ -68,17 +73,19 @@ def show_discord_stats(data):
 def success_msg():
     embed = discord.Embed(
         title="Verified!",
-        description=("You have been verified and should have the ICRS Member role"
-                     "\n You have already completed the induction"
-                     "\n Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"),
+        description=("You have been verified and should have the ICRS Member role\n"  # noqa: E501
+                     "You have already completed the induction\n" +
+                     INSTA_LINKTREE),
         color=success_color)
     return embed
+
 
 def already_inducted():
     embed = discord.Embed(
         title="Already Inducted!",
-        description=("You have already completed the induction"
-                     "\nCheck out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"),
+        description=("You have already completed the induction\n" +
+                     INSTA_LINKTREE
+                     ),
         color=success_color)
     return embed
 
@@ -86,6 +93,6 @@ def already_inducted():
 def reverified_msg():
     embed = discord.Embed(
         title="Membership reverified",
-        description="Welcome back! Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)",
+        description="Welcome back! " + INSTA_LINKTREE,
         color=success_color)
     return embed
