@@ -43,9 +43,9 @@ async def add_card_to_member(interaction: discord.Interaction,
 
         res = requests.request(
             "POST",
-            url=SERVER_IP +
-            "/member/register/card/shortcode?" +
-            f"uuid={uid}&shortcode={shortcode}",
+            url=(SERVER_IP +
+                 "/member/register/card/shortcode?"
+                 f"uuid={uid}&shortcode={shortcode}"),
             auth=BASIC_AUTH)
 
         if res.status_code == 200:
