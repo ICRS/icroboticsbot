@@ -1,8 +1,9 @@
 import logging
 import discord
 from discord.ext import commands
+import requests
 
-from src.commands.quiz import launch_quiz
+from src.commands.quiz import DATABASE_ADAPTER_IP, launch_quiz
 from src.utils.induction_utils import (
     hasPaidForMembership,
     validatePreviousShortcode)
@@ -71,6 +72,48 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
             )
 
         await launch_quiz(interaction, shortcode)
+
+    except Exception as e:
+        await interaction.response.send_message(embed=util_msg.error_msg(e))
+
+
+async def unlink_discord(
+        interaction: discord.Interaction,
+        shortcode: str):
+    """
+    register_on_dm Register message when user tries to register on DM
+
+    Parameters
+    ----------
+    interaction : Discord.interaction
+        Discord interaction
+    shortcode : str
+        Member shortcode
+    """
+
+    author = interaction.user
+    try:
+        logging.info("Trying to unlink shortcode -" + shortcode)
+
+        if "committee" not in [y.name.lower() for y in author.roles]:
+            return await interaction.response.send_message(
+                embed=util_msg.not_committee())
+
+        if not shortcode:
+            return await interaction.response.send_message(
+                embed=util_msg.not_on_guild_msg(), ephemeral=True)
+
+        r = requests.delete(
+            DATABASE_ADAPTER_IP + "/shortcode/discord/mapping",
+            params={
+                "shortcode": shortcode
+            }
+        )
+
+        logging.info(f"Success {r.status_code}")
+        return await interaction.response.send_message(
+            embed=util_msg.success_msg(),
+            ephemeral=True)
 
     except Exception as e:
         await interaction.response.send_message(embed=util_msg.error_msg(e))
