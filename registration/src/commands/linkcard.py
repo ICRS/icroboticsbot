@@ -1,6 +1,6 @@
 __all__ = [
     "link_card",
-    "unlink_card"
+    "unlink_card",
 ]
 
 import discord

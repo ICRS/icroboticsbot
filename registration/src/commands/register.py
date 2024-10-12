@@ -1,3 +1,8 @@
+__all__ = [
+    "register_user",
+    "unlink_discord",
+]
+
 import logging
 import discord
 from discord.ext import commands
@@ -8,11 +13,6 @@ from src.utils.induction_utils import (
     hasPaidForMembership,
     validatePreviousShortcode)
 import src.utils as util_msg
-
-
-__all__ = [
-    "register_user"
-]
 
 
 async def register_user(interaction: discord.Interaction, shortcode: str):
