@@ -82,7 +82,7 @@ class DiscordBot(commands.Bot):
             await register_user(interaction, shortcode)
 
         @self.tree.command(
-            name="link-card",
+            name="unlink-card",
             description="ADMIN ONLY: Link a members card to their shortcode"
         )
         async def unlink_card_cmd(
