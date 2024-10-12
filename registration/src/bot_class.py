@@ -10,12 +10,14 @@ from src.commands.stats import SERVER_IP
 from src.commands import (
     get_help,
     link_card,
+    unlink_card,
     quote_person,
     register_user,
     stats_card,
     whois,
     get_timelapse,
-    induct_member
+    induct_member,
+    unlink_discord
 )
 from src.utils import deregister_discord_id
 
@@ -78,6 +80,22 @@ class DiscordBot(commands.Bot):
         )
         async def register(interaction: discord.Interaction, shortcode: str):
             await register_user(interaction, shortcode)
+
+        @self.tree.command(
+            name="unlink-card",
+            description="ADMIN ONLY: Unlink a members card by the card uid"
+        )
+        async def unlink_card_cmd(
+                interaction: discord.Interaction, uid: str):
+            await unlink_card(interaction, uid)
+
+        @self.tree.command(
+            name="unlink-discord",
+            description="ADMIN ONLY: Unlink discord to shortcode mapping"
+        )
+        async def unlink_discord_(
+                interaction: discord.Interaction, shortcode: str,):
+            await unlink_discord(interaction, shortcode)
 
         @self.tree.command(
             name="link-card",
