@@ -10,6 +10,7 @@ import requests
 
 from src.commands.quiz import DATABASE_ADAPTER_IP, launch_quiz
 from src.utils.induction_utils import (
+    State,
     hasPaidForMembership,
     validatePreviousShortcode)
 import src.utils as util_msg
@@ -39,7 +40,7 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
                 embed=util_msg.not_on_guild_msg(), ephemeral=True)
 
         shortcodeState = validatePreviousShortcode(member.id, shortcode)
-        if shortcodeState == "invalid":
+        if shortcodeState == State.VALID:
             return await interaction.response.send_message(
                 embed=util_msg.different_link(), ephemeral=True)
 
