@@ -1,13 +1,12 @@
+__all__ = [
+    "whois"
+]
+
+
 import discord
 import logging
 import src.utils as util_msg
 from src.utils import error_msg
-
-
-
-__all__ = [
-    "whois"
-]
 
 
 async def whois(interaction: discord.Interaction, user: str):
@@ -49,7 +48,7 @@ async def whois(interaction: discord.Interaction, user: str):
 
         if perms is None or perms == {}:
             return await interaction.response.send_message(
-            embed=error_msg("Couldn't find user"))
+                embed=error_msg("Couldn't find user"))
 
         time_sum = 0
         weight_sum = 0

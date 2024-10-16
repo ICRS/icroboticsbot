@@ -11,7 +11,7 @@ __all__ = [
     "format_discord_id"
 ]
 
-SHORTCODE_REGEX = r'^[a-z]{2,3}[0-9]{2,4}$'
+SHORTCODE_REGEX = r'^[a-z]{2,3}\d{2,5}$'
 UID_REGEX = r'^[0-9A-F]{8,14}$'
 DISCORD_ID_REGEX = r'^<@[0-9]{18,19}>$'
 
@@ -28,7 +28,7 @@ def is_uid(message: str) -> bool:
     return any(found)
 
 
-def format_uid(message: str) -> bool:
+def format_uid(message: str) -> str:
     message = message.upper()
     message = message.replace(" ", "")
     message = message.replace(":", "")

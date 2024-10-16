@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 import discord
 import requests
@@ -75,7 +76,7 @@ async def linkDiscordUser(
 
     isShortValidState = validatePreviousShortcode(member_id, shortcode)
 
-    if (isShortValidState == "not found"):
+    if (isShortValidState == State.NOT_FOUND):
         linkDiscordWorked = requests.post(
             SERVER_IP + "/discord-id/register",
             params={
@@ -97,7 +98,7 @@ async def linkDiscordUser(
             return False
         return True
 
-    if (isShortValidState == "valid"):
+    if (isShortValidState == State.VALID):
         return True
 
     await message.edit(
@@ -135,6 +136,12 @@ def hasPaidForMembership(shortcode: str):
                 params={"shortcode": shortcode})
 
 
+class State(Enum, str):
+    VALID = "valid"
+    INVALID = "invalid"
+    NOT_FOUND = "not found"
+
+
 def validatePreviousShortcode(member_id: str, shortcode: str):
     # default not found if it makes it through the checks
     preShortcode = requests.request(
@@ -151,9 +158,9 @@ def validatePreviousShortcode(member_id: str, shortcode: str):
     if didPreShortcodeWork:
         logging.info(f"Previous shortcode: {preShortcode.json()}")
         if preShortcode.json()["shortcode"] == shortcode:
-            return "valid"
+            return State.VALID
         else:
-            return "invalid"
+            return State.INVALID
 
     # check if previous discord
     preDiscord = requests.request(
@@ -168,8 +175,8 @@ def validatePreviousShortcode(member_id: str, shortcode: str):
     if didPreDiscordWork:
         logging.info(f"Previous discord: {preDiscord.json()}")
         if preDiscord.json()["discord_id"] == member_id:
-            return "valid"
+            return State.VALID
         else:
-            return "invalid"
+            return State.INVALID
 
-    return "not found"
+    return State.NOT_FOUND
