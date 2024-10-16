@@ -37,72 +37,22 @@ DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
 BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 
-async def add_card_to_member(interaction: discord.Interaction,
-                             shortcode: str, uid: str) -> bool:
-    try:
-        logging.info(f"Adding card {uid} to shortcode {shortcode}")
-
-        res = requests.request(
-            "POST",
-            url=(SERVER_IP +
-                 "/member/register/card/shortcode?"
-                 f"uuid={uid}&shortcode={shortcode}"),
-            auth=BASIC_AUTH)
-
-        if res.status_code == 200:
-            return True
-
-        await interaction.response.send_message(
-            embed=error_msg(str(res.reason), "Bad Response"))
-        return False
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
+async def add_card_to_member(shortcode: str, uid: str) -> requests.Response:
+    logging.info(f"Adding card {uid} to shortcode {shortcode}")
+    return requests.post(
+        SERVER_IP + "/member/register/card/shortcode",
+        params={"uuid": uid, "shortcode": shortcode},
+        auth=BASIC_AUTH)
 
 
-async def unlink_card(
-        interaction: discord.Interaction,
-        uid: str) -> bool:
-    try:
-        logging.info(f"Removing card {uid} from db")
-
-        res = requests.delete(
-            SERVER_IP +
-            "/member/register/card",
-            params={"uuid": uid},
-            auth=BASIC_AUTH
-        )
-
-        if res.status_code == 200:
-            return True
-
-        await interaction.response.send_message(
-            embed=error_msg(str(res.reason), "Bad Response"))
-        return False
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
-
-
-async def add_member_to_DB(interaction: discord.Interaction,
-                           shortcode: str, uid: str) -> bool:
-    try:
-        res = requests.request(
-            "POST",
-            url=SERVER_IP + "/member/add",
-            json={
-                "id": uid,
-                "shortcode": shortcode,
-                "canPrint:": False,
-                "canLaserCut": False
-            }, auth=BASIC_AUTH)
-
-        if res.status_code == 200:
-            return True
-
-        await interaction.response.send_message(
-            embed=error_msg(str(res.reason), "Bad Response"))
-        return False
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
+async def unlink_card(uid: str) -> requests.Response:
+    logging.info(f"Removing card {uid} from db")
+    return requests.delete(
+        SERVER_IP +
+        "/member/register/card",
+        params={"uuid": uid},
+        auth=BASIC_AUTH
+    )
 
 
 def deregister_discord_id(userid: int) -> bool:

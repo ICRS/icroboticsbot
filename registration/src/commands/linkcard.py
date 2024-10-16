@@ -37,16 +37,16 @@ async def link_card(interaction: discord.Interaction,
 
         uid = utils.format_uid(uid)
 
-        server_success = await utils.add_card_to_member(
-            interaction, shortcode, uid)
+        result = await utils.add_card_to_member(
+            shortcode, uid)
 
-        if server_success:
+        if result.status_code == 200:
             return await interaction.response.send_message(
                 embed=utils.success_induction_msg(shortcode, uid),
                 ephemeral=True)
-
-        return await interaction.response.send_message(
-            embed=utils.server_error_msg())
+        else:
+            await interaction.response.send_message(
+                embed=utils.error_msg(str(result.reason), "Bad Response"))
 
     # pylint: disable=broad-except
     except Exception as e:
@@ -78,20 +78,20 @@ async def unlink_card(interaction: discord.Interaction,
 
         uid = utils.format_uid(uid)
 
-        server_success = await utils.unlink_card(
-            interaction, uid)
+        response = await utils.unlink_card(
+            uid)
 
-        if server_success:
+        if response.status_code == 200:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Card has been unlinked!",
                     description=f"Card ID: {uid}",
-                    color=discord.Color.red()
+                    color=discord.Color.yellow()
                 ),
                 ephemeral=True)
-
-        return await interaction.response.send_message(
-            embed=utils.server_error_msg())
+        else:
+            return await interaction.response.send_message(
+                embed=utils.error_msg(str(response.reason), "Bad Response"))
 
     # pylint: disable=broad-except
     except Exception as e:
