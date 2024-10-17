@@ -12,8 +12,6 @@ from src.utils.induction_utils import fullInduction
 
 
 DATABASE_ADAPTER_IP = os.getenv("SERVER_IP")
-result = requests.get(SERVER_IP + "/induction/quiz")
-questions = result.json()
 
 
 @dataclass
@@ -33,7 +31,7 @@ class Question:
     assets: List[Asset] = field(default_factory=lambda: [])
 
 
-def parse_questions(questions):
+def parse_questions(questions) -> List[Question]:
     l: List[Question] = []
     for q in questions:
         l.append(Question(
@@ -47,9 +45,6 @@ def parse_questions(questions):
         l[-1].assets += [Asset(**c) for c in q["assets"]]
 
     return l
-
-
-questions: List[Question] = parse_questions(questions)
 
 
 class QuizSelectList(Select):
@@ -123,7 +118,8 @@ class Quiz:
             self,
             interaction: discord.Interaction,
             shortcode: str) -> None:
-        self.questions = questions
+        result = requests.get(SERVER_IP + "/induction/quiz")
+        self.questions = parse_questions(result.json())
         self.index = 0
         self.num_questions = len(self.questions)
 
