@@ -8,7 +8,9 @@ __all__ = [
     "committee_command",
 ]
 
+import logging
 import re
+from typing import Callable
 
 import discord
 
@@ -53,12 +55,14 @@ def is_not_committee(author: discord.User | discord.Member):
     return "committee" not in [y.name.lower() for y in author.roles]
 
 
-def committee_command(function):
+def committee_command(function: Callable):
     async def query_api(interaction: discord.Interaction, *args, **kwargs):
         author = interaction.user
         if is_not_committee(author):
+            logging.warning(f"User {author} {author.id}: tried to use "
+                            f"a committee command: {function.__name__}")
             return await interaction.response.send_message(
                 embed=utils.not_committee())
         else:
-            return function(interaction, *args, **kwargs)
+            return await function(interaction, *args, **kwargs)
     return query_api
