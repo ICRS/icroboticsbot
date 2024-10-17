@@ -78,6 +78,7 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
         await interaction.response.send_message(embed=util_msg.error_msg(e))
 
 
+@util_msg.committee_command
 async def unlink_discord(
         interaction: discord.Interaction,
         shortcode: str):
@@ -92,13 +93,8 @@ async def unlink_discord(
         Member shortcode
     """
 
-    author = interaction.user
     try:
         logging.info("Trying to unlink shortcode -" + shortcode)
-
-        if "committee" not in [y.name.lower() for y in author.roles]:
-            return await interaction.response.send_message(
-                embed=util_msg.not_committee())
 
         if not shortcode:
             return await interaction.response.send_message(
