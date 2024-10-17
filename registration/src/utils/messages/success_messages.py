@@ -1,5 +1,5 @@
 __all__ = [
-    "success_induction_msg",
+    "success_card_linking_msg",
     "is_inducted_msg",
     "show_discord_stats",
     "success_msg",
@@ -17,10 +17,10 @@ success_color = 0x46fa64
 INSTA_LINKTREE = "Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
 
 
-def success_induction_msg(shortcode, uuid):
+def success_card_linking_msg(shortcode, uuid):
     embed = discord.Embed(
         title="Card had been linked!",
-        description=f"shortcode: {shortcode}\\Card ID: {uuid}",
+        description=f"shortcode: {shortcode} \\ Card ID: {uuid}",
         color=success_color)
     return embed
 

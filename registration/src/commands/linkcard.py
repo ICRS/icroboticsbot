@@ -37,7 +37,7 @@ async def link_card(interaction: discord.Interaction,
 
         if result.status_code == 200:
             return await interaction.response.send_message(
-                embed=utils.success_induction_msg(shortcode, uid),
+                embed=utils.success_card_linking_msg(shortcode, uid),
                 ephemeral=True)
         else:
             await interaction.response.send_message(
@@ -76,7 +76,7 @@ async def unlink_card(interaction: discord.Interaction,
                 embed=discord.Embed(
                     title="Card has been unlinked!",
                     description=f"Card ID: {uid}",
-                    color=discord.Color.yellow()
+                    color=discord.Color.dark_green()
                 ),
                 ephemeral=True)
         else:
