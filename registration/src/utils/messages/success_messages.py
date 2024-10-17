@@ -4,7 +4,8 @@ __all__ = [
     "show_discord_stats",
     "success_msg",
     "reverified_msg",
-    "already_inducted"
+    "already_inducted",
+    "unlink_discord_success_msg",
 ]
 
 import discord
@@ -96,3 +97,11 @@ def reverified_msg():
         description="Welcome back! " + INSTA_LINKTREE,
         color=success_color)
     return embed
+
+
+def unlink_discord_success_msg(shortcode: str):
+    return discord.Embed(
+        title="Unlinked Discord Successfully!",
+        description=(f"Successfully unlinked discord by shortcode: {shortcode}"
+                     ),
+        color=success_color)
