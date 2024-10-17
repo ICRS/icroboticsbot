@@ -9,15 +9,10 @@ import src.utils as util_msg
 from src.utils import error_msg
 
 
+@util_msg.committee_command
 async def whois(interaction: discord.Interaction, user: str):
     try:
-        logging.info(f"User: {user}")
-
-        author = interaction.user
-        roles = [r for r in author.roles if r is not None]
-        if not ("committee" in [y.name.lower() for y in roles]):
-            return await interaction.response.send_message(
-                embed=util_msg.not_committee())
+        logging.info(f"Whois User: {user}")
 
         if not util_msg.is_discord_id(user) and not util_msg.is_shortcode(user):    # noqa: E501
             logging.info(f"User invalid: {user}")
