@@ -109,7 +109,7 @@ async def unlink_discord(
 
         logging.info(f"Success {r.status_code}")
         return await interaction.response.send_message(
-            embed=util_msg.success_msg(),
+            embed=util_msg.unlink_discord_success_msg(),
             ephemeral=True)
 
     except Exception as e:
