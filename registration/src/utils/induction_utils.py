@@ -136,7 +136,7 @@ def hasPaidForMembership(shortcode: str):
                 params={"shortcode": shortcode})
 
 
-class State(Enum, str):
+class State(str, Enum):
     VALID = "valid"
     INVALID = "invalid"
     NOT_FOUND = "not found"
