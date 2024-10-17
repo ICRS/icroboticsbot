@@ -5,21 +5,16 @@ __all__ = [
 import logging
 import discord
 
-import src.utils as util_msg
+from src.utils import committee_command
 from src.utils.induction_utils import fullInduction, hasPaidForMembership
 
 
+@committee_command
 async def induct_member(
         interaction: discord.Interaction,
         shortcode: str,
         member: discord.Member, bypass: bool = False):
     logging.info(f"trying to manually induct: {member.name}")
-
-    author = interaction.user
-    roles = [r for r in author.roles if r is not None]
-    if not ("committee" in [y.name.lower() for y in roles]):
-        return await interaction.response.send_message(
-            embed=util_msg.not_committee())
 
     await interaction.response.send_message(
         embed=discord.Embed(

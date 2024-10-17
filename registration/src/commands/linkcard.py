@@ -7,6 +7,7 @@ import discord
 import src.utils as utils
 
 
+@utils.committee_command
 async def link_card(interaction: discord.Interaction,
                     shortcode: str, uid: str):
     """
@@ -21,13 +22,7 @@ async def link_card(interaction: discord.Interaction,
     uid : str
         uid of the user's card
     """
-    author = interaction.user
-
     try:
-        if "committee" not in [y.name.lower() for y in author.roles]:
-            return await interaction.response.send_message(
-                embed=utils.not_committee())
-
         if not utils.is_shortcode(shortcode):
             return await interaction.response.send_message(
                 embed=utils.invalid_shortcode(), ephemeral=True)
@@ -53,6 +48,7 @@ async def link_card(interaction: discord.Interaction,
         await interaction.response.send_message(embed=utils.error_msg(e))
 
 
+@utils.committee_command
 async def unlink_card(interaction: discord.Interaction,
                       uid: str):
     """
@@ -65,13 +61,7 @@ async def unlink_card(interaction: discord.Interaction,
     uid : str
         uid of the user's card
     """
-    author = interaction.user
-
     try:
-        if "committee" not in [y.name.lower() for y in author.roles]:
-            return await interaction.response.send_message(
-                embed=utils.not_committee())
-
         if not utils.is_uid(uid):
             return await interaction.response.send_message(
                 embed=utils.invalid_UID(), ephemeral=True)
