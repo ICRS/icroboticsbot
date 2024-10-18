@@ -5,13 +5,15 @@ __all__ = [
 import logging
 import discord
 
-from src.utils import committee_command
+from src.utils import (committee_command, validate_shortcode)
 from src.utils.induction_utils import fullInduction, hasPaidForMembership
 
 
 @committee_command
+@validate_shortcode
 async def induct_member(
         interaction: discord.Interaction,
+        *,
         shortcode: str,
         member: discord.Member, bypass: bool = False):
     logging.info(f"trying to manually induct: {member.name}")
