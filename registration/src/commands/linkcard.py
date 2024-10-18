@@ -8,7 +8,9 @@ import src.utils as utils
 
 
 @utils.committee_command
-async def link_card(interaction: discord.Interaction,
+@utils.validate_card_uid
+@utils.validate_shortcode
+async def link_card(interaction: discord.Interaction, *,
                     shortcode: str, uid: str):
     """
     register_on_dm Register message when user tries to register on DM
@@ -23,13 +25,6 @@ async def link_card(interaction: discord.Interaction,
         uid of the user's card
     """
     try:
-        if not utils.is_shortcode(shortcode):
-            return await interaction.response.send_message(
-                embed=utils.invalid_shortcode(), ephemeral=True)
-        elif not utils.is_uid(uid):
-            return await interaction.response.send_message(
-                embed=utils.invalid_UID(), ephemeral=True)
-
         uid = utils.format_uid(uid)
 
         result = await utils.add_card_to_member(
@@ -49,7 +44,8 @@ async def link_card(interaction: discord.Interaction,
 
 
 @utils.committee_command
-async def unlink_card(interaction: discord.Interaction,
+@utils.validate_card_uid
+async def unlink_card(interaction: discord.Interaction, *,
                       uid: str):
     """
     unlink card of user
@@ -62,12 +58,6 @@ async def unlink_card(interaction: discord.Interaction,
         uid of the user's card
     """
     try:
-        if not utils.is_uid(uid):
-            return await interaction.response.send_message(
-                embed=utils.invalid_UID(), ephemeral=True)
-
-        uid = utils.format_uid(uid)
-
         response = await utils.unlink_card(
             uid)
 

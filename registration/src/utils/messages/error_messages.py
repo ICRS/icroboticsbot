@@ -65,7 +65,9 @@ def cant_find_discord_user():
 
 
 def invalid_shortcode():
-    return error_msg("Please ensure the short code (eg: ab123) is valid", "hmmmmm")  # noqa: E501
+    return error_msg(
+        "Please ensure the short code (eg: ab123) is valid",
+        "Skill Issue: Incorrect Shortcode Format")
 
 
 def different_link():
