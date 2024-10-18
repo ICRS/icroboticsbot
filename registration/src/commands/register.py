@@ -16,14 +16,13 @@ from src.utils.induction_utils import (
 import src.utils as util_msg
 
 
-async def register_user(interaction: discord.Interaction, shortcode: str):
+@util_msg.validate_shortcode
+async def register_user(interaction: discord.Interaction, *, shortcode: str):
     """
     register_on_dm Register message when user tries to register on DM
 
     Parameters
     ----------
-    bot : DiscordBot
-        Discord bot instance
     interaction : Discord.interaction
         Discord interaction
     shortcode : str
@@ -83,6 +82,7 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
 
 
 @util_msg.committee_command
+@util_msg.validate_shortcode
 async def unlink_discord(
         interaction: discord.Interaction,
         shortcode: str):

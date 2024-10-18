@@ -6,8 +6,12 @@ __all__ = [
     "format_discord_id",
     "is_not_committee",
     "committee_command",
+    "validate_card_uid",
+    "validate_shortcode",
 ]
 
+
+import functools
 import logging
 import re
 from typing import Callable
@@ -56,6 +60,7 @@ def is_not_committee(author: discord.User | discord.Member):
 
 
 def committee_command(function: Callable):
+    @functools.wraps(function)
     async def query_api(interaction: discord.Interaction, *args, **kwargs):
         author = interaction.user
         if is_not_committee(author):
@@ -66,3 +71,39 @@ def committee_command(function: Callable):
         else:
             return await function(interaction, *args, **kwargs)
     return query_api
+
+
+def validate_card_uid(function: Callable):
+    @functools.wraps(function)
+    async def wrap(
+        interaction: discord.Interaction,
+        *args, **kwargs
+    ):
+        assert "uid" in kwargs
+        uid = kwargs["uid"]
+        if not utils.is_uid(uid):
+            logging.warning(f"Card Uuid incorrect: {uid}")
+            return await interaction.response.send_message(
+                embed=utils.invalid_UID(), ephemeral=True)
+        else:
+            uid = utils.format_uid(uid)
+            kwargs["uid"] = uid
+            return await function(interaction, *args, **kwargs)
+    return wrap
+
+
+def validate_shortcode(function: Callable):
+    @functools.wraps(function)
+    async def wrap(
+            interaction: discord.Interaction,
+            *args, **kwargs):
+        name = "shortcode"
+        assert name in kwargs
+        shortcode = kwargs[name]
+        if not utils.is_shortcode(shortcode):
+            logging.warning(f"Card shortcode incorrect: {shortcode}")
+            return await interaction.response.send_message(
+                embed=utils.invalid_shortcode(), ephemeral=True)
+        else:
+            return await function(interaction, *args, **kwargs)
+    return wrap

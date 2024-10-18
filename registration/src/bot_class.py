@@ -79,7 +79,7 @@ class DiscordBot(commands.Bot):
             description="Register and complete the induction quiz"
         )
         async def register(interaction: discord.Interaction, shortcode: str):
-            await register_user(interaction, shortcode)
+            await register_user(interaction, shortcode=shortcode)
 
         @self.tree.command(
             name="unlink-card",
@@ -87,7 +87,7 @@ class DiscordBot(commands.Bot):
         )
         async def unlink_card_cmd(
                 interaction: discord.Interaction, uid: str):
-            await unlink_card(interaction, uid)
+            await unlink_card(interaction, uid=uid)
 
         @self.tree.command(
             name="unlink-discord",
@@ -95,7 +95,7 @@ class DiscordBot(commands.Bot):
         )
         async def unlink_discord_(
                 interaction: discord.Interaction, shortcode: str,):
-            await unlink_discord(interaction, shortcode)
+            await unlink_discord(interaction, shortcode=shortcode)
 
         @self.tree.command(
             name="link-card",
@@ -103,14 +103,14 @@ class DiscordBot(commands.Bot):
         )
         async def link_card_cmd(
                 interaction: discord.Interaction, shortcode: str, uid: str):
-            await link_card(interaction, shortcode, uid)
+            await link_card(interaction, shortcode=shortcode, uid=uid)
 
         @self.tree.command(
             name="whois",
             description="ADMIN ONLY: check info of a shortcode/discord member",
         )
         async def whois_cmd(interaction, user: str):
-            await whois(interaction, user)
+            await whois(interaction, user=user)
 
         @self.tree.command(
             name="induct",
@@ -120,7 +120,10 @@ class DiscordBot(commands.Bot):
                 interaction: discord.Interaction,
                 shortcode: str,
                 discord_member: discord.Member, bypass: bool = False):
-            await induct_member(interaction, shortcode, discord_member, bypass)
+            await induct_member(interaction,
+                                shortcode=shortcode,
+                                discord_member=discord_member,
+                                bypass=bypass)
 
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))

@@ -10,7 +10,7 @@ from src.utils import error_msg
 
 
 @util_msg.committee_command
-async def whois(interaction: discord.Interaction, user: str):
+async def whois(interaction: discord.Interaction, *, user: str):
     try:
         logging.info(f"Whois User: {user}")
 
