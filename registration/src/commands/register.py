@@ -47,7 +47,7 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
             return await interaction.response.send_message(
                 embed=util_msg.different_link(), ephemeral=True)
 
-        if await isInducted(interaction, shortcode):
+        if await is_inducted(interaction, shortcode):
             return await interaction.response.send_message(
                 embed=util_msg.already_inducted(), ephemeral=True)
 
@@ -111,20 +111,38 @@ async def unlink_discord(
             }
         )
 
-        logging.info(f"Success {r.status_code}")
-        return await interaction.response.send_message(
-            embed=util_msg.unlink_discord_success_msg(shortcode=shortcode),
-            ephemeral=True)
+        if r.status_code == 200:
+            logging.info(f"Success {r.status_code}")
+            r = r.json().get("deleted", 0)
 
+            if r:
+                return await interaction.response.send_message(
+                    embed=util_msg.unlink_discord_success_msg(
+                        shortcode=shortcode),
+                    ephemeral=True)
+            else:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        title="Unlinked Discord",
+                        description=(f"Did not find shortcode: {shortcode} "
+                                     "so nothing deleted."),
+                        color=discord.Color.yellow(),
+                    ),
+                    ephemeral=True)
+        else:
+            msg = f"Could not unlink shortcode from discord: {r.reason}"
+            logging.error(msg)
+            await interaction.response.send_message(
+                embed=util_msg.error_msg(msg))
     except Exception as e:
         await interaction.response.send_message(embed=util_msg.error_msg(e))
 
 
-async def isInducted(interaction: discord.Interaction, shortcode: str):
+async def is_inducted(interaction: discord.Interaction, shortcode: str):
     perms = await util_msg.get_member_perms(interaction, shortcode)
     logging.info(perms)
 
-    if perms is None or perms == {}:
+    if perms is None:
         return False
     if isinstance(perms, bool):
         return perms

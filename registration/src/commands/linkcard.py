@@ -61,14 +61,25 @@ async def unlink_card(interaction: discord.Interaction, *,
         response = await utils.unlink_card(
             uid)
 
-        if response.status_code == 200:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Card has been unlinked!",
-                    description=f"Card ID: {uid}",
-                    color=discord.Color.dark_green()
-                ),
-                ephemeral=True)
+        if response.status_code == 200 and (j := response.json()):
+            v = j.get("deleted", 0)
+            if v:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        title="Card has been unlinked!",
+                        description=f"Card ID: {uid}",
+                        color=discord.Color.dark_green()
+                    ),
+                    ephemeral=True)
+            else:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        title="Unlinking Card",
+                        description=("Nothing deleted, no uid found for card "
+                                     f"ID: {uid}"),
+                        color=discord.Color.yellow()
+                    ),
+                    ephemeral=True)
         else:
             return await interaction.response.send_message(
                 embed=utils.error_msg(str(response.reason), "Bad Response"))
