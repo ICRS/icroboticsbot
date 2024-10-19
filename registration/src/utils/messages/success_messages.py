@@ -1,7 +1,6 @@
 __all__ = [
     "success_card_linking_msg",
     "is_inducted_msg",
-    "show_discord_stats",
     "success_msg",
     "reverified_msg",
     "already_inducted",
@@ -30,44 +29,6 @@ def is_inducted_msg():
         title="Yep",
         description=("They are a member"),
         color=success_color)
-    return embed
-
-
-def show_discord_stats(data):
-    embed = discord.Embed(
-        title="Short code - " + data["short_code"],
-        description=("Discord user: " + data["discord_id"] +
-                     "\nCard ID: " + str(data["perms"]["card_id"]) +
-                     "\nDate Added: " + data["perms"]["time_added"] + "\n"),
-        color=success_color)
-    embed.add_field(
-        name="User Permissions",
-        value=(
-            "Inducted: " + str(data["perms"]["inducted"]) + "\n" +
-            "Can Print: " + str(data["perms"]["print"]) + "\n"
-        ),
-        inline=False)
-
-    embed.add_field(
-        name="Total Prints",
-        value=(
-            "Weight: " + str(data["totals"][1]) + "g\n" +
-            "Time: " +
-            str(round(data["totals"][0]/60, 2)) + "min\n"
-        ),
-        inline=False)
-
-    if data["last_print"]:
-        embed.add_field(
-            name="Last Print",
-            value=(
-                "Printer: " + data["last_print"][4] + "\n" +
-                "Weight: " + str(data["last_print"][3]) + "g\n" +
-                "Time: " + str(round(data["last_print"][2]/60, 2)) + "min\n" +
-                "Started At: " + data["last_print"][1]
-            ),
-            inline=False)
-
     return embed
 
 
