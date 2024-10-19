@@ -142,13 +142,16 @@ class State(str, Enum):
     NOT_FOUND = "not found"
 
 
-def validatePreviousShortcode(member_id: str, shortcode: str):
+def validatePreviousShortcode(member_id: str,
+                              shortcode: str,
+                              active: bool = False):
     # default not found if it makes it through the checks
     preShortcode = requests.request(
             "GET",
             url=SERVER_IP + "/discord-id/shortcode",
             params={
                 "id": member_id,
+                "active": active
             },
             auth=BASIC_AUTH)
 
