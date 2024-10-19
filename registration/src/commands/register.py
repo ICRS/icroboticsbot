@@ -39,7 +39,11 @@ async def register_user(interaction: discord.Interaction, shortcode: str):
             return await interaction.response.send_message(
                 embed=util_msg.not_on_guild_msg(), ephemeral=True)
 
-        shortcodeState = validatePreviousShortcode(member.id, shortcode)
+        shortcodeState = validatePreviousShortcode(
+            member.id,
+            shortcode,
+            active=True)
+
         if shortcodeState == State.VALID:
             return await interaction.response.send_message(
                 embed=util_msg.different_link(), ephemeral=True)
