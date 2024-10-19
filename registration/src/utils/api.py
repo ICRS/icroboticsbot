@@ -143,27 +143,16 @@ def get_discord_from_shortcode(shortcode: str):
         return None
 
 
-async def get_shortcode_from_discord(interaction: discord.Interaction,
-                                     discord_id: str):
-    try:
-        res = requests.get(
-            url=SERVER_IP + "/discord-id/shortcode",
-            params={
-                "id": str(discord_id),
-            },
-            auth=BASIC_AUTH)
+def get_shortcode_from_discord(discord_id: str):
+    res = requests.get(
+        url=SERVER_IP + "/discord-id/shortcode",
+        params={
+            "id": str(discord_id),
+        },
+        auth=BASIC_AUTH)
 
-        if res.status_code == 200:
-            return res.json()
-
-        await interaction.response.send_message(
-            embed=error_msg("Couldn't get short code"), ephemeral=True)
-        return {"shortcode": None}
-
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
-
-        return False
+    if res.status_code == 200:
+        return res.json().get("shortcode", None)
 
 
 async def get_current_user_printer(printer_name: str):
