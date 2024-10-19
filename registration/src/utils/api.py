@@ -66,8 +66,8 @@ def deregister_discord_id(userid: int) -> bool:
 
 async def get_member_perms(interaction: discord.Interaction, shortcode: str):
     try:
-        res = requests.request(
-            "GET", url=SERVER_IP + "/member/permissions/shortcode",
+        res = requests.get(
+            SERVER_IP + "/member/permissions/shortcode",
             params={"shortcode": shortcode}, auth=BASIC_AUTH)
 
         if res.status_code == 200:
@@ -84,8 +84,8 @@ async def get_member_perms(interaction: discord.Interaction, shortcode: str):
 async def get_stats_from_discord(interaction: discord.Interaction,
                                  discord_id: str):
     try:
-        res = requests.request(
-            "GET", url=SERVER_IP + "/print-metrics/member/stats/discord",
+        res = requests.get(
+            SERVER_IP + "/print-metrics/member/stats/discord",
             params={
                 "discord_id": str(discord_id),
             },
@@ -108,8 +108,7 @@ async def get_stats_from_discord(interaction: discord.Interaction,
 async def get_stats_from_shortcode(interaction: discord.Interaction,
                                    shortcode: str):
     try:
-        res = requests.request(
-            "GET",
+        res = requests.get(
             url=SERVER_IP + "/print-metrics/member/stats/shortcode",
             params={
                 "shortcode": str(shortcode)
@@ -130,34 +129,24 @@ async def get_stats_from_shortcode(interaction: discord.Interaction,
         return []
 
 
-async def get_discord_from_shortcode(interaction: discord.Interaction,
-                                     shortcode: str):
-    try:
-        res = requests.request(
-            "GET",
-            url=SERVER_IP + "/shortcode/discord-id",
-            params={
-                "shortcode": str(shortcode),
-            },
-            auth=BASIC_AUTH)
+def get_discord_from_shortcode(shortcode: str):
+    res = requests.get(
+        url=SERVER_IP + "/shortcode/discord-id",
+        params={
+            "shortcode": str(shortcode),
+        },
+        auth=BASIC_AUTH)
 
-        if res.status_code == 200:
-            return res.json()
-
-        logging.info("Couldn't get Discord User")
-        return {"discord_id": None}
-
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
-
-        return False
+    if res.status_code == 200:
+        return res.json().get("discord_id", None)
+    else:
+        return None
 
 
 async def get_shortcode_from_discord(interaction: discord.Interaction,
                                      discord_id: str):
     try:
-        res = requests.request(
-            "GET",
+        res = requests.get(
             url=SERVER_IP + "/discord-id/shortcode",
             params={
                 "id": str(discord_id),

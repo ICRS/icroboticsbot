@@ -36,7 +36,7 @@ def is_inducted_msg():
 def show_discord_stats(data):
     embed = discord.Embed(
         title="Short code - " + data["short_code"],
-        description=("Discord user: <@" + data["discord_id"] + ">" +
+        description=("Discord user: " + data["discord_id"] +
                      "\nCard ID: " + str(data["perms"]["card_id"]) +
                      "\nDate Added: " + data["perms"]["time_added"] + "\n"),
         color=success_color)

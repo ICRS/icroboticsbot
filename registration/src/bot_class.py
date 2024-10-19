@@ -19,7 +19,7 @@ from src.commands import (
     induct_member,
     unlink_discord
 )
-from src.utils import deregister_discord_id
+from src.utils import deregister_discord_id, error_msg, committee_command
 
 
 __all__ = ["DiscordBot"]
@@ -109,8 +109,20 @@ class DiscordBot(commands.Bot):
             name="whois",
             description="ADMIN ONLY: check info of a shortcode/discord member",
         )
-        async def whois_cmd(interaction, user: str):
-            await whois(interaction, user=user)
+        @committee_command
+        async def whois_cmd(interaction: discord.Interaction,
+                            user: discord.User | discord.Member | None = None,
+                            shortcode: str | None = None):
+            if user is not None:
+                return await whois(interaction, user=user)
+            elif shortcode is not None:
+                return await whois(interaction, user=shortcode)
+            else:
+                return await interaction.response.send_message(
+                    embed=error_msg("No user or shortcode provided",
+                                    "Whois no inputs!"),
+                    ephemeral=True
+                )
 
         @self.tree.command(
             name="induct",

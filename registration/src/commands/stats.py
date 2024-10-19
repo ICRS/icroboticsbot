@@ -9,6 +9,8 @@ import requests  # type: ignore
 import discord
 from dotenv import load_dotenv
 
+import src.utils as utils
+
 info_color = 0x297bff
 
 
@@ -45,6 +47,9 @@ async def stats_card(interaction: discord.Interaction):
         card = generate_stat_card(user)
     except Exception as e:
         logging.error(f"Could not generate stats {e}")
+        return await interaction.response.send_message(
+            embed=utils.error_msg("Could not generate stats", "Error"),
+        )
     with io.BytesIO() as image_binary:
         card.save(image_binary, 'PNG')
         image_binary.seek(0)
