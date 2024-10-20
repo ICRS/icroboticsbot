@@ -47,14 +47,15 @@ async def whois(interaction: discord.Interaction, *,
     embed = discord.Embed(
         title="Short code - " + shortcode,
         description=("Discord user: " + discord_id +
-                     "\nCard ID: " + str(perms["card_id"]) +
-                     "\nDate Added: " + perms["time_added"] + "\n"),
+                     "\nCard ID: " + str(perms.get("card_id", "Not Found")) +
+                     f"\nDate Added: {perms.get('time_added', 'Not Found')}\n"
+                     ),
         color=discord.Color.green())
     embed.add_field(
         name="User Permissions",
         value=(
-            "Inducted: " + str(perms["inducted"]) + "\n" +
-            "Can Print: " + str(perms["print"]) + "\n"
+            "Inducted: " + str(perms.get("inducted", "Not Found")) + "\n" +
+            "Can Print: " + str(perms.get("print", "Not Found")) + "\n"
         ),
         inline=False)
 

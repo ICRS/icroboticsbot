@@ -146,7 +146,7 @@ def is_inducted(shortcode: str):
         return False
     if isinstance(perms, bool):
         return perms
-    return perms["inducted"]
+    return perms.get("inducted", False)
 
 
 def check_role(ctx: discord.Interaction, item: str | int):
