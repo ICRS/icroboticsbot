@@ -104,7 +104,7 @@ def generate_stat_card(user: discord.User) -> Image.Image:
         days, hours, mins = 0, 0, 0
         res = f"{seconds}s"
         if seconds > 60:
-            mins, secs = divmod(seconds, 60)
+            mins, secs = divmod(secs, 60)
             res = f"{mins}m{secs}s"
         if mins > 60:
             hours, mins = divmod(mins, 60)
@@ -193,7 +193,7 @@ def generate_stat_card(user: discord.User) -> Image.Image:
     for idx, i in enumerate(data):
         a.text((12, 40+idx*35), f"{idx+1}.",
                font=BOLD_FONT, fill=WHITE)
-        a.text((40, 40+idx*35), f"{i[3]}g",
+        a.text((40, 40+idx*35), f"{i.weight}g",
                font=BOLD_FONT, fill=WHITE)
     card.paste(window, (586, 125))
     return card

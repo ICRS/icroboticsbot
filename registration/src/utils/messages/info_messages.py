@@ -24,7 +24,7 @@ def how_to_msg():
                      " Please reply to THIS message like this "
                      "format:\n```/register yourShortcodeHere``` \n"
                      "Example:\n ```/register ab123```"
-                     "\n Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"),
+                     "\n Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"),  # noqa: E501
         color=info_color)
     return embed
 
