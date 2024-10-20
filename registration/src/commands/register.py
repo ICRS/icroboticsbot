@@ -47,7 +47,7 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
             return await interaction.response.send_message(
                 embed=utils.different_link(), ephemeral=True)
 
-        if await is_inducted(shortcode):
+        if is_inducted(shortcode):
             return await interaction.response.send_message(
                 embed=utils.already_inducted(), ephemeral=True)
 
