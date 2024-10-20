@@ -1,14 +1,12 @@
 from functools import cache
 import io
 import logging
-import os
 
 from PIL import Image, ImageDraw, ImageFont
 from colorthief import ColorThief
 
 import requests  # type: ignore
 import discord
-from dotenv import load_dotenv
 
 import src.utils as utils
 
@@ -20,14 +18,7 @@ __all__ = [
     "generate_stat_card"
 ]
 
-# ===== Constants =====
-load_dotenv()
-
-# ===== Get the API key =====
 BASE_PATH = "./"
-SERVER_IP = os.getenv("SERVER_IP")
-# =========================================
-
 DEFAULT_AVATAR = "https://assets-global.website-files.com/5f9072399b2640f14d6a2bf4/619442eb8b3fab3eda4c29eb_Author-Wumpus-Webflow.png"  # noqa: E501
 
 

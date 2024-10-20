@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord import app_commands
 import requests
 
-from src.commands.stats import SERVER_IP
 from src.commands import (
     get_help,
     link_card,
@@ -19,7 +18,8 @@ from src.commands import (
     induct_member,
     unlink_discord
 )
-from src.utils import deregister_discord_id, error_msg, committee_command
+from src.utils import (deregister_discord_id, error_msg,
+                       committee_command, SERVER_IP)
 
 
 __all__ = ["DiscordBot"]
