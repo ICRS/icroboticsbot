@@ -5,66 +5,93 @@ __all__ = [
 
 import discord
 import logging
-import src.utils as util_msg
-from src.utils import error_msg
+import src.utils as utils
 
 
-@util_msg.committee_command
-async def whois(interaction: discord.Interaction, *, user: str):
-    try:
-        logging.info(f"Whois User: {user}")
+@utils.committee_command
+async def whois(interaction: discord.Interaction, *,
+                user: str | discord.User | discord.Member):
+    logging.info(f"Whois User: {user}")
 
-        if not util_msg.is_discord_id(user) and not util_msg.is_shortcode(user):    # noqa: E501
-            logging.info(f"User invalid: {user}")
+    if isinstance(user, str):
+        if not utils.is_shortcode(user):
+            logging.info(f"Whois shortcode invalid: {user}")
             return await interaction.response.send_message(
-                embed=util_msg.invalid_discord_id(), ephemeral=True)
+                embed=utils.invalid_shortcode(), ephemeral=True)
 
-        shortcode = ""
-        discord_id = ""
-        # allow shortcode or @user
-        if (util_msg.is_shortcode(user)):
-            discord_id = (await util_msg.get_discord_from_shortcode(
-                interaction, user))["discord_id"]
-            discord_id = discord_id if discord_id else "Not on discord"
-            shortcode = user
-        else:
-            discord_id = util_msg.format_discord_id(user)
+        discord_id = utils.get_discord_from_shortcode(user)
+        shortcode = user
+    else:
+        discord_id = str(user.id)
+        logging.info(f"Discord ID: {discord_id}")
 
-            logging.info(f"Discord ID: {discord_id}")
+        shortcode = utils.get_shortcode_from_discord(discord_id)
 
-            shortcode = (await util_msg.get_shortcode_from_discord(
-                interaction, discord_id))["shortcode"]
-
-            if not shortcode:
-                return
-
-        perms = await util_msg.get_member_perms(interaction, shortcode)
-        stats = await util_msg.get_stats_from_shortcode(interaction, shortcode)
-
-        if perms is None or perms == {}:
+        if not shortcode:
             return await interaction.response.send_message(
-                embed=error_msg("Couldn't find user"))
+                embed=utils.error_msg(
+                    f"Couldn't get short code for <@{discord_id}>",
+                    "Whois Warning"),
+                ephemeral=True)
 
-        time_sum = 0
-        weight_sum = 0
-
-        for item in stats:
-            time_sum += item[2]
-            weight_sum += item[3]
-
-        last_print = stats[-1] if stats else None
-        totals = [time_sum, weight_sum]
-
-        data = {
-            "perms": perms,
-            "last_print": last_print,
-            "totals": totals,
-            "discord_id": discord_id,
-            "short_code": shortcode
-        }
-
+    perms = utils.get_member_perms(shortcode)
+    if perms is None:
         return await interaction.response.send_message(
-            embed=util_msg.show_discord_stats(data), ephemeral=True)
+            embed=utils.error_msg(
+                "Couldn't get user permissions",
+                "Server Error: Whois command"))
 
-    except Exception as e:
-        await interaction.response.send_message(embed=util_msg.error_msg(e))
+    if not perms and not discord_id:
+        return await interaction.response.send_message(
+            embed=discord.Embed(
+                title="User Not Found on Systems",
+                description="Could not find discord id or user permission on "
+                f"systems for shortcode - {shortcode}.",
+                color=discord.Color.yellow()
+            ),
+            ephemeral=True
+        )
+
+    stats = utils.get_stats_summary_from_shortcode(shortcode)
+
+    discord_id = f"<@{discord_id}>" if discord_id is not None else "Not on discord"  # noqa: E501
+    embed = discord.Embed(
+        title="Short code - " + shortcode,
+        description=("Discord user: " + discord_id +
+                     "\nCard ID: " + str(perms.get("card_id", "Not Found")) +
+                     f"\nDate Added: {perms.get('time_added', 'Not Found')}\n"
+                     ),
+        color=discord.Color.green())
+    embed.add_field(
+        name="User Permissions",
+        value=(
+            "Inducted: " + str(perms.get("inducted", "Not Found")) + "\n" +
+            "Can Print: " + str(perms.get("print", "Not Found")) + "\n"
+        ),
+        inline=False)
+
+    embed.add_field(
+        name="Total Prints",
+        value=(
+            f"Weight: {stats.total_weight} g\n" +
+            "Time: " +
+            str(round(stats.total_time/60, 2)) + "min\n"
+        ),
+        inline=False)
+
+    last_print = stats.last_print
+    if last_print:
+        embed.add_field(
+            name="Last Print",
+            value=(
+                f"Printer: {last_print.printer_name}\n" +
+                f"Weight: {last_print.weight}\n" +
+                f"Time: {round(last_print.time/60, 2)}min\n" +
+                f"Started At: {last_print.time_started}"
+            ),
+            inline=False)
+
+    return await interaction.response.send_message(
+        embed=embed,
+        ephemeral=True,
+    )
