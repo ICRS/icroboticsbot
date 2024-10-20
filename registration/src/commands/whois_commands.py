@@ -11,83 +11,70 @@ import src.utils as utils
 @utils.committee_command
 async def whois(interaction: discord.Interaction, *,
                 user: str | discord.User | discord.Member):
-    try:
-        logging.info(f"Whois User: {user}")
+    logging.info(f"Whois User: {user}")
 
-        if isinstance(user, str):
-            if not utils.is_shortcode(user):
-                logging.info(f"Whois shortcode invalid: {user}")
-                return await interaction.response.send_message(
-                    embed=utils.invalid_shortcode(), ephemeral=True)
-
-            discord_id = utils.get_discord_from_shortcode(user)
-            discord_id = f"<@{discord_id}>" if discord_id is not None else "Not on discord"  # noqa: E501
-            shortcode = user
-        else:
-            discord_id = str(user.id)
-            logging.info(f"Discord ID: {discord_id}")
-
-            shortcode = utils.get_shortcode_from_discord(discord_id)
-
-            if not shortcode:
-                return await interaction.response.send_message(
-                    embed=utils.error_msg(
-                        f"Couldn't get short code for <@{discord_id}>",
-                        "Whois Warning"),
-                    ephemeral=True)
-
-        perms = await utils.get_member_perms(interaction, shortcode)
-        stats = await utils.get_stats_from_shortcode(interaction, shortcode)
-
-        if perms is None:
+    if isinstance(user, str):
+        if not utils.is_shortcode(user):
+            logging.info(f"Whois shortcode invalid: {user}")
             return await interaction.response.send_message(
-                embed=utils.error_msg("Couldn't find user"))
+                embed=utils.invalid_shortcode(), ephemeral=True)
 
-        time_sum = 0
-        weight_sum = 0
+        discord_id = utils.get_discord_from_shortcode(user)
+        discord_id = f"<@{discord_id}>" if discord_id is not None else "Not on discord"  # noqa: E501
+        shortcode = user
+    else:
+        discord_id = str(user.id)
+        logging.info(f"Discord ID: {discord_id}")
 
-        for item in stats:
-            time_sum += item[2]
-            weight_sum += item[3]
+        shortcode = utils.get_shortcode_from_discord(discord_id)
 
-        last_print = stats[-1] if stats else None
+        if not shortcode:
+            return await interaction.response.send_message(
+                embed=utils.error_msg(
+                    f"Couldn't get short code for <@{discord_id}>",
+                    "Whois Warning"),
+                ephemeral=True)
 
-        embed = discord.Embed(
-            title="Short code - " + shortcode,
-            description=("Discord user: " + discord_id +
-                         "\nCard ID: " + str(perms["card_id"]) +
-                         "\nDate Added: " + perms["time_added"] + "\n"),
-            color=discord.Color.green())
-        embed.add_field(
-            name="User Permissions",
-            value=(
-                "Inducted: " + str(perms["inducted"]) + "\n" +
-                "Can Print: " + str(perms["print"]) + "\n"
-            ),
-            inline=False)
-
-        embed.add_field(
-            name="Total Prints",
-            value=(
-                "Weight: " + str(weight_sum) + "g\n" +
-                "Time: " +
-                str(round(time_sum/60, 2)) + "min\n"
-            ),
-            inline=False)
-
-        if last_print:
-            embed.add_field(
-                name="Last Print",
-                value=(
-                    "Printer: " + last_print[4] + "\n" +
-                    "Weight: " + str(last_print[3]) + "g\n" +
-                    "Time: " + str(round(last_print[2]/60, 2)) + "min\n" +
-                    "Started At: " + last_print[1]
-                ),
-                inline=False)
-
+    perms = utils.get_member_perms(shortcode)
+    if perms is None:
         return await interaction.response.send_message(
-            embed=embed, ephemeral=True)
+            embed=utils.error_msg(
+                "Couldn't find user permissions",
+                "Whois command"))
 
-    except Exception as e:
-        await interaction.response.send_message(embed=utils.error_msg(e))
+    stats = utils.get_stats_summary_from_shortcode(shortcode)
+
+    embed = discord.Embed(
+        title="Short code - " + shortcode,
+        description=("Discord user: " + discord_id +
+                     "\nCard ID: " + str(perms["card_id"]) +
+                     "\nDate Added: " + perms["time_added"] + "\n"),
+        color=discord.Color.green())
+    embed.add_field(
+        name="User Permissions",
+        value=(
+            "Inducted: " + str(perms["inducted"]) + "\n" +
+            "Can Print: " + str(perms["print"]) + "\n"
+        ),
+        inline=False)
+
+    embed.add_field(
+        name="Total Prints",
+        value=(
+            f"Weight: {stats.total_weight} g\n" +
+            "Time: " +
+            str(round(stats.total_time/60, 2)) + "min\n"
+        ),
+        inline=False)
+
+    last_print = stats.last_print
+    if last_print:
+        embed.add_field(
+            name="Last Print",
+            value=(
+                f"Printer: {last_print.printer_name}\n" +
+                f"Weight: {last_print.weight}\n" +
+                f"Time: {round(last_print.time/60, 2)}min\n" +
+                f"Started At: {last_print.time_started}"
+            ),
+            inline=False)

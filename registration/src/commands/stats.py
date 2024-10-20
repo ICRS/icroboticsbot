@@ -92,62 +92,34 @@ def generate_stat_card(user: discord.User) -> Image.Image:
                fill=(255, 255, 255), anchor="la")
         return window
 
-    def format_time(seconds) -> str:
-        days = 0
-        hours = 0
-        mins = 0
-        secs = seconds
+    def format_time(seconds: float) -> str:
+        secs = round(seconds)
+        days, hours, mins = 0, 0, 0
         res = f"{seconds}s"
         if seconds > 60:
-            mins = seconds // 60
-            secs = seconds % 60
+            mins, secs = divmod(seconds, 60)
             res = f"{mins}m{secs}s"
         if mins > 60:
-            hours = mins//60
-            mins = mins % 60
+            hours, mins = divmod(mins, 60)
             res = f"{hours}h{mins}m{secs}s"
         if hours > 24:
-            days = hours//24
-            hours = hours % 24
+            days, hours = divmod(hours, 24)
             res = f"{days}d{hours}h{mins}m{secs}s"
 
         return res
 
-    res = requests.get(url=SERVER_IP +
-                       "/print-metrics/member/stats/discord",
-                       params={
-                           "discord_id": str(user.id)
-                       }
-                       )
-    if res.status_code != 200:
-        return False
-    data = res.json()
+    res = utils.get_stats_from_discord(str(user.id))
+
+    total_filament = res.total_weight
+    total_time = res.total_time
+    favourite_printer, fav_no = res.favourite_printer
+    display_no = len(res)
+    data = res.prints[:5]
+
     username = user.name
     avatar = user.avatar
     if not avatar:
         avatar = DEFAULT_AVATAR
-    if data:
-        total_filament = sum([i[3] for i in data])
-        total_time = sum([i[2] for i in data])
-        printers = {}
-        names = list(set([i[-1] for i in data]))
-
-        for name in names:
-            printers[name] = sum([1 for i in data if i[-1] == name])
-        printers = dict(sorted(printers.items(), key=lambda item: item[1]))
-        fav = [i for i in printers.keys()][-1]
-        fav_no = printers[fav]
-        print_no = len(data)
-        display_no = print_no
-        if print_no > 5:
-            data = data[:5]
-    else:
-        total_filament = 0
-        total_time = 0
-        fav = "null"
-        fav_no = 0
-        print_no = 1
-        display_no = 0
     r = requests.get(avatar, timeout=60)
 
     temp = io.BytesIO()
@@ -182,13 +154,15 @@ def generate_stat_card(user: discord.User) -> Image.Image:
     card.paste(window, (7, 243))
     window = generate_card(
         "Avg. Weight",
-        f"{round(total_filament/print_no)}g",
+        f"{round(res.average_weight)}g",
         accent_colour=accent_colour)
     card.paste(window, (200, 125))
-    window = generate_card("Avg. Time", format_time(
-        total_time//print_no), accent_colour=accent_colour)
+    window = generate_card(
+        "Avg. Time",
+        format_time(res.average_time),
+        accent_colour=accent_colour)
     card.paste(window, (200, 243))
-    window = generate_card("Fav. Printer", fav,
+    window = generate_card("Fav. Printer", favourite_printer,
                            accent_colour=accent_colour, value_size=18)
     card.paste(window, (393, 125))
     window = generate_card("Fav. Prints", str(

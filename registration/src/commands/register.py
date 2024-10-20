@@ -47,7 +47,7 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
             return await interaction.response.send_message(
                 embed=utils.different_link(), ephemeral=True)
 
-        if await is_inducted(interaction, shortcode):
+        if await is_inducted(shortcode):
             return await interaction.response.send_message(
                 embed=utils.already_inducted(), ephemeral=True)
 
@@ -138,8 +138,8 @@ async def unlink_discord(
         await interaction.response.send_message(embed=utils.error_msg(e))
 
 
-async def is_inducted(interaction: discord.Interaction, shortcode: str):
-    perms = await utils.get_member_perms(interaction, shortcode)
+def is_inducted(shortcode: str):
+    perms = utils.get_member_perms(shortcode)
     logging.info(perms)
 
     if perms is None:
