@@ -78,3 +78,8 @@ async def whois(interaction: discord.Interaction, *,
                 f"Started At: {last_print.time_started}"
             ),
             inline=False)
+
+    return await interaction.response.send_message(
+        embed=embed,
+        ephemeral=True,
+    )
