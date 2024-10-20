@@ -20,7 +20,6 @@ async def whois(interaction: discord.Interaction, *,
                 embed=utils.invalid_shortcode(), ephemeral=True)
 
         discord_id = utils.get_discord_from_shortcode(user)
-        discord_id = f"<@{discord_id}>" if discord_id is not None else "Not on discord"  # noqa: E501
         shortcode = user
     else:
         discord_id = str(user.id)
@@ -39,11 +38,23 @@ async def whois(interaction: discord.Interaction, *,
     if perms is None:
         return await interaction.response.send_message(
             embed=utils.error_msg(
-                "Couldn't find user permissions",
-                "Whois command"))
+                "Couldn't get user permissions",
+                "Server Error: Whois command"))
+
+    if not perms and not discord_id:
+        return await interaction.response.send_message(
+            embed=discord.Embed(
+                title="User Not Found on Systems",
+                description="Could not find discord id or user permission on "
+                f"systems for shortcode - {shortcode}.",
+                color=discord.Color.yellow()
+            ),
+            ephemeral=True
+        )
 
     stats = utils.get_stats_summary_from_shortcode(shortcode)
 
+    discord_id = f"<@{discord_id}>" if discord_id is not None else "Not on discord"  # noqa: E501
     embed = discord.Embed(
         title="Short code - " + shortcode,
         description=("Discord user: " + discord_id +
