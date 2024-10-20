@@ -39,7 +39,7 @@ DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
 BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 
-async def add_card_to_member(shortcode: str, uid: str) -> requests.Response:
+def add_card_to_member(shortcode: str, uid: str) -> requests.Response:
     logging.info(f"Adding card {uid} to shortcode {shortcode}")
     return requests.post(
         SERVER_IP + "/member/register/card/shortcode",
@@ -47,7 +47,7 @@ async def add_card_to_member(shortcode: str, uid: str) -> requests.Response:
         auth=BASIC_AUTH)
 
 
-async def unlink_card(uid: str) -> requests.Response:
+def unlink_card(uid: str) -> requests.Response:
     logging.info(f"Removing card {uid} from db")
     return requests.delete(
         SERVER_IP +

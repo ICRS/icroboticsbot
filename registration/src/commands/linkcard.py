@@ -27,7 +27,7 @@ async def link_card(interaction: discord.Interaction, *,
     try:
         uid = utils.format_uid(uid)
 
-        result = await utils.add_card_to_member(
+        result = utils.add_card_to_member(
             shortcode, uid)
 
         if result.status_code == 200:
@@ -58,8 +58,7 @@ async def unlink_card(interaction: discord.Interaction, *,
         uid of the user's card
     """
     try:
-        response = await utils.unlink_card(
-            uid)
+        response = utils.unlink_card(uid)
 
         if response.status_code == 200 and (j := response.json()):
             v = j.get("deleted", 0)
