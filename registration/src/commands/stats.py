@@ -1,3 +1,4 @@
+from functools import cache
 import io
 import logging
 import os
@@ -40,8 +41,6 @@ async def stats_card(interaction: discord.Interaction):
         Discord context
     """
     user = interaction.user
-    embed = discord.Embed(
-        title=f"3D Printing Stats for {user.name}", color=info_color)
 
     try:
         card = generate_stat_card(user)
@@ -50,12 +49,22 @@ async def stats_card(interaction: discord.Interaction):
         return await interaction.response.send_message(
             embed=utils.error_msg("Could not generate stats", "Error"),
         )
+
     with io.BytesIO() as image_binary:
         card.save(image_binary, 'PNG')
         image_binary.seek(0)
         file = discord.File(image_binary, filename="image.png")
+
+        embed = discord.Embed(
+            title=f"3D Printing Stats for {user.name}", color=info_color)
         embed.set_image(url=f"attachment://{file.filename}")
+
         await interaction.response.send_message(file=file, embed=embed)
+
+BOLD_FONT = ImageFont.truetype("assets/fonts/Bold.ttf", 32)
+MEDIUM_FONT = ImageFont.truetype("assets/fonts/Medium.ttf", 25)
+WHITE = (255, 255, 255)
+GREY = (181, 181, 181)
 
 
 def generate_stat_card(user: discord.User) -> Image.Image:
@@ -83,14 +92,21 @@ def generate_stat_card(user: discord.User) -> Image.Image:
         a = ImageDraw.Draw(window)
         a.rectangle([(0, 0), (175, 100)], fill=(47, 49, 54))
         a.rectangle([(0, 0), (7, 100)], fill=accent_colour)
-        key_font = ImageFont.truetype(
-            BASE_PATH+"assets/fonts/Medium.ttf", key_size)
-        value_font = ImageFont.truetype(
-            BASE_PATH+"assets/fonts/Bold.ttf", value_size)
-        a.text((12, 10), key, font=key_font, fill=(181, 181, 181))
-        a.text((12, 40), value, font=value_font,
-               fill=(255, 255, 255), anchor="la")
+
+        a.text((12, 10), key, font=key_font(key_size), fill=GREY)
+        a.text((12, 40), value, font=value_font(value_size),
+               fill=WHITE, anchor="la")
         return window
+
+    @cache
+    def value_font(value_size):
+        return ImageFont.truetype(
+            BASE_PATH+"assets/fonts/Bold.ttf", value_size)
+
+    @cache
+    def key_font(key_size):
+        return ImageFont.truetype(
+            BASE_PATH+"assets/fonts/Medium.ttf", key_size)
 
     def format_time(seconds: float) -> str:
         secs = round(seconds)
@@ -117,9 +133,7 @@ def generate_stat_card(user: discord.User) -> Image.Image:
     data = res.prints[:5]
 
     username = user.name
-    avatar = user.avatar
-    if not avatar:
-        avatar = DEFAULT_AVATAR
+    avatar = user.avatar if user.avatar else DEFAULT_AVATAR
     r = requests.get(avatar, timeout=60)
 
     temp = io.BytesIO()
@@ -138,33 +152,43 @@ def generate_stat_card(user: discord.User) -> Image.Image:
     d.rectangle([(7, 7), (818, 107)], fill=(47, 49, 54))
     d.rectangle([(7, 7), (14, 107)], fill=accent_colour)
     card.paste(pic, (35, 28), pic)
-    name_font = ImageFont.truetype("assets/fonts/Bold.ttf", 32)
-    sub_font = ImageFont.truetype("assets/fonts/Medium.ttf", 25)
-    d.text((130, 52), username, font=name_font, fill=(255, 255, 255))
-    d.text((130, 28), "User", font=sub_font, fill=(181, 181, 181))
-    d.text((795, 52), str(display_no), font=name_font,
-           fill=(255, 255, 255), anchor='ra')
-    d.text((649, 28), "Total Prints", font=sub_font, fill=(181, 181, 181))
+    d.text((130, 28), "User", font=MEDIUM_FONT, fill=GREY)
+    d.text((130, 52), username, font=BOLD_FONT, fill=WHITE)
+
+    d.text((649, 28), "Total Prints", font=MEDIUM_FONT, fill=GREY)
+    d.text((795, 52), str(display_no), font=BOLD_FONT,
+           fill=WHITE, anchor='ra')
 
     window = generate_card("Filament Used", "{:,}".format(
         total_filament)+"g", accent_colour=accent_colour)
     card.paste(window, (7, 125))
-    window = generate_card("Total Time", format_time(
-        total_time), accent_colour=accent_colour)
+
+    window = generate_card(
+        "Total Time",
+        format_time(total_time),
+        accent_colour=accent_colour)
     card.paste(window, (7, 243))
+
     window = generate_card(
         "Avg. Weight",
         f"{round(res.average_weight)}g",
         accent_colour=accent_colour)
     card.paste(window, (200, 125))
+
     window = generate_card(
         "Avg. Time",
         format_time(res.average_time),
         accent_colour=accent_colour)
     card.paste(window, (200, 243))
-    window = generate_card("Fav. Printer", favourite_printer,
-                           accent_colour=accent_colour, value_size=18)
+
+    window = generate_card(
+        "Fav. Printer",
+        favourite_printer,
+        accent_colour=accent_colour,
+        value_size=18)
+
     card.paste(window, (393, 125))
+
     window = generate_card("Fav. Prints", str(
         fav_no), accent_colour=accent_colour)
     card.paste(window, (393, 243))
@@ -173,13 +197,12 @@ def generate_stat_card(user: discord.User) -> Image.Image:
     a = ImageDraw.Draw(window)
     a.rectangle([(0, 0), (232, 218)], fill=(47, 49, 54))
     a.rectangle([(0, 0), (7, 218)], fill=accent_colour)
-    sub_font = ImageFont.truetype(BASE_PATH+"assets/fonts/Medium.ttf", 22)
-    item_font = ImageFont.truetype(BASE_PATH+"assets/fonts/Bold.ttf", 25)
-    a.text((12, 10), "Print History", font=sub_font, fill=(181, 181, 181))
+
+    a.text((12, 10), "Print History", font=MEDIUM_FONT, fill=GREY)
     for idx, i in enumerate(data):
         a.text((12, 40+idx*35), f"{idx+1}.",
-               font=item_font, fill=(255, 255, 255))
+               font=BOLD_FONT, fill=WHITE)
         a.text((40, 40+idx*35), f"{i[3]}g",
-               font=item_font, fill=(255, 255, 255))
+               font=BOLD_FONT, fill=WHITE)
     card.paste(window, (586, 125))
     return card
