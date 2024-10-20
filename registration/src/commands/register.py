@@ -13,10 +13,10 @@ from src.utils.induction_utils import (
     State,
     hasPaidForMembership,
     validatePreviousShortcode)
-import src.utils as util_msg
+import src.utils as utils
 
 
-@util_msg.validate_shortcode
+@utils.validate_shortcode
 async def register_user(interaction: discord.Interaction, *, shortcode: str):
     """
     register_on_dm Register message when user tries to register on DM
@@ -36,7 +36,7 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
 
         if not member:
             return await interaction.response.send_message(
-                embed=util_msg.not_on_guild_msg(), ephemeral=True)
+                embed=utils.not_on_guild_msg(), ephemeral=True)
 
         shortcodeState = validatePreviousShortcode(
             member.id,
@@ -45,11 +45,11 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
 
         if shortcodeState == State.VALID:
             return await interaction.response.send_message(
-                embed=util_msg.different_link(), ephemeral=True)
+                embed=utils.different_link(), ephemeral=True)
 
-        if await isInducted(interaction, shortcode):
+        if await is_inducted(shortcode):
             return await interaction.response.send_message(
-                embed=util_msg.already_inducted(), ephemeral=True)
+                embed=utils.already_inducted(), ephemeral=True)
 
         membershipPaid = hasPaidForMembership(shortcode)
         if membershipPaid.status_code != 200:
@@ -78,11 +78,11 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
         await launch_quiz(interaction, shortcode)
 
     except Exception as e:
-        await interaction.response.send_message(embed=util_msg.error_msg(e))
+        await interaction.response.send_message(embed=utils.error_msg(e))
 
 
-@util_msg.committee_command
-@util_msg.validate_shortcode
+@utils.committee_command
+@utils.validate_shortcode
 async def unlink_discord(
         interaction: discord.Interaction,
         shortcode: str):
@@ -102,7 +102,7 @@ async def unlink_discord(
 
         if not shortcode:
             return await interaction.response.send_message(
-                embed=util_msg.not_on_guild_msg(), ephemeral=True)
+                embed=utils.not_on_guild_msg(), ephemeral=True)
 
         r = requests.delete(
             DATABASE_ADAPTER_IP + "/shortcode/discord/mapping",
@@ -111,24 +111,42 @@ async def unlink_discord(
             }
         )
 
-        logging.info(f"Success {r.status_code}")
-        return await interaction.response.send_message(
-            embed=util_msg.unlink_discord_success_msg(shortcode=shortcode),
-            ephemeral=True)
+        if r.status_code == 200:
+            logging.info(f"Success {r.status_code}")
+            r = r.json().get("deleted", 0)
 
+            if r:
+                return await interaction.response.send_message(
+                    embed=utils.unlink_discord_success_msg(
+                        shortcode=shortcode),
+                    ephemeral=True)
+            else:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        title="Unlinked Discord",
+                        description=(f"Did not find shortcode: {shortcode} "
+                                     "so nothing deleted."),
+                        color=discord.Color.yellow(),
+                    ),
+                    ephemeral=True)
+        else:
+            msg = f"Could not unlink shortcode from discord: {r.reason}"
+            logging.error(msg)
+            await interaction.response.send_message(
+                embed=utils.error_msg(msg))
     except Exception as e:
-        await interaction.response.send_message(embed=util_msg.error_msg(e))
+        await interaction.response.send_message(embed=utils.error_msg(e))
 
 
-async def isInducted(interaction: discord.Interaction, shortcode: str):
-    perms = await util_msg.get_member_perms(interaction, shortcode)
+def is_inducted(shortcode: str):
+    perms = utils.get_member_perms(shortcode)
     logging.info(perms)
 
-    if perms is None or perms == {}:
+    if perms is None:
         return False
     if isinstance(perms, bool):
         return perms
-    return perms["inducted"]
+    return perms.get("inducted", False)
 
 
 def check_role(ctx: discord.Interaction, item: str | int):

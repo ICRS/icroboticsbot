@@ -3,7 +3,7 @@ import logging
 import discord
 import requests
 from src.utils.api import BASIC_AUTH, SERVER_IP
-import src.utils as util_msg
+import src.utils as utils
 
 
 SUCCESS_MSG = (
@@ -102,7 +102,7 @@ async def linkDiscordUser(
         return True
 
     await message.edit(
-            embed=util_msg.different_link(),
+            embed=utils.different_link(),
             view=None
         )
     return False
@@ -146,8 +146,7 @@ def validatePreviousShortcode(member_id: str,
                               shortcode: str,
                               active: bool = False):
     # default not found if it makes it through the checks
-    preShortcode = requests.request(
-            "GET",
+    preShortcode = requests.get(
             url=SERVER_IP + "/discord-id/shortcode",
             params={
                 "id": member_id,
@@ -166,8 +165,7 @@ def validatePreviousShortcode(member_id: str,
             return State.INVALID
 
     # check if previous discord
-    preDiscord = requests.request(
-            "GET",
+    preDiscord = requests.get(
             url=SERVER_IP + "/shortcode/discord-id",
             params={
                 "shortcode": shortcode,

@@ -4,7 +4,7 @@ __all__ = [
     "deregister_discord_id",
     "get_member_perms",
     "get_stats_from_discord",
-    "get_stats_from_shortcode",
+    "get_stats_summary_from_shortcode",
     "get_discord_from_shortcode",
     "SERVER_IP",
     "get_current_user_printer",
@@ -19,16 +19,18 @@ __all__ = [
 Utility functions used by the bot
 """
 
+import collections
+from dataclasses import dataclass, field
+import datetime
+from functools import cached_property
 import logging
 import os
 
 import aiohttp
-import discord
 import requests
 from requests.auth import HTTPBasicAuth
 from bambulabs_api import GcodeState
 
-from src.utils import error_msg
 
 SERVER_IP = os.getenv("SERVER_IP")
 DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")
@@ -37,7 +39,7 @@ DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
 BASIC_AUTH = HTTPBasicAuth(DATABASE_ADAPTER_USER, DATABASE_ADAPTER_PASSWORD)
 
 
-async def add_card_to_member(shortcode: str, uid: str) -> requests.Response:
+def add_card_to_member(shortcode: str, uid: str) -> requests.Response:
     logging.info(f"Adding card {uid} to shortcode {shortcode}")
     return requests.post(
         SERVER_IP + "/member/register/card/shortcode",
@@ -45,7 +47,7 @@ async def add_card_to_member(shortcode: str, uid: str) -> requests.Response:
         auth=BASIC_AUTH)
 
 
-async def unlink_card(uid: str) -> requests.Response:
+def unlink_card(uid: str) -> requests.Response:
     logging.info(f"Removing card {uid} from db")
     return requests.delete(
         SERVER_IP +
@@ -64,120 +66,126 @@ def deregister_discord_id(userid: int) -> bool:
     return result == 200
 
 
-async def get_member_perms(interaction: discord.Interaction, shortcode: str):
-    try:
-        res = requests.request(
-            "GET", url=SERVER_IP + "/member/permissions/shortcode",
-            params={"shortcode": shortcode}, auth=BASIC_AUTH)
+def get_member_perms(shortcode: str):
+    res = requests.get(
+        SERVER_IP + "/member/permissions/shortcode",
+        params={"shortcode": shortcode}, auth=BASIC_AUTH)
 
-        if res.status_code == 200:
-            return res.json()
-
-        await interaction.response.send_message(
-            embed=error_msg(str(res.reason), "Bad Response"))
-        return {}
-
-    # pylint: disable=broad-except
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
-
-        return {}
+    if res.status_code == 200:
+        return res.json()
 
 
-async def get_stats_from_discord(interaction: discord.Interaction,
-                                 discord_id: str):
-    try:
-        res = requests.request(
-            "GET", url=SERVER_IP + "/print-metrics/member/stats/discord",
-            params={
-                "discord_id": str(discord_id),
-            },
-            auth=BASIC_AUTH)
+def get_stats_from_discord(discord_id: str):
+    res = requests.get(
+        SERVER_IP + "/print-metrics/member/stats/discord",
+        params={
+            "discord_id": str(discord_id),
+        },
+        auth=BASIC_AUTH)
 
-        if res.status_code == 200:
-            return res.json()
+    if res.status_code == 200:
+        return Stats(prints=[Print(**c) for c in res.json()])
 
-        await interaction.response.send_message(
-            embed=error_msg(str(res.reason), "Bad Response"))
-        return False
-
-    # pylint: disable=broad-except
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
-
-        return False
+    return Stats()
 
 
-async def get_stats_from_shortcode(interaction: discord.Interaction,
-                                   shortcode: str):
-    try:
-        res = requests.request(
-            "GET",
-            url=SERVER_IP + "/print-metrics/member/stats/shortcode",
-            params={
-                "shortcode": str(shortcode)
-            },
-            auth=BASIC_AUTH)
-
-        if res.status_code == 200:
-            return res.json()
-
-        await interaction.response.send_message(
-            embed=error_msg(str(res.reason)))
-        return []
-
-    # pylint: disable=broad-except
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
-
-        return []
+@dataclass
+class Print:
+    shortcode: str
+    time_started: datetime.datetime
+    time: float
+    weight: float
+    printer_name: str
 
 
-async def get_discord_from_shortcode(interaction: discord.Interaction,
-                                     shortcode: str):
-    try:
-        res = requests.request(
-            "GET",
-            url=SERVER_IP + "/shortcode/discord-id",
-            params={
-                "shortcode": str(shortcode),
-            },
-            auth=BASIC_AUTH)
+@dataclass
+class Stats:
+    prints: list[Print] = field(default_factory=lambda: [])
 
-        if res.status_code == 200:
-            return res.json()
+    @cached_property
+    def __calculate(self):
+        total_time, total_weight = 0., 0.
+        for print in self.prints:
+            total_time += print.time
+            total_weight += print.weight
 
-        logging.info("Couldn't get Discord User")
-        return {"discord_id": None}
+        return total_time, total_weight
 
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
+    @cached_property
+    def total_time(self):
+        return self.__calculate[0]
 
-        return False
+    @cached_property
+    def total_weight(self):
+        return self.__calculate[1]
+
+    @cached_property
+    def last_print(self):
+        return self.prints[-1] if self.prints else None
+
+    @cached_property
+    def favourite_printer(self):
+        c = collections.Counter(p.printer_name for p in self.prints)
+        if not c:
+            return "None", 0
+        return c.most_common(1)[0]
+
+    @cached_property
+    def average_weight(self):
+        if not self.prints:
+            return 0
+        else:
+            return self.total_weight / len(self.prints)
+
+    @cached_property
+    def average_time(self):
+        if not self.prints:
+            return 0
+        else:
+            return self.total_time / len(self.prints)
+
+    def __len__(self):
+        return len(self.prints)
 
 
-async def get_shortcode_from_discord(interaction: discord.Interaction,
-                                     discord_id: str):
-    try:
-        res = requests.request(
-            "GET",
-            url=SERVER_IP + "/discord-id/shortcode",
-            params={
-                "id": str(discord_id),
-            },
-            auth=BASIC_AUTH)
+def get_stats_summary_from_shortcode(shortcode: str):
+    res = requests.get(
+        url=SERVER_IP + "/print-metrics/member/stats/shortcode",
+        params={
+            "shortcode": str(shortcode)
+        },
+        auth=BASIC_AUTH)
 
-        if res.status_code == 200:
-            return res.json()
+    if res.status_code == 200:
+        return Stats(prints=[Print(**c) for c in res.json()])
 
-        await interaction.response.send_message(
-            embed=error_msg("Couldn't get short code"), ephemeral=True)
-        return {"shortcode": None}
+    return Stats()
 
-    except Exception as e:
-        await interaction.response.send_message(embed=error_msg(e))
 
-        return False
+def get_discord_from_shortcode(shortcode: str):
+    res = requests.get(
+        url=SERVER_IP + "/shortcode/discord-id",
+        params={
+            "shortcode": str(shortcode),
+        },
+        auth=BASIC_AUTH)
+
+    if res.status_code == 200:
+        return res.json().get("discord_id", None)
+    else:
+        return None
+
+
+def get_shortcode_from_discord(discord_id: str):
+    res = requests.get(
+        url=SERVER_IP + "/discord-id/shortcode",
+        params={
+            "id": str(discord_id),
+        },
+        auth=BASIC_AUTH)
+
+    if res.status_code == 200:
+        return res.json().get("shortcode", None)
 
 
 async def get_current_user_printer(printer_name: str):

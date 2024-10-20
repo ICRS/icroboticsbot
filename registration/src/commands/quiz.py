@@ -7,7 +7,7 @@ import os
 import discord
 import random
 import requests
-from src.commands.stats import SERVER_IP
+from src.utils import SERVER_IP
 from src.utils.induction_utils import fullInduction
 
 
