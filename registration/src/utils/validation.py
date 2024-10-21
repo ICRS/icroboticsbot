@@ -8,6 +8,7 @@ __all__ = [
     "committee_command",
     "validate_card_uid",
     "validate_shortcode",
+    "verified_member",
 ]
 
 
@@ -59,6 +60,10 @@ def is_not_committee(author: discord.User | discord.Member):
     return "committee" not in [y.name.lower() for y in author.roles]
 
 
+def is_member(author: discord.User | discord.Member):
+    return "verified member" in [y.name.lower() for y in author.roles]
+
+
 def committee_command(function: Callable):
     @functools.wraps(function)
     async def query_api(interaction: discord.Interaction, *args, **kwargs):
@@ -68,6 +73,31 @@ def committee_command(function: Callable):
                             f"a committee command: {function.__name__}")
             return await interaction.response.send_message(
                 embed=utils.not_committee())
+        else:
+            return await function(interaction, *args, **kwargs)
+    return query_api
+
+
+def verified_member(function: Callable, ephemeral=True):
+    @functools.wraps(function)
+    async def query_api(interaction: discord.Interaction, *args, **kwargs):
+        author = interaction.user
+        if not is_member(author) and is_not_committee(author):
+            logging.warning(f"User {author} {author.id}: tried to use "
+                            f"a member command: {function.__name__}")
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="No membership!",
+                    description="We couldn't verify your membership, "
+                    "please run the `/registration` command. "
+                    "If you already bought one contact a committee member"
+                    "\nTo get a membership:"
+                    "\nBuy it from the union website: "
+                    "[linktr.ee/icrobotics](https://linktr.ee/icrobotics)",
+                    color=discord.Color.red()
+                ),
+                ephemeral=ephemeral
+            )
         else:
             return await function(interaction, *args, **kwargs)
     return query_api

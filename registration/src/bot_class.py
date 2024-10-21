@@ -19,7 +19,7 @@ from src.commands import (
     unlink_discord
 )
 from src.utils import (deregister_discord_id, error_msg,
-                       committee_command, SERVER_IP)
+                       committee_command, SERVER_IP, verified_member)
 
 
 __all__ = ["DiscordBot"]
@@ -153,6 +153,7 @@ class DiscordBot(commands.Bot):
             name="alert",
             description="Alert the bot. Purely for testing purposes"
         )  # noqa: E501
+        @verified_member
         async def alert(interaction: discord.Interaction):
             await interaction.response.send_message("""
                 Alert! <:ALERT:1033044801714671727>
@@ -161,13 +162,14 @@ class DiscordBot(commands.Bot):
         @self.tree.command(
             name="help", description="List all the Snazzy Commands we have"
         )
-        async def help_cmd(interaction):
+        async def help_cmd(interaction: discord.Interaction):
             await get_help(interaction, self.tree)
 
         @self.tree.command(
             name="stats",
             description="Get your 3D printing stats")
-        async def stats(interaction):
+        @verified_member
+        async def stats(interaction: discord.Interaction):
             await stats_card(interaction)
 
         # @self.tree.command(
@@ -188,7 +190,8 @@ class DiscordBot(commands.Bot):
             name="timelapse",
             description="Get the last timelapse for a printer"
         )
-        async def timelapse(interaction):
+        @verified_member
+        async def timelapse(interaction: discord.Interaction):
             await get_timelapse(
                 interaction,
                 printer_names=self.printer_names,
