@@ -1,5 +1,6 @@
 __all__ = ["DiscordBot"]
 
+import threading
 import logging
 import requests
 import json
@@ -86,42 +87,52 @@ class DiscordBot(commands.Bot):
             on_message_callback=self.rabbit_callback,
             auto_ack=True)
 
-    async def rabbit_callback(
+    def rabbit_callback(
             self,
             ch: pika.channel.Channel,
             method: pika.spec.Basic.Deliver,
             properties: pika.spec.BasicProperties,
             body: bytes):
         # Decode bytes sent from rabbitmq queue
-        data: str = json.loads(body)
+        data = body
         try:
             # Parse bytes to json and then to dict
             json_data = dict(json.loads(data))
+            logging.info(f"Json Data {json_data} {method.routing_key}")
             if json_data.get("state_changed", False) and json_data.get(
                     "state", "") in ("FINISHED", "IDLE", "FAILED"):
                 printer_name = str(method.routing_key).removeprefix(
                     "printer.").removesuffix(".status")
 
+                logging.info(f"Printer Name {printer_name}")
                 res = requests.delete(
                     DATABASE_URL + "/printer-notification/printer",
                     params={"printer_name": printer_name}
                 )
+                logging.info(f"res {res}, {res.text}")
 
-                if res == 200:
+                if res.status_code == 200:
+                    logging.info("ok")
                     printer_name = " ".join(
                         [p.title() for p in printer_name.split("-")])
                     users = res.json()
+
+                    logging.info(users)
                     for i in users:
                         try:
-                            user = self.get_user(int(i))
-                            dm_channel = await user.create_dm()
-                            dm_channel.send(
+                            logging.info(f"Printer Name {printer_name} {i}")
+                            async def __n():
+                                user = self.get_user(int(i))
+                                dm = await user.create_dm()
+                                await dm.send(
                                 embed=discord.Embed(
                                     title="Printer available!",
                                     description=f"Printer {printer_name} is done",  # noqa: E501
                                     color=discord.Color.blue()
+                                    )
                                 )
-                            )
+
+                            asyncio.run_coroutine_threadsafe(__n(), self.loop).result()
                         except Exception as e:
                             logging.info(f"Could send dm to user {i}: {e}")
         except json.JSONDecodeError as e:
@@ -134,7 +145,8 @@ class DiscordBot(commands.Bot):
         """
         guild = discord.utils.get(self.guilds, id=self.guild_info['GUILD'])
         logging.info(f'Connected to {guild.name}, id: {guild.id}')
-        self.channel.start_consuming()
+        t = threading.Thread(target=self.channel.start_consuming)
+        t.start()
 
     def start_loop(self):
         """
@@ -144,5 +156,5 @@ class DiscordBot(commands.Bot):
             await self.start(self.token)
             await self.close()
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(run_bot())
+        self.loop = asyncio.get_event_loop()
+        self.loop.run_until_complete(run_bot())
