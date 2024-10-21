@@ -56,6 +56,11 @@ spec:
             mountPath: /app/settings.json
             subPath: settings.json
             readOnly: true
+          - name: rabbitmq-config
+            mountPath: /app/rabbitmq.json
+            subPath: rabbitmq.json
+            readOnly: true
+
 
       volumes:
         - name: discord-bot-secret
@@ -64,3 +69,9 @@ spec:
             items:
               - key: discord_settings
                 path: settings.json
+        - name: rabbitmq-config
+          secret:
+            secretName: rabbitmq-secret
+            items:
+              - key: printer_rabbitmq.json
+                path: rabbitmq.json
