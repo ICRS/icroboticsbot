@@ -83,7 +83,7 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="unlink-card",
-            description="ADMIN ONLY: Unlink a members card by the card uid"
+            description="**ADMIN ONLY**: Unlink a members card by the card uid"
         )
         async def unlink_card_cmd(
                 interaction: discord.Interaction, uid: str):
@@ -91,7 +91,7 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="unlink-discord",
-            description="ADMIN ONLY: Unlink discord to shortcode mapping"
+            description="**ADMIN ONLY**: Unlink discord to shortcode mapping"
         )
         async def unlink_discord_(
                 interaction: discord.Interaction, shortcode: str,):
@@ -99,7 +99,7 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="link-card",
-            description="ADMIN ONLY: Link a members card to their shortcode"
+            description="**ADMIN ONLY**: Link a members card to their shortcode"  # noqa: E501
         )
         async def link_card_cmd(
                 interaction: discord.Interaction, shortcode: str, uid: str):
@@ -107,7 +107,7 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="whois",
-            description="ADMIN ONLY: check info of a shortcode/discord member",
+            description="**ADMIN ONLY**: check info of a shortcode/discord member",  # noqa: E501
         )
         @committee_command
         async def whois_cmd(interaction: discord.Interaction,
@@ -126,7 +126,7 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="induct",
-            description="ADMIN ONLY: induct member",
+            description="**ADMIN ONLY**: induct member",
         )
         async def induct_user(
                 interaction: discord.Interaction,
