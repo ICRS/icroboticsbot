@@ -8,7 +8,6 @@ import logging
 import src.utils as utils
 
 
-@utils.committee_command
 async def whois(interaction: discord.Interaction, *,
                 user: str | discord.User | discord.Member):
     logging.info(f"Whois User: {user}")

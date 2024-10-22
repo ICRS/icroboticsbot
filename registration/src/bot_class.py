@@ -19,7 +19,8 @@ from src.commands import (
     unlink_discord
 )
 from src.utils import (deregister_discord_id, error_msg,
-                       committee_command, SERVER_IP, verified_member)
+                       committee_command, SERVER_IP, verified_member,
+                       validate_shortcode)
 
 
 __all__ = ["DiscordBot"]
@@ -111,18 +112,25 @@ class DiscordBot(commands.Bot):
         )
         @committee_command
         async def whois_cmd(interaction: discord.Interaction,
-                            user: discord.User | discord.Member | None = None,
-                            shortcode: str | None = None):
-            if user is not None:
-                return await whois(interaction, user=user)
-            elif shortcode is not None:
-                return await whois(interaction, user=shortcode)
+                            user: str):
+            user = user.strip()
+            if user.startswith("<@") and user.endswith(">"):
+                user_id = user[2:-1]
+                if user_id.isnumeric():
+                    user = self.get_user(int(user_id))
+                    return await whois(interaction, user=user)
+                else:
+                    return await interaction.response.send_message(
+                        embed=error_msg(
+                            "Bad input into whois command for discord user",
+                            "Whois input Error"),
+                        ephemeral=True
+                    )
             else:
-                return await interaction.response.send_message(
-                    embed=error_msg("No user or shortcode provided",
-                                    "Whois no inputs!"),
-                    ephemeral=True
-                )
+                @validate_shortcode
+                async def whois_shortcode(interaction, *, shortcode: str):
+                    return await whois(interaction, user=shortcode)
+                return await whois_shortcode(interaction, shortcode=user)
 
         @self.tree.command(
             name="induct",
