@@ -10,9 +10,9 @@ import requests
 
 from src.commands.quiz import DATABASE_ADAPTER_IP, launch_quiz
 from src.utils.induction_utils import (
-    State,
     hasPaidForMembership,
-    validatePreviousShortcode)
+    mapping_state_msg,
+    validate_mapping_state)
 import src.utils as utils
 
 
@@ -38,14 +38,16 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
             return await interaction.response.send_message(
                 embed=utils.not_on_guild_msg(), ephemeral=True)
 
-        shortcodeState = validatePreviousShortcode(
-            member.id,
-            shortcode,
-            active=True)
+        discord_id = str(member.id)
+        mapping_state = validate_mapping_state(
+            discord_id=discord_id,
+            shortcode=shortcode)
 
-        if shortcodeState == State.VALID:
+        mapping_state_embed = mapping_state_msg(mapping_state)
+        if mapping_state_embed is not None:
             return await interaction.response.send_message(
-                embed=utils.different_link(), ephemeral=True)
+                embed=mapping_state_embed
+            )
 
         if is_inducted(shortcode):
             return await interaction.response.send_message(
