@@ -15,8 +15,8 @@ async def induct_member(
         interaction: discord.Interaction,
         *,
         shortcode: str,
-        member: discord.Member, bypass: bool = False):
-    logging.info(f"trying to manually induct: {member.name}")
+        discord_member: discord.Member, bypass: bool = False):
+    logging.info(f"trying to manually induct: {discord_member.name}")
 
     await interaction.response.send_message(
         embed=discord.Embed(
@@ -31,7 +31,7 @@ async def induct_member(
         membershipPaid = hasPaidForMembership(shortcode)
         if membershipPaid.status_code != 200:
             logging.warning(
-                f"Union Member Failed: {member} - "
+                f"Union Member Failed: {discord_member} - "
                 f"{shortcode}; {membershipPaid.status_code}, "
                 f"{membershipPaid.reason}")
             return await message.edit(
@@ -51,4 +51,4 @@ async def induct_member(
                 )
             )
 
-    await fullInduction(interaction, shortcode, member)
+    await fullInduction(interaction, shortcode, discord_member)
