@@ -47,7 +47,7 @@ async def fullInduction(
             "discord_id": member_id
         })
 
-    if (linkDiscordWorked.status_code != 200):
+    if linkDiscordWorked.status_code not in (200, 304):
         logging.warning(f"Link discord failed:- "
                         f"{shortcode}; {linkDiscordWorked.status_code}, {linkDiscordWorked.reason}")  # noqa: E501
         await message.edit(
