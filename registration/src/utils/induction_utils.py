@@ -2,7 +2,7 @@ from enum import Enum
 import logging
 import discord
 import requests
-from src.utils.api import BASIC_AUTH, SERVER_IP
+from src.utils.api import SERVER_IP
 import src.utils as utils
 
 
@@ -10,6 +10,15 @@ SUCCESS_MSG = (
     "If this is your first year in ICRS please\n"
     "**Register your card in person** for 3D printing access!\n\n"
     "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)")  # noqa: E501
+
+
+class State(str, Enum):
+    VALID = "valid"
+    INVALID_STATE = "invalid state"
+    NOT_FOUND = "not found"
+    SERVER_ERROR = "server error"
+    DISCORD_MISMATCH = "discord mismatch"
+    SHORTCODE_MISMATCH = "shortcode mismatch"
 
 
 async def fullInduction(
@@ -20,7 +29,35 @@ async def fullInduction(
     message = await interaction.original_response()
     shortcode = shortcode.strip().lower()
 
-    if not await linkDiscordUser(shortcode, member_id, message):
+    mapping_state = validate_mapping_state(
+        shortcode=shortcode, discord_id=member_id)
+    mapping_state_embed = mapping_state_msg(mapping_state=mapping_state)
+
+    if mapping_state_embed is not None:
+        await message.edit(
+            embed=mapping_state_embed,
+            view=None
+        )
+        return False
+
+    linkDiscordWorked = requests.post(
+        SERVER_IP + "/discord-id/register",
+        params={
+            "shortcode": shortcode,
+            "discord_id": member_id
+        })
+
+    if (linkDiscordWorked.status_code != 200):
+        logging.warning(f"Link discord failed:- "
+                        f"{shortcode}; {linkDiscordWorked.status_code}, {linkDiscordWorked.reason}")  # noqa: E501
+        await message.edit(
+            embed=discord.Embed(
+                title="You passed, but we had a tech issue",
+                description=f"Link discord API Error: {linkDiscordWorked.status_code} - {linkDiscordWorked.reason}",  # noqa: E501
+                color=discord.Color.red()
+            ),
+            view=None
+        )
         return False
 
     inductMemberWorked = inductMember(member_id)
@@ -68,52 +105,56 @@ async def fullInduction(
     return True
 
 
-async def linkDiscordUser(
-        shortcode: str,
-        member_id: str,
-        message: discord.Message):
-    logging.info(f"trying to link discord Member: {member_id} - {shortcode}")
-
-    isShortValidState = validatePreviousShortcode(member_id, shortcode)
-
-    if (isShortValidState == State.NOT_FOUND):
-        linkDiscordWorked = requests.post(
-            SERVER_IP + "/discord-id/register",
-            params={
-                "shortcode": shortcode,
-                "discord_id": member_id
-            })
-
-        if (linkDiscordWorked.status_code != 200):
-            logging.warning(f"Link discord failed:- "
-                            f"{shortcode}; {linkDiscordWorked.status_code}, {linkDiscordWorked.reason}")  # noqa: E501
-            await message.edit(
-                embed=discord.Embed(
-                    title="You passed, but we had a tech issue",
-                    description=f"Link discord API Error: {linkDiscordWorked.status_code} - {linkDiscordWorked.reason}",  # noqa: E501
-                    color=discord.Color.red()
-                ),
-                view=None
-            )
-            return False
-        return True
-
-    if (isShortValidState == State.VALID):
-        return True
-
-    await message.edit(
-            embed=utils.different_link(),
-            view=None
+def mapping_state_msg(mapping_state: State):
+    embed = None
+    if mapping_state is State.SERVER_ERROR:
+        embed = discord.Embed(
+            title="Server Error - Registration",
+            description="Something bad happened on the server! " +
+            "Please try again in a little while ...",
+            color=discord.Color.red()
         )
-    return False
+    elif mapping_state is State.SHORTCODE_MISMATCH:
+        embed = discord.Embed(
+            title="Registration Warning",
+            description=(
+                "This is sus. "
+                "Please check that the shortcode you've provided "
+                "is yours. If this is your shortcode, "
+                "please message <@Committee> for assistance!"),
+            color=discord.Color.dark_red()
+        )
+    elif mapping_state is State.DISCORD_MISMATCH:
+        embed = discord.Embed(
+            title="Registration Warning",
+            description=(
+                "Looks like you're trying to register a shortcode "
+                "that has registered before with a different "
+                "discord account."
+                "Please message <@Committee> for assistance!"),
+            color=discord.Color.dark_red()
+        )
+    elif mapping_state is State.INVALID_STATE:
+        logging.warning("Something very bad has happened - "
+                        "duplicate rows in the mappings table!!")
+        embed = discord.Embed(
+            title="Registration Error State",
+            description=(
+                "If you are seeing this, something horrendous has "
+                "happened. "
+                "Please message <@Committee> ASAP!"),
+            color=discord.Color.red()
+        )
+
+    return embed
 
 
 def inductMember(member_id: str):
     logging.info(f"trying to induct Member: {member_id}")
 
     return requests.post(
-                SERVER_IP + "/induction/induct/discord-id",
-                params={"id": member_id})
+        SERVER_IP + "/induction/induct/discord-id",
+        params={"id": member_id})
 
 
 async def addRoletoUser(
@@ -132,52 +173,43 @@ def hasPaidForMembership(shortcode: str):
     logging.info(f"trying to check union: {shortcode}")
 
     return requests.get(
-                SERVER_IP + "/member",
-                params={"shortcode": shortcode})
+        SERVER_IP + "/member",
+        params={"shortcode": shortcode})
 
 
-class State(str, Enum):
-    VALID = "valid"
-    INVALID = "invalid"
-    NOT_FOUND = "not found"
+def validate_mapping_state(
+    discord_id: str,
+    shortcode: str,
+):
+    res = requests.get(
+        utils.SERVER_IP + "/discord-mapping/exists",
+        params={"discord_id": discord_id,
+                "shortcode": shortcode})
 
+    if res.status_code != 200:
+        logging.error("Discord mapping exists api threw some error! " +
+                      res.reason)
+        return State.SERVER_ERROR
 
-def validatePreviousShortcode(member_id: str,
-                              shortcode: str,
-                              active: bool = False):
-    # default not found if it makes it through the checks
-    preShortcode = requests.get(
-            url=SERVER_IP + "/discord-id/shortcode",
-            params={
-                "id": member_id,
-                "active": active
-            },
-            auth=BASIC_AUTH)
+    res = res.json()
 
-    didPreShortcodeWork = preShortcode.status_code == 200 and preShortcode.json() and preShortcode.json()["shortcode"]  # noqa: E501
+    if not res:
+        return State.NOT_FOUND
+    elif len(res) == 1:
+        r = res[0]
+        existing_id = r.get("discord_id", "")
+        existing_shortcode = r.get("shortcode", "")
+        # active = r.get("active", 0)
 
-    # check if previous shortcode is exists
-    if didPreShortcodeWork:
-        logging.info(f"Previous shortcode: {preShortcode.json()}")
-        if preShortcode.json()["shortcode"] == shortcode:
-            return State.VALID
+        if existing_id != discord_id:
+            return State.DISCORD_MISMATCH
+        elif existing_shortcode != shortcode:
+            return State.SHORTCODE_MISMATCH
         else:
-            return State.INVALID
-
-    # check if previous discord
-    preDiscord = requests.get(
-            url=SERVER_IP + "/shortcode/discord-id",
-            params={
-                "shortcode": shortcode,
-            },
-            auth=BASIC_AUTH)
-
-    didPreDiscordWork = preDiscord.status_code == 200 and preDiscord.json() and preDiscord.json()["discord_id"]  # noqa: E501
-    if didPreDiscordWork:
-        logging.info(f"Previous discord: {preDiscord.json()}")
-        if preDiscord.json()["discord_id"] == member_id:
             return State.VALID
-        else:
-            return State.INVALID
-
-    return State.NOT_FOUND
+    elif len(res) == 2:
+        return State.DISCORD_MISMATCH
+    else:
+        logging.warning("Something very bad has happened - "
+                        "duplicate rows in the mappings table!!")
+        return State.INVALID_STATE
