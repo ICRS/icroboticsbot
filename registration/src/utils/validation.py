@@ -116,7 +116,7 @@ def validate_card_uid(function: Callable):
             return await interaction.response.send_message(
                 embed=utils.invalid_UID(), ephemeral=True)
         else:
-            uid = utils.format_uid(uid)
+            uid = utils.format_uid(uid).upper()
             kwargs["uid"] = uid
             return await function(interaction, *args, **kwargs)
     return wrap
@@ -135,5 +135,6 @@ def validate_shortcode(function: Callable):
             return await interaction.response.send_message(
                 embed=utils.invalid_shortcode(), ephemeral=True)
         else:
+            kwargs[name] = shortcode.lower()
             return await function(interaction, *args, **kwargs)
     return wrap

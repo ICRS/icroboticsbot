@@ -25,8 +25,6 @@ async def link_card(interaction: discord.Interaction, *,
         uid of the user's card
     """
     try:
-        uid = utils.format_uid(uid)
-
         result = utils.add_card_to_member(
             shortcode, uid)
 
