@@ -14,8 +14,21 @@ services:
     develop:
       watch:
         - action: rebuild
-          path: ./src
+          path: ./
           target: /app
+    env_file:
+      - .env
+    volumes:
+      - ./rabbitmq.json:/app/rabbitmq.json
+      - ./settings.json:/app/settings.json
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: "rabbitmq"
+    ports:
+      - 37000:5672
+      - 37001:15672
+
 
 
 # The commented out section below is an example of how to define a PostgreSQL
