@@ -14,6 +14,7 @@ from faststream import FastStream, Path
 from faststream.rabbit import (RabbitBroker, RabbitExchange,
                                ExchangeType, RabbitQueue)
 from faststream.security import SASLPlaintext
+from pydantic import BaseModel, Field
 import requests
 
 # =============================================================================
@@ -82,20 +83,26 @@ logging.basicConfig(
 exch = RabbitExchange(RABBITMQ_EXCHANGE,
                       auto_delete=True, type=ExchangeType.TOPIC)
 queue_1 = RabbitQueue("", auto_delete=True,
-                      routing_key="printer.*.status",)
+                      routing_key="printer.{printer}.status",)
+
+
+class PrinterStatus(BaseModel):
+    state: str = Field("UNKNOWN")
+    running: bool = Field(False)
+    state_changed: bool = Field(False)
 
 
 @broker.subscriber(queue_1, exch)
-async def base(body, level: str = Path(),):
+async def base(
+    body: PrinterStatus,
+    printer: str = Path()
+):
     try:
-        # Parse bytes to json and then to dict
-        print(body, level)
-        json_data = dict(json.loads(body))
-        logging.info(f"Json Data {json_data} {level}")
-        if json_data.get("state_changed", False) and json_data.get(
-                "state", "") in ("FINISHED", "IDLE", "FAILED"):
-            printer_name = level.removeprefix(
-                "printer.").removesuffix(".status")
+        logging.info(f"Json Data {body}, ")
+        if body.state_changed and body.state in (
+                "FINISH", "IDLE", "FAILED"):
+            printer_name = printer.removeprefix("printer.").removesuffix(
+                ".status")
 
             logging.info(f"Printer Name {printer_name}")
             res = requests.delete(
@@ -119,7 +126,7 @@ async def base(body, level: str = Path(),):
                         await dm.send(
                             embed=discord.Embed(
                                 title="Printer available!",
-                                description=f"Printer {printer_name} is now"
+                                description=f"Printer {printer_name} is now "
                                 "free",
                                 color=discord.Color.blue()
                             )
