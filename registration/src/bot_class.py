@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord import app_commands
 import requests
 
+from src.commands.printer_commands import printer_buttons
 from src.commands import (
     get_help,
     link_card,
@@ -180,12 +181,14 @@ class DiscordBot(commands.Bot):
         async def stats(interaction: discord.Interaction):
             await stats_card(interaction)
 
-        # @self.tree.command(
-        #     name="printers",
-        #     description="List and interact with all the printers"
-        # )  # noqa
-        # async def printers_cmd(interaction):
-        #     await printer_buttons(self, interaction)
+        @self.tree.command(
+            name="printers-notification",
+            description="List and interact with all the printers"
+        )  # noqa
+        @verified_member
+        async def printers_cmd(interaction):
+            await printer_buttons(
+                interaction, printer_names=self.printer_names)
 
         # @self.tree.command(
         #     name="bounds",
