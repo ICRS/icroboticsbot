@@ -20,6 +20,7 @@ import requests
 # =============================================================================
 # RabbitMQ Settings
 # =============================================================================
+
 rabbitmq_settings = json.load(open("rabbitmq.json", "r", encoding="utf-8"))
 RABBITMQ_EXCHANGE = rabbitmq_settings["EXCHANGE_NAME"]
 
@@ -27,9 +28,17 @@ RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
 RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", 5672))
 RABBITMQ_USERNAME = os.getenv("RABBITMQ_USERNAME")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD")
+
 # =============================================================================
 
 DATABASE_URL = os.getenv("DATABASE_ADAPTER_ENDPOINT", "localhost")
+
+settings = json.load(open("settings.json",
+                          "r", encoding="utf-8"))
+
+# =============================================================================
+# FASTSTREAM RABBITMQ SETUP
+# =============================================================================
 
 cred = SASLPlaintext(
     username=RABBITMQ_USERNAME,
@@ -38,9 +47,10 @@ cred = SASLPlaintext(
 broker = RabbitBroker(host=RABBITMQ_HOST, port=RABBITMQ_PORT, security=cred)
 app = FastStream(broker, )
 
-settings = json.load(open("settings.json",
-                          "r", encoding="utf-8"))
 
+# =============================================================================
+# DISCORD SETUP STUFF
+# =============================================================================
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = int(settings['DISCORD_GUILD_ID'])
 ADMIN_ID = int(settings['ADMIN_ID'])
@@ -70,6 +80,7 @@ async def on_ready():
     # asyncio.create_task(start)
     asyncio.create_task(app.run())
 
+# =============================================================================
 
 logging.basicConfig(
     level=logging.INFO,
@@ -80,6 +91,8 @@ logging.basicConfig(
     ]
 )
 
+
+# RABBIT EXCHANGE STUFF
 exch = RabbitExchange(RABBITMQ_EXCHANGE,
                       auto_delete=True, type=ExchangeType.TOPIC)
 queue_1 = RabbitQueue("", auto_delete=True,
@@ -139,6 +152,7 @@ async def base(
         return
 
 
+# Startup Scripts
 async def start():
     await bot.start(TOKEN)
 
