@@ -8,7 +8,9 @@ __all__ = [
 import os
 import discord
 from discord.ui import View, Button
+import requests
 
+from src.commands.quiz import DATABASE_ADAPTER_IP
 import src.utils as utils
 
 
@@ -19,9 +21,9 @@ if DEBUG:
 
 
 class PrinterButton(Button):
-    def __init__(self, printer: utils.PrinterListener, **kwargs):
+    def __init__(self, printer_name: str, **kwargs):
         super().__init__(**kwargs)
-        self.printer = printer
+        self.printer = printer_name
 
     async def callback(self, interaction: discord.Interaction):
         """
@@ -34,7 +36,7 @@ class PrinterButton(Button):
         """
         self.disabled = True  # Disable the button after being clicked
         message_embed = discord.Embed(
-            title=f"Printer selected: {self.printer.printer_name}",
+            title=f"Printer selected: {self.printer}",
             description="Choose an action",
             color=discord.Color.green())
 
@@ -51,11 +53,11 @@ class PrinterButton(Button):
 
 
 class PrinterCommandPage(View):
-    def __init__(self, *, timeout=180,
-                 printer: utils.PrinterListener):
-
+    def __init__(self, *,
+                 timeout=180,
+                 printer: str):
         super().__init__(timeout=timeout)
-        self.printer: utils.PrinterListener = printer
+        self.printer = printer
 
     @discord.ui.button(label="Notify", style=discord.ButtonStyle.green)
     async def notify(self, interaction: discord.Interaction,
@@ -71,25 +73,37 @@ class PrinterCommandPage(View):
             Discord button
         """
         button.style = discord.ButtonStyle.gray
-        self.printer.add_user(interaction.user, utils.Command.NOTIFY)
-        await interaction.response.edit_message(
-            content="All set!",
-            view=None,
-            embed=None,
-            delete_after=5)
+        result = requests.post(
+            DATABASE_ADAPTER_IP + "/printer-notification/discord-id",
+            params={
+                "discord_id": interaction.user.id,
+            },
+            json=[self.printer],)
+        if result.status_code == 200:
+            return await interaction.response.edit_message(
+                content="All set!",
+                view=None,
+                embed=None,
+                delete_after=5)
+        else:
+            return await interaction.response.edit_message(
+                content="Something bad happened!",
+                view=None,
+                embed=None,
+                delete_after=5)
 
 
 class PrintersMainPage(View):
-    def __init__(self, *, timeout=180,
-                 printer_farm: utils.PrinterFarm = utils.PrinterFarm()):
+    def __init__(self, *, printer_names: list[str], timeout=180,):
         super().__init__(timeout=timeout)
-        for name, listener in printer_farm.printers.items():
-            self.add_item(PrinterButton(printer=listener,
+        for name in printer_names:
+            self.add_item(PrinterButton(printer_name=name,
                                         label=name,
                                         style=discord.ButtonStyle.green))
 
 
-async def printer_buttons(bot, interaction: discord.Interaction):
+async def printer_buttons(
+        interaction: discord.Interaction, printer_names: list[str]):
     """
     printer_buttons sends a message with buttons to the user
 
@@ -100,18 +114,13 @@ async def printer_buttons(bot, interaction: discord.Interaction):
     interaction : Discord.interaction
         Discord interaction
     """
-    printer_farm: utils.PrinterFarm = bot.printer_farm
-
     message_embed = discord.Embed(
         title="Select a printer",
-        description="",
+        description=("Select a printer, you will be notified once this "
+                     "printer finishes"),
         color=discord.Color.green())
-    for name, listener in printer_farm.printers.items():
-        message_embed.add_field(
-            name=name,
-            value=f"Status: {listener.get_state()}",
-            inline=False)
+
     await interaction.response.send_message(embed=message_embed,
                                             view=PrintersMainPage(
-                                                printer_farm=printer_farm),
+                                                printer_names=printer_names),
                                             ephemeral=True)
