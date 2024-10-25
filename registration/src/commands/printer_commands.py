@@ -21,17 +21,23 @@ class PrinterNotificationView(View):
             self,
             *,
             printer_names: list[str],
+            subscribed_printers: list[str],
             timeout: float | None = None,
     ):
         super().__init__(timeout=timeout)
-        self.add_item(PrinterNotificationSelect(printer_names=printer_names))
+
+        p = set(printer_names)
+        sp = set(subscribed_printers)
+        p = p - sp
+        if p:
+            self.add_item(PrinterNotificationSelect(printer_names=p))
 
 
 class PrinterNotificationSelect(Select):
     def __init__(
             self,
             *,
-            printer_names: list[str],
+            printer_names: set[str] | list[str],
             **kwargs):
         super().__init__(
             min_values=1,
@@ -80,13 +86,34 @@ async def printer_buttons(
     interaction : Discord.interaction
         Discord interaction
     """
+
+    subscribed_printers: list[str] = []
+    result = requests.get(
+        DATABASE_ADAPTER_IP + "/printer-notification/discord-id",
+        params={
+            "discord_id": interaction.user.id,
+        },
+    )
+    if result.status_code == 200:
+        subscribed_printers = result.json()
+
+    message = ("Select a printer, you will be notified once this "
+               "printer finishes.\n")
+    if subscribed_printers:
+        message += ("\nYou are already subscribed to the following printers:\n"
+                    + (
+                        "\n".join(" * " + " ".join(
+                            c.title() for c in s.split("-")
+                        ) for s in subscribed_printers)
+                    ))
     message_embed = discord.Embed(
         title="Select a printer",
-        description=("Select a printer, you will be notified once this "
-                     "printer finishes"),
+        description=message,
         color=discord.Color.green())
-
-    await interaction.response.send_message(embed=message_embed,
-                                            view=PrinterNotificationView(
-                                                printer_names=printer_names),
-                                            ephemeral=True,)
+    await interaction.response.send_message(
+        embed=message_embed,
+        view=PrinterNotificationView(
+            printer_names=printer_names,
+            subscribed_printers=subscribed_printers),
+        ephemeral=True,
+        delete_after=180)
