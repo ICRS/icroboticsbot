@@ -94,7 +94,7 @@ logging.basicConfig(
 
 # RABBIT EXCHANGE STUFF
 exch = RabbitExchange(RABBITMQ_EXCHANGE,
-                      auto_delete=True, type=ExchangeType.TOPIC)
+                      type=ExchangeType.TOPIC)
 queue_1 = RabbitQueue("", auto_delete=True,
                       routing_key="printer.{printer}.status",)
 
