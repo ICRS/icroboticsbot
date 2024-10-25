@@ -183,7 +183,7 @@ class DiscordBot(commands.Bot):
 
         @self.tree.command(
             name="printers-notification",
-            description="List and interact with all the printers"
+            description="Get a notification of when a printer is free"
         )  # noqa
         @verified_member
         async def printers_cmd(interaction):
