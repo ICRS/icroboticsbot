@@ -1,7 +1,5 @@
 __all__ = [
     "PrinterButton",
-    "PrinterCommandPage",
-    "PrintersMainPage",
     "printer_buttons"
 ]
 
@@ -102,6 +100,58 @@ class PrintersMainPage(View):
                                         style=discord.ButtonStyle.green))
 
 
+class PrinterNotificationView(discord.ui.View):
+    def __init__(
+            self,
+            *,
+            printer_names: list[str],
+            timeout: float | None = None,
+    ):
+        super().__init__(timeout=timeout)
+        self.add_item(PrinterNotificationSelect(printer_names=printer_names))
+
+
+class PrinterNotificationSelect(discord.ui.Select):
+    def __init__(
+            self,
+            *,
+            printer_names: list[str],
+            **kwargs):
+        super().__init__(
+            min_values=1,
+            max_values=len(printer_names),
+            **kwargs)
+
+        for name in printer_names:
+            self.add_option(
+                label=" ".join(n.title() for n in name.split("-")),
+                value=name,
+            )
+
+    async def callback(self, interaction):
+        v = interaction.data.values().mapping
+        v = v.get("values", [])
+
+        result = requests.post(
+            DATABASE_ADAPTER_IP + "/printer-notification/discord-id",
+            params={
+                "discord_id": interaction.user.id,
+            },
+            json=v,)
+        if result.status_code == 200:
+            return await interaction.response.edit_message(
+                content="All set!",
+                view=None,
+                embed=None,
+                delete_after=5)
+        else:
+            return await interaction.response.edit_message(
+                content="Something bad happened!",
+                view=None,
+                embed=None,
+                delete_after=5)
+
+
 async def printer_buttons(
         interaction: discord.Interaction, printer_names: list[str]):
     """
@@ -121,6 +171,6 @@ async def printer_buttons(
         color=discord.Color.green())
 
     await interaction.response.send_message(embed=message_embed,
-                                            view=PrintersMainPage(
+                                            view=PrinterNotificationView(
                                                 printer_names=printer_names),
-                                            ephemeral=True)
+                                            ephemeral=True,)
