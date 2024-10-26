@@ -40,21 +40,21 @@ class PrinterNotificationView(View):
             ))
 
         if add:
-            self.add_item(PrinterUnsubscriptionButton(
-                printer_names, subscribed_printers))
             if p:
                 self.add_item(PrinterSubscribeAllButton())
-        else:
-            self.add_item(PrinterSubscriptionButton(
+            self.add_item(PrinterUnsubscriptionButton(
                 printer_names, subscribed_printers))
+        else:
             if sp:
                 self.add_item(PrinterUnsubscribeAllButton())
+            self.add_item(PrinterSubscriptionButton(
+                printer_names, subscribed_printers))
 
 
 class PrinterSubscriptionButton(Button):
     def __init__(self, printer_names, subscribed_printers, ** kwargs):
         super().__init__(
-            style=discord.ButtonStyle.green,
+            style=discord.ButtonStyle.blurple,
             label="Switch to Subscribe",
             **kwargs)
         self.printer_names = printer_names
@@ -73,7 +73,7 @@ class PrinterSubscriptionButton(Button):
 class PrinterUnsubscriptionButton(Button):
     def __init__(self, printer_names, subscribed_printers, **kwargs):
         super().__init__(
-            style=discord.ButtonStyle.green,
+            style=discord.ButtonStyle.blurple,
             label="Switch to Unsubscribe",
             **kwargs)
         self.printer_names = printer_names
