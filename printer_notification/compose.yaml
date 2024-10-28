@@ -16,8 +16,6 @@ services:
         - action: rebuild
           path: ./
           target: /app
-    env_file:
-      - .env
     volumes:
       - ./rabbitmq.json:/app/rabbitmq.json
       - ./settings.json:/app/settings.json
