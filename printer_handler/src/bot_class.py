@@ -1,7 +1,6 @@
 import base64
 from io import BytesIO
 
-import atexit
 import logging
 from PIL import Image
 from discord_webhook import DiscordWebhook, DiscordEmbed
@@ -16,17 +15,18 @@ class PrinterWebhook:
                  printer_names: list[str],
                  printer_endpoint_suffix: str,
                  prog_length: int = 45,
-                 timeout: int = 60) -> None:
+                 timeout: int = 60,
+                 webhook_message_id: str = "",
+                 ) -> None:
         self.prog_length = prog_length
         self.webhook_url = webhook_url
         self.webhook = DiscordWebhook(url=self.webhook_url,
                                       username="Printer Bot",
-                                      id="Printer Bot", )
+                                      id=webhook_message_id, )
 
         self.__default_image = Image.open("./src/no_image.jpg")
 
         self.printer_farm = PrinterFarm(printer_names, printer_endpoint_suffix)
-        atexit.register(self.delete_message)
 
         self.executed = False
 
@@ -123,7 +123,7 @@ class PrinterWebhook:
         self.webhook.remove_embeds()
         for printer_name in self.printer_farm.get_printers():
             self.send_message(printer_name)
-        if not self.executed:
+        if not self.executed and not self.webhook.id:
             response = self.webhook.execute()
             self.executed = True
         else:
@@ -133,12 +133,6 @@ class PrinterWebhook:
             logging.error(f"Error in sending message: {response.text}")
         else:
             self.last_executed = datetime.datetime.now()
-
-    def delete_message(self) -> None:
-        """
-        Deletes the message from the discord webhook
-        """
-        self.webhook.delete()
 
     def health_check(self) -> bool:
         """
