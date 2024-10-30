@@ -28,7 +28,7 @@ PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
 
 w = PrinterWebhook(WEBHOOK_URL, PRINTER_NAMES,
                    PRINTER_GATEWAY_ENDPOINT_SUFFIX,
-                   webhook_message_id=MESSAGE_ID)
+                   )
 
 
 @app.get("/healthz", status_code=200)
