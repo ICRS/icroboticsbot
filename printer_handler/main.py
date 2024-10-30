@@ -20,7 +20,6 @@ logging.basicConfig(
 
 
 WEBHOOK_URL = str(os.getenv("WEBHOOK_URL")).strip()
-MESSAGE_ID = str(os.getenv("MESSAGE_ID")).strip()
 settings = json.load(open("settings.json", "r", encoding="utf-8"))
 PRINTER_NAMES = list(settings["PRINTER_NAMES"])
 PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
