@@ -1,14 +1,18 @@
 import base64
 from io import BytesIO
+import os
 
-import atexit
 import logging
 from PIL import Image
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from bambulabs_api import GcodeState
+import requests
 
 from src.printer_farm import PrinterFarm
 import datetime
+
+DATABASE_ADAPTER_ENDPOINT = os.getenv("DATABASE_ADAPTER_ENDPOINT",
+                                      "http://database_adapter:8000")
 
 
 class PrinterWebhook:
@@ -16,19 +20,27 @@ class PrinterWebhook:
                  printer_names: list[str],
                  printer_endpoint_suffix: str,
                  prog_length: int = 45,
-                 timeout: int = 60) -> None:
+                 timeout: int = 60,
+                 ) -> None:
         self.prog_length = prog_length
         self.webhook_url = webhook_url
-        self.webhook = DiscordWebhook(url=self.webhook_url,
-                                      username="Printer Bot",
-                                      id="Printer Bot", )
+        result = requests.get(
+            DATABASE_ADAPTER_ENDPOINT + "/printer-streamer/message-id/latest")
+
+        if result.status_code == 200:
+            self.executed = True
+            self.webhook = DiscordWebhook(url=self.webhook_url,
+                                          username="Printer Bot",
+                                          id=result.json(), )
+        else:
+            self.executed = False
+            self.webhook = DiscordWebhook(url=self.webhook_url,
+                                          username="Printer Bot",
+                                          )
 
         self.__default_image = Image.open("./src/no_image.jpg")
 
         self.printer_farm = PrinterFarm(printer_names, printer_endpoint_suffix)
-        atexit.register(self.delete_message)
-
-        self.executed = False
 
         # Health check
         self.timeout = timeout
@@ -125,6 +137,11 @@ class PrinterWebhook:
             self.send_message(printer_name)
         if not self.executed:
             response = self.webhook.execute()
+            id = self.webhook.id
+            if id:
+                requests.post(
+                    DATABASE_ADAPTER_ENDPOINT + "/printer-streamer/message-id",
+                    params={"message_id": id})
             self.executed = True
         else:
             response = self.webhook.edit()
@@ -133,12 +150,6 @@ class PrinterWebhook:
             logging.error(f"Error in sending message: {response.text}")
         else:
             self.last_executed = datetime.datetime.now()
-
-    def delete_message(self) -> None:
-        """
-        Deletes the message from the discord webhook
-        """
-        self.webhook.delete()
 
     def health_check(self) -> bool:
         """

@@ -26,6 +26,11 @@ spec:
             secretKeyRef:
               name: discord-bot-secret
               key: printer_status_channel_webhook
+        - name: DATABASE_ADAPTER_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: endpoint-url
         volumeMounts:
         - name: printer-config
           mountPath: /app/settings.json
