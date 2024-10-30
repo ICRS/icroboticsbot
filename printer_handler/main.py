@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import signal
 import threading
 import time
 import uvicorn
@@ -27,10 +26,8 @@ PRINTER_GATEWAY_ENDPOINT_SUFFIX = settings["PRINTER_GATEWAY_ENDPOINT_SUFFIX"]
 
 
 w = PrinterWebhook(WEBHOOK_URL, PRINTER_NAMES,
-                   PRINTER_GATEWAY_ENDPOINT_SUFFIX)
-
-signal.signal(signal.SIGINT, w.delete_message)
-signal.signal(signal.SIGTERM, w.delete_message)
+                   PRINTER_GATEWAY_ENDPOINT_SUFFIX,
+                   )
 
 
 @app.get("/healthz", status_code=200)
