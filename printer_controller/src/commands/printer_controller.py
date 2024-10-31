@@ -134,11 +134,10 @@ class PrinterController:
                     description="Your print has finished!",
                     color=Color.blurple(),
                 )
-                video = await self.printer_controller_interface.get_timelapse()
-                file = discord.File(video, filename="timelapse.webm")
-                self.message.edit(
+                file = await self.printer_controller_interface.get_timelapse()
+                await self.message.edit(
                     embed=embed,
-                    attachments=[file] if file else [],
+                    attachments=[discord.File(file, filename="timelapse.webm")] if file else [],
                     view=None,
                 )
                 self.message = None
