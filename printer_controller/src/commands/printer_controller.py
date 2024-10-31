@@ -97,8 +97,8 @@ class PrinterController:
             percentage = self.printer_controller_interface.get_percentage()
 
             embed_msg = f"Printer: {self.printer_state.value}\n\n"
-            embed_msg += f"  * Time remaining: {remaining_time}\n"
-            embed_msg += f"  * Percentage: {percentage} %\n"
+            embed_msg += f"* Time remaining: {remaining_time}\n"
+            embed_msg += f"* Percentage: {percentage} %\n"
 
             embed = Embed(
                 title=f"Printer {self.printer_name}",
