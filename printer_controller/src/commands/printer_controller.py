@@ -135,9 +135,11 @@ class PrinterController:
                     color=Color.blurple(),
                 )
                 file = await self.printer_controller_interface.get_timelapse()
+                f = [discord.File(file, filename="timelapse.webm")] if file is not None else []
+                logging.info(file, f)
                 await self.message.edit(
                     embed=embed,
-                    attachments=[discord.File(file, filename="timelapse.webm")] if file else [],
+                    attachments=f,
                     view=None,
                 )
                 self.message = None
