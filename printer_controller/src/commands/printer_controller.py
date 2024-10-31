@@ -4,12 +4,14 @@ __all__ = ["PrinterController"]
 import asyncio
 import base64
 from io import BytesIO
+import io
 import logging
 from threading import Thread
 from PIL import Image
 import aiohttp
 from discord import (ButtonStyle, DMChannel, File, HTTPException,
                      Interaction, Embed, Color, Message, User)
+import discord
 from discord.ext.commands import Bot
 from discord.ui import View, Button
 from bambulabs_api import GcodeState
@@ -117,14 +119,28 @@ class PrinterController:
                 else:
                     await self.message.edit(
                         embed=embed,
-                        attachments=[image_file]
+                        attachments=[image_file],
+                        view=PrinterControllerMainPage(
+                            self.printer_controller_interface
+                        ),
                     )
             except HTTPException as httpEx:
                 logging.warning(f"Discord Api Failed to send msg: {httpEx}")
 
         else:
             if self.message is not None:
-                await self.message.delete()
+                embed = Embed(
+                    title=f"Printer {self.printer_name}",
+                    description="Your print has finished!",
+                    color=Color.blurple(),
+                )
+                video = await self.printer_controller_interface.get_timelapse()
+                file = discord.File(video, filename="timelapse.webm")
+                self.message.edit(
+                    embed=embed,
+                    attachments=[file] if file else [],
+                    view=None,
+                )
                 self.message = None
             if self.dm_channel is not None:
                 self.dm_channel = None
@@ -150,6 +166,10 @@ class PrinterControllerInterface:
     def __init__(self, printer_name: str, printer_suffix: str) -> None:
         self.printer_name = printer_name
         self.printer_url = f"http://{printer_name}{printer_suffix}"
+        self.timelapse = False
+
+    def toggle_timelapse(self):
+        self.timelapse = not self.timelapse
 
     def pause_print(self):
         return self.query_printer("/pause")
@@ -165,6 +185,24 @@ class PrinterControllerInterface:
             f"{self.printer_url}/printer/print{endpoint}")
 
         return response.status_code == 200
+
+    async def get_timelapse(self):
+        if self.timelapse:
+            return await self._timelapse()
+
+    async def _timelapse(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.printer_url) as response:
+                status_code = response.status
+                data = await response.read()
+
+        if status_code == 204:
+            msg = f"No timelapse available yet for {self.printer_name}!"
+            logging.info(msg)
+
+        elif status_code == 200:
+            data = io.BytesIO(data)
+            return data
 
     async def get_image(self):
         async with aiohttp.ClientSession() as session:
@@ -247,6 +285,13 @@ class PrinterControllerMainPage(View):
                 self.printer_controller.resume_print,
                 style=ButtonStyle.green,
                 label="Resume"
+            ))
+
+        self.add_item(
+            PrinterControlButton(
+                self.printer_controller.toggle_timelapse,
+                style=ButtonStyle.blurple,
+                label="Enable Timelapse" if not self.printer_controller.timelapse else "Disable Timelapse"
             ))
 
 
