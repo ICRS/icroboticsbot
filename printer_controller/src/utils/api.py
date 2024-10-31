@@ -75,5 +75,39 @@ def get_state(printer_url) -> GcodeState:
     return GcodeState(r.get("state", "IDLE"))
 
 
+def get_remaining_time(printer_url: str):
+    """
+    Retrieves the state of the printer.
+
+    Returns
+    -------
+    State: The state of the printer.
+    """
+    r = requests.get(
+        f"{printer_url}/printer/status/time",
+        timeout=5)
+    if r.status_code == 200:
+        r = r.json()
+        if r:
+            return r.get("time")
+
+
+def get_percentage(printer_url: str):
+    """
+    Retrieves the state of the printer.
+
+    Returns
+    -------
+    State: The state of the printer.
+    """
+    r = requests.get(
+        f"{printer_url}/printer/status/percentage",
+        timeout=5)
+    if r.status_code == 200:
+        r = r.json()
+        if r:
+            return r.get("percentage")
+
+
 if __name__ == '__main__':
     pass
