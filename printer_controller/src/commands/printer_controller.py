@@ -16,6 +16,7 @@ from bambulabs_api import GcodeState
 import requests
 
 from src.utils import get_current_user_printer, get_state
+from src.utils.api import get_percentage, get_remaining_time
 
 DEFAULT_IMAGE = Image.open("src/no_image.jpg")
 RUNNING_GCODE = (GcodeState.RUNNING, GcodeState.PAUSE)
@@ -91,9 +92,16 @@ class PrinterController:
                 fp=image, filename="image.jpeg")
             image.close()
 
+            remaining_time = self.printer_controller_interface.get_remaining_time()
+            percentage = self.printer_controller_interface.get_percentage()
+
+            embed_msg = f"Printer: {self.printer_state.value}\n\n"
+            embed_msg += f"  * Time remaining: {remaining_time}\n"
+            embed_msg += f"  * Percentage: {percentage} %\n"
+
             embed = Embed(
                 title=f"Printer {self.printer_name}",
-                description=f"Printer: {self.printer_state.value}",
+                description=embed_msg,
                 color=Color.blurple(),
             )
             embed.set_image(url="attachment://image.jpeg")
@@ -181,6 +189,12 @@ class PrinterControllerInterface:
 
     async def get_state(self):
         return get_state(self.printer_url)
+
+    def get_remaining_time(self):
+        return get_remaining_time(self.printer_url)
+
+    def get_percentage(self):
+        return get_percentage(self.printer_url)
 
 
 class PrinterControllerMainPage(View):
