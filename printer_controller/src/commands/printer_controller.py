@@ -191,7 +191,7 @@ class PrinterControllerInterface:
 
     async def _timelapse(self):
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.printer_url) as response:
+            async with session.get(self.printer_url + "/timelapse") as response:
                 status_code = response.status
                 data = await response.read()
 
