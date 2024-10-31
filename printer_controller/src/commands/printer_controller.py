@@ -15,8 +15,7 @@ from discord.ui import View, Button
 from bambulabs_api import GcodeState
 import requests
 
-from src.utils import get_current_user_printer, get_state
-from src.utils.api import get_percentage, get_remaining_time
+from src.utils import get_current_user_printer
 
 DEFAULT_IMAGE = Image.open("src/no_image.jpg")
 RUNNING_GCODE = (GcodeState.RUNNING, GcodeState.PAUSE)
@@ -73,7 +72,7 @@ class PrinterController:
                 await asyncio.sleep(self.timeout)
 
     async def control_task_iteration_(self):
-        self.printer_state = await self.printer_controller_interface.get_state()  # noqa: E501
+        self.printer_state = self.printer_controller_interface.get_state()
         logging.info(f"{self.printer_name} in state {self.printer_state}")
         if self.user and self.printer_state in RUNNING_GCODE:
             if self.dm_channel is None:
@@ -187,14 +186,36 @@ class PrinterControllerInterface:
                     bytes(frame, "utf-8")))
             return frame
 
-    async def get_state(self):
-        return get_state(self.printer_url)
+    def get_state(self):
+        response: requests.Response = requests.Response()
+        try:
+            response = requests.get(
+                f"{self.printer_url}/printer/status/state",
+                timeout=5)
+        except Exception as e:
+            logging.error(f"{self.printer_url} Error getting state: {e}")
+        if response.status_code != 200:
+            return GcodeState.UNKNOWN
+        r: dict = response.json()
+        return GcodeState(r.get("state", "IDLE"))
 
     def get_remaining_time(self):
-        return get_remaining_time(self.printer_url)
+        r = requests.get(
+            f"{self.printer_url}/printer/status/time",
+            timeout=5)
+        if r.status_code == 200:
+            r = r.json()
+            if r:
+                return r.get("time")
 
     def get_percentage(self):
-        return get_percentage(self.printer_url)
+        r = requests.get(
+            f"{self.printer_url}/printer/status/percentage",
+            timeout=5)
+        if r.status_code == 200:
+            r = r.json()
+            if r:
+                return r.get("percentage")
 
 
 class PrinterControllerMainPage(View):
