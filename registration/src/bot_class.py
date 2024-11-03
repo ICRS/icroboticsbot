@@ -169,6 +169,20 @@ class DiscordBot(commands.Bot):
                 """)
 
         @self.tree.command(
+            name="fun-fact",
+            description="Get a fun fact"
+        )  # noqa: E501
+        @verified_member
+        async def fun_fact(interaction: discord.Interaction):
+            res = requests.get("https://uselessfacts.jsph.pl/api/v2/facts/random")
+            if res.status_code != 200:
+                return await interaction.response.send_message("""
+                Couldn't find a fact for some reason :(
+                """)
+            else:
+                return await interaction.response.send_message(res.json().get("text"))
+
+        @self.tree.command(
             name="help", description="List all the Snazzy Commands we have"
         )
         async def help_cmd(interaction: discord.Interaction):
