@@ -224,8 +224,8 @@ class DiscordBot(commands.Bot):
         @verified_member
         async def order(interaction: discord.Interaction,
                         name: str, quantity: int,
-                        reason: str):
-            await order_component(interaction, name, quantity, reason)
+                        reason: str, url: str = ""):
+            await order_component(interaction, name, quantity, reason, url)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
