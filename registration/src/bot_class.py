@@ -204,13 +204,6 @@ class DiscordBot(commands.Bot):
             await printer_buttons(
                 interaction, printer_names=self.printer_names)
 
-        # @self.tree.command(
-        #     name="bounds",
-        #     description="List all the printers and the users bound to them",
-        # )  # noqa: E501
-        # async def bounds(interaction):
-        #     await printer_status(self, interaction)
-
         @self.tree.command(
             name="timelapse",
             description="Get the last timelapse for a printer"
@@ -221,6 +214,16 @@ class DiscordBot(commands.Bot):
                 interaction,
                 printer_names=self.printer_names,
                 printer_suffix=self.printer_suffix,
+            )
+
+        @self.tree.command(
+            name="order",
+            description="Order a component for the lab"
+        )
+        @verified_member
+        async def order(interaction: discord.Interaction):
+            await interaction.response.send_message(
+                "Ordering is currently disabled. Please contact the lab manager for more information."
             )
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
