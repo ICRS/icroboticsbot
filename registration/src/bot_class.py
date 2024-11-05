@@ -17,7 +17,8 @@ from src.commands import (
     whois,
     get_timelapse,
     induct_member,
-    unlink_discord
+    unlink_discord,
+    order_component,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -222,9 +223,7 @@ class DiscordBot(commands.Bot):
         )
         @verified_member
         async def order(interaction: discord.Interaction):
-            await interaction.response.send_message(
-                "Ordering is currently disabled. Please contact the lab manager for more information."
-            )
+            await order_component(interaction)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
