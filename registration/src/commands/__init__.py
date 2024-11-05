@@ -8,6 +8,7 @@ from .printer_commands import *
 from .printer_status_commands import *
 from .induct import *
 from .timelapse import *
+from .order import *
 
 __all__ = []
 __all__.extend(help.__all__)
@@ -21,3 +22,5 @@ __all__.extend(quote.__all__)
 __all__.extend(register.__all__)
 __all__.extend(stats.__all__)
 __all__.extend(whois_commands.__all__)
+
+__all__.extend(order.__all__)
