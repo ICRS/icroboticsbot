@@ -222,8 +222,10 @@ class DiscordBot(commands.Bot):
             description="Order a component for the lab"
         )
         @verified_member
-        async def order(interaction: discord.Interaction):
-            await order_component(interaction)
+        async def order(interaction: discord.Interaction,
+                        name: str, quantity: int,
+                        reason: str):
+            await order_component(interaction, name, quantity, reason)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
