@@ -1,6 +1,7 @@
 __all__ = [
     "add_card_to_member",
     "unlink_card",
+    "send_notion_order",
     "deregister_discord_id",
     "get_member_perms",
     "get_stats_from_discord",
@@ -55,6 +56,20 @@ def unlink_card(uid: str) -> requests.Response:
         params={"uuid": uid},
         auth=BASIC_AUTH
     )
+
+
+def send_notion_order(order: dict) -> requests.Response:
+    order = {
+        "Item": order["item"],
+        "Link": order["url"] if "url" in order else "",
+        "Quantity": order["qty"],
+        "Requested_by": order["user"]
+    }
+    result = requests.post(
+        SERVER_IP + "/notion/add_item",
+        json=order
+    )
+    return result == 200
 
 
 def deregister_discord_id(userid: int) -> bool:
