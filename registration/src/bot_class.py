@@ -17,7 +17,8 @@ from src.commands import (
     whois,
     get_timelapse,
     induct_member,
-    unlink_discord
+    unlink_discord,
+    order_component,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -204,13 +205,6 @@ class DiscordBot(commands.Bot):
             await printer_buttons(
                 interaction, printer_names=self.printer_names)
 
-        # @self.tree.command(
-        #     name="bounds",
-        #     description="List all the printers and the users bound to them",
-        # )  # noqa: E501
-        # async def bounds(interaction):
-        #     await printer_status(self, interaction)
-
         @self.tree.command(
             name="timelapse",
             description="Get the last timelapse for a printer"
@@ -222,6 +216,16 @@ class DiscordBot(commands.Bot):
                 printer_names=self.printer_names,
                 printer_suffix=self.printer_suffix,
             )
+
+        @self.tree.command(
+            name="order",
+            description="Order a component for the lab"
+        )
+        @verified_member
+        async def order(interaction: discord.Interaction,
+                        name: str, quantity: int,
+                        reason: str, url: str = ""):
+            await order_component(interaction, name, quantity, reason, url)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
