@@ -34,6 +34,7 @@ from bambulabs_api import GcodeState
 
 
 SERVER_IP = os.getenv("SERVER_IP")
+NOTION_IP = os.getenv("NOTION_IP")
 DATABASE_ADAPTER_USER = os.getenv("DATABASE_ADAPTER_USER")
 DATABASE_ADAPTER_PASSWORD = os.getenv("DATABASE_ADAPTER_PASSWORD")
 
@@ -66,7 +67,7 @@ def send_notion_order(order: dict) -> requests.Response:
         "Requested_by": order["user"]
     }
     result = requests.post(
-        SERVER_IP + "/notion/add_item",
+        NOTION_IP + "/notion/add_item",
         json=order
     )
     return result == 200

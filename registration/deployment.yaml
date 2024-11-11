@@ -24,13 +24,18 @@ spec:
           - name: DISCORD_TOKEN
             valueFrom:
               secretKeyRef:
-                name: discord-bot-secret 
+                name: discord-bot-secret
                 key: discord_token
           - name: SERVER_IP
             valueFrom:
               configMapKeyRef:
                 name: database-config
                 key: endpoint-url
+          - name: NOTION_IP
+            valueFrom:
+              configMapKeyRef:
+                name: database-config
+                key: notion-url
           - name: DATABASE_ADAPTER_USER
             valueFrom:
               secretKeyRef:
@@ -42,7 +47,7 @@ spec:
                 name: access-server-secret
                 key: secret
         volumeMounts:
-          - name: postgres-ini 
+          - name: postgres-ini
             mountPath: /app/postgres.ini
             subPath: postgres.ini
             readOnly: true
@@ -56,9 +61,9 @@ spec:
             readOnly: true
 
       volumes:
-        - name: postgres-ini 
+        - name: postgres-ini
           secret:
-            secretName: postgres-ini-secret 
+            secretName: postgres-ini-secret
         - name: discord-bot-secret
           secret:
             secretName: discord-bot-secret
