@@ -5,6 +5,7 @@ __all__ = [
     "reverified_msg",
     "already_inducted",
     "unlink_discord_success_msg",
+    "order_successful"
 ]
 
 import discord
@@ -66,3 +67,10 @@ def unlink_discord_success_msg(shortcode: str):
         description=(f"Successfully unlinked discord by shortcode: {shortcode}"
                      ),
         color=success_color)
+
+def order_successful():
+    embed = discord.Embed(
+        title="Request placed successfully!",
+        description="We'll keep you up to date with your requests status!",
+        color=success_color)
+    return embed

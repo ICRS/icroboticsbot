@@ -1,7 +1,8 @@
 import discord
 
 from src.utils import send_notion_order
-
+from src.utils.messages.error_messages import order_error
+from src.utils.messages.success_messages import order_successful
 
 __all__ = ["order_component"]
 
@@ -24,9 +25,11 @@ async def order_component(interaction: discord.Interaction,
 
     if res:
         await interaction.response.send_message(
-            "Order placed successfully!"
+            embed=order_successful(),
+            ephemeral=True
         )
     else:
         await interaction.response.send_message(
-            "Failed to place order. Please contact the lab manager."
+            embed=order_error(),
+            ephemeral=True
         )
