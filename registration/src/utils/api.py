@@ -70,7 +70,10 @@ def send_notion_order(order: dict) -> requests.Response:
         NOTION_IP + "/notion/add_item",
         json=order
     )
-    return result == 200
+
+    logging.info(f"Order sent to Notion: {order}")
+
+    return result.status_code == 200
 
 
 def deregister_discord_id(userid: int) -> bool:
