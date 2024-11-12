@@ -136,7 +136,7 @@ class PrinterController:
                 )
                 file = await self.printer_controller_interface.get_timelapse()
                 f = [discord.File(file, filename="timelapse.webm")] if file is not None else []
-                logging.info(file, f)
+                logging.info(f"File sending: {self.printer_name}")
                 await self.message.edit(
                     embed=embed,
                     attachments=f,
