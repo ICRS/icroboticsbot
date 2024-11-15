@@ -19,6 +19,7 @@ from src.commands import (
     induct_member,
     unlink_discord,
     order_component,
+    xkcd_meme,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -158,6 +159,14 @@ class DiscordBot(commands.Bot):
         async def quote(ctx, name: str | None = ""):
             # logging.info(f"Latency: {self.latency}")
             await quote_person(ctx, name)
+            
+        @self.tree.command(
+            name="xkcd",
+            description="Prints random xkcd meme"
+        )
+        @verified_member
+        async def xkcd(interaction: discord.Interaction):
+            await xkcd_meme(interaction)
 
         @self.tree.command(
             name="alert",
