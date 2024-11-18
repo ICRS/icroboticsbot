@@ -20,6 +20,7 @@ from src.commands import (
     unlink_discord,
     order_component,
     xkcd_meme,
+    add_note
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -110,6 +111,14 @@ class DiscordBot(commands.Bot):
             await link_card(interaction, shortcode=shortcode, uid=uid)
 
         @self.tree.command(
+            name="notes",
+            description="**ADMIN ONLY**: add notes to discord member with @user",  # noqa: E501
+        )
+        @committee_command
+        async def notes(interaction: discord.Interaction, user: discord.User, note: str):
+            await add_note(interaction, user, note)
+
+        @self.tree.command(
             name="whois",
             description="**ADMIN ONLY**: check info of a shortcode/discord member",  # noqa: E501
         )
@@ -159,7 +168,7 @@ class DiscordBot(commands.Bot):
         async def quote(ctx, name: str | None = ""):
             # logging.info(f"Latency: {self.latency}")
             await quote_person(ctx, name)
-            
+
         @self.tree.command(
             name="xkcd",
             description="Prints random xkcd meme"
@@ -184,7 +193,8 @@ class DiscordBot(commands.Bot):
         )  # noqa: E501
         @verified_member
         async def fun_fact(interaction: discord.Interaction):
-            res = requests.get("https://uselessfacts.jsph.pl/api/v2/facts/random")
+            res = requests.get(
+                "https://uselessfacts.jsph.pl/api/v2/facts/random")
             if res.status_code != 200:
                 return await interaction.response.send_message("""
                 Couldn't find a fact for some reason :(

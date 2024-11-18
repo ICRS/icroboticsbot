@@ -5,6 +5,9 @@ __all__ = [
 
 import discord
 import logging
+
+import requests
+from src.datamodels import UserNote
 import src.utils as utils
 
 
@@ -53,10 +56,10 @@ async def whois(interaction: discord.Interaction, *,
 
     stats = utils.get_stats_summary_from_shortcode(shortcode)
 
-    discord_id = f"<@{discord_id}>" if discord_id is not None else "Not on discord"  # noqa: E501
+    discord_id_ = f"<@{discord_id}>" if discord_id is not None else "Not on discord"  # noqa: E501
     embed = discord.Embed(
         title="Short code - " + shortcode,
-        description=("Discord user: " + discord_id +
+        description=("Discord user: " + discord_id_ +
                      "\nCard ID: " + str(perms.get("card_id", "Not Found")) +
                      f"\nDate Added: {perms.get('time_added', 'Not Found')}\n"
                      ),
@@ -89,6 +92,33 @@ async def whois(interaction: discord.Interaction, *,
                 f"Started At: {last_print.time_started}"
             ),
             inline=False)
+    if discord_id:
+        res = requests.get(
+            utils.SERVER_IP + "/user/notes",
+            params={"id": discord_id})
+        if res.status_code == 200:
+            r = res.json()
+            v = [UserNote(**c) for c in r]
+            msg = ""
+            for k, c in enumerate(v):
+                m = (f"* *{c.created_time.strftime('%b %d %Y')}*:\n"
+                     "```ansi\n"  # begin ansi block
+                     '\u001b'
+                     f"[{0};{32}m{c.note}"
+                     '\u001b'
+                     "[0m"  # reset ansi color
+                     "```\n"
+                     )
+                if len(msg) + len(m) > 1024:
+                    break
+                msg += m
+
+            embed.add_field(name="NOTES", value=msg, inline=False)
+            embed.add_field(
+                name="Notes Stats",
+                value=f"Showing {k}/{len(v)} notes!",
+                inline=False,
+            )
 
     return await interaction.response.send_message(
         embed=embed,

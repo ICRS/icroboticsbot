@@ -10,6 +10,7 @@ from .induct import *
 from .timelapse import *
 from .order import *
 from .xkcd import *
+from .user_notes import *
 
 __all__ = []
 __all__.extend(help.__all__)
@@ -26,3 +27,4 @@ __all__.extend(whois_commands.__all__)
 
 __all__.extend(order.__all__)
 __all__.extend(xkcd.__all__)
+__all__.extend(user_notes.__all__)
