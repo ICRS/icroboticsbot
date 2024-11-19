@@ -101,12 +101,13 @@ async def whois(interaction: discord.Interaction, *,
             v = [UserNote(**c) for c in r]
             msg = ""
             for k, c in enumerate(v):
+                note = c.note.replace('`', '\\`')
                 m = (f"* *{c.created_time.strftime('%b %d %Y')}*:\n"
-                     "```ansi\n"  # begin ansi block
+                     "```ansi\n"
                      '\u001b'
-                     f"[{0};{32}m{c.note}"
+                     f"[{0};{32}m{note}"
                      '\u001b'
-                     "[0m"  # reset ansi color
+                     "[0m"
                      "```\n"
                      )
                 if len(msg) + len(m) > 1024:
