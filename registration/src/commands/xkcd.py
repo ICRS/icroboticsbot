@@ -4,10 +4,8 @@ __all__ = [
 
 import logging
 import discord
-
 import requests
 import random
-import logging
 
 import discord.ext
 import src.utils as utils

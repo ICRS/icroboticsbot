@@ -22,7 +22,7 @@ async def add_note(
                         })
 
     if res.status_code == 204:
-        msg = (f"Could not add note to <@{interaction.user.id}>\n"
+        msg = (f"Could not add note to <@{user.id}>\n"
                f"Note: {note}\n"
                "Is user registered?")
         logging.warning(msg + res.reason)
@@ -35,7 +35,7 @@ async def add_note(
             ephemeral=True,
         )
     elif res.status_code != 200:
-        msg = (f"Could not add note to <@{interaction.user.id}>\n"
+        msg = (f"Could not add note to <@{user.id}>\n"
                f"Note: {note}\n"
                f"Error: {res.status_code} {res.reason}")
         return await interaction.response.send_message(
@@ -45,7 +45,7 @@ async def add_note(
 
     j = res.json()
     user_note = UserNote(**j)
-    msg = (f"Successfully added your note to user {interaction.user}\n\n"
+    msg = (f"Successfully added your note to user {user}\n\n"
            f"* Note UID: {user_note.uid}\n"
            f"* Shortcode: {user_note.shortcode}\n"
            f"* Contents: {user_note.note}\n"

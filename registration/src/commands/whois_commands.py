@@ -110,13 +110,14 @@ async def whois(interaction: discord.Interaction, *,
                      "```\n"
                      )
                 if len(msg) + len(m) > 1024:
+                    k -= 1
                     break
                 msg += m
 
             embed.add_field(name="NOTES", value=msg, inline=False)
             embed.add_field(
                 name="Notes Stats",
-                value=f"Showing {k}/{len(v)} notes!",
+                value=f"Showing {k + 1}/{len(v)} notes!",
                 inline=False,
             )
 
