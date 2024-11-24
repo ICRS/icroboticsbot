@@ -200,7 +200,8 @@ class DiscordBot(commands.Bot):
                 Couldn't find a fact for some reason :(
                 """)
             else:
-                return await interaction.response.send_message(res.json().get("text"))
+                return await interaction.response.send_message(
+                    res.json().get("text").replace("`", "'"))
 
         @self.tree.command(
             name="help", description="List all the Snazzy Commands we have"
