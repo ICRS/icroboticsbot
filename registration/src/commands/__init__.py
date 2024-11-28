@@ -11,8 +11,10 @@ from .timelapse import *
 from .order import *
 from .xkcd import *
 from .user_notes import *
+from .card_admin import *
 
 __all__ = []
+__all__.extend(card_admin.__all__)
 __all__.extend(help.__all__)
 __all__.extend(linkcard.__all__)
 __all__.extend(printer_commands.__all__)

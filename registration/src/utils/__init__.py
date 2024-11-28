@@ -1,7 +1,7 @@
 from .messages import *
 from .api import *
-from .validation import *  
-from .printer import *  
+from .validation import *
+from .printer import *
 
 
 __all__ = []

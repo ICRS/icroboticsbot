@@ -20,7 +20,8 @@ from src.commands import (
     unlink_discord,
     order_component,
     xkcd_meme,
-    add_note
+    add_note,
+    all_inducted
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -246,6 +247,14 @@ class DiscordBot(commands.Bot):
                         name: str, quantity: int,
                         reason: str, url: str = ""):
             await order_component(interaction, name, quantity, reason, url)
+
+        @self.tree.command(
+            name="all-inducted",
+            description="**ADMIN ONLY**: Get info of all inducted members"
+        )
+        @committee_command
+        async def all_inducted_(interaction: discord.Interaction):
+            return await all_inducted(interaction)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
