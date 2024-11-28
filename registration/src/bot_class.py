@@ -21,7 +21,8 @@ from src.commands import (
     order_component,
     xkcd_meme,
     add_note,
-    all_inducted
+    all_inducted,
+    card_office,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -255,6 +256,14 @@ class DiscordBot(commands.Bot):
         @committee_command
         async def all_inducted_(interaction: discord.Interaction):
             return await all_inducted(interaction)
+
+        @self.tree.command(
+            name="card-office-registration",
+            description="**ADMIN ONLY**: Get details to send of the the card office"  # noqa: E501
+        )
+        @committee_command
+        async def card_office_(interaction: discord.Interaction):
+            return await card_office(interaction)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
