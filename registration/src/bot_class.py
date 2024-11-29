@@ -262,8 +262,10 @@ class DiscordBot(commands.Bot):
             description="**ADMIN ONLY**: Get details to send of the the card office"  # noqa: E501
         )
         @committee_command
-        async def card_office_(interaction: discord.Interaction):
-            return await card_office(interaction)
+        async def card_office_(
+                interaction: discord.Interaction,
+                update: bool = False):
+            return await card_office(interaction, update=update)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

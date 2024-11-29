@@ -48,10 +48,14 @@ async def all_inducted(interaction: discord.Interaction):
         embed=embed, file=file, ephemeral=True)
 
 
-async def card_office(interaction: discord.Interaction):
+async def card_office(
+    interaction: discord.Interaction,
+    update: bool = False
+):
     logging.info("Getting all data for card office stuff")
     res = requests.get(
         f"{SERVER_IP}/v2/summary/inducted/recent",
+        params={"update": update},
         auth=BASIC_AUTH)
     if res.status_code != 200:
         msg = f"Could not get all inducted members: {res.reason}"
