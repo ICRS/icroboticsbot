@@ -59,6 +59,11 @@ class PrinterWebhook:
         embed_desc = ""
         try:
             state = self.printer_farm.get_state(printer_name)
+            filament_info = self.printer_farm.get_filament_info(printer_name)
+
+            # if filament_info:
+            vt_tray = filament_info.get("vt_tray", {})
+            vt_tray_color, vt_tray_filament = vt_tray.get("tray_color", "0" * 8), vt_tray.get("tray_type", "na")  # noqa: E501
 
             if state == GcodeState.IDLE:
                 embed_desc = f"```asciidoc\n {'No print in progress'.center(self.prog_length-4, ' ')}:: \n```"   # noqa
@@ -68,7 +73,6 @@ class PrinterWebhook:
                     {'Preparing print'.center(self.prog_length-2, ' ')}]\n```"
 
             elif state == GcodeState.RUNNING or state == GcodeState.PAUSE:
-
                 remaining_time = self.printer_farm.get_remaining_time(printer_name)                             # noqa
                 percentage = self.printer_farm.get_percentage(printer_name)
 

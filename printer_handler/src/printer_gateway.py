@@ -29,6 +29,21 @@ class PrinterGateway:
         r = response.json()
         return r['time'] if 'time' in r else -1
 
+    def get_filament_info(self) -> int:
+        """
+        Get the percentage of the print job
+
+        Returns
+        -------
+        int
+            The percentage of the print job
+        """
+        response = requests.get(
+            f"http://{self.printer_url}/printer/filament/info")
+        if response.status_code != 200:
+            return {}
+        return response.json()
+
     def get_percentage(self) -> int:
         """
         Get the percentage of the print job

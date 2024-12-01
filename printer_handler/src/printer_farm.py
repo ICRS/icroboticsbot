@@ -59,6 +59,11 @@ class PrinterFarm:
         return percentage if percentage > 0 else 0
 
     @printer_exists
+    def get_filament_info(self, printer_name: str) -> int:
+        logging.info("Printer name: %s", printer_name)
+        return self.printers[printer_name].get_filament_info()
+
+    @printer_exists
     def get_frame(self, printer_name: str) -> str:
         """
         Get the frame of the print job
