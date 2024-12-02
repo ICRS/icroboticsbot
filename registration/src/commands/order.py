@@ -25,11 +25,9 @@ async def order_component(interaction: discord.Interaction,
 
     if res:
         await interaction.response.send_message(
-            embed=order_successful(),
-            ephemeral=True
+            embed=order_successful()
         )
     else:
         await interaction.response.send_message(
-            embed=order_error(),
-            ephemeral=True
+            embed=order_error()
         )
