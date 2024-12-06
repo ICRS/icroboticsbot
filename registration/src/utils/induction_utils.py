@@ -160,6 +160,8 @@ def inductMember(member_id: str):
 async def addRoletoUser(
         interaction: discord.Interaction,
         member: discord.Member):
+    logging.info(f"Trying to get interaction guild: {interaction} "
+                 f"{interaction.guild} {interaction.guild.roles if interaction.guild else None}")  # noqa: E501
     role = discord.utils.get(
         interaction.guild.roles, name="Verified Member")
 
