@@ -12,6 +12,7 @@ from .order import *
 from .xkcd import *
 from .user_notes import *
 from .card_admin import *
+from .whois_printing import *
 
 __all__ = []
 __all__.extend(card_admin.__all__)
@@ -30,3 +31,4 @@ __all__.extend(whois_commands.__all__)
 __all__.extend(order.__all__)
 __all__.extend(xkcd.__all__)
 __all__.extend(user_notes.__all__)
+__all__.extend(whois_printing.__all__)
