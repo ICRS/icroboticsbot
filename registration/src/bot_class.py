@@ -23,6 +23,7 @@ from src.commands import (
     add_note,
     all_inducted,
     card_office,
+    who_is_printing,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -266,6 +267,16 @@ class DiscordBot(commands.Bot):
                 interaction: discord.Interaction,
                 update: bool = False):
             return await card_office(interaction, update=update)
+        
+        @self.tree.command(
+            name="whois-printing",
+            description="**ADMIN ONLY**: Gets who is printing on a given printer"
+        )
+        @committee_command
+        async def whois_printing_(
+                interaction: discord.Interaction):
+            return await who_is_printing(interaction)
+
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
