@@ -2,7 +2,6 @@ __all__ = [
     "who_is_printing",
 ]
 
-
 import discord
 import logging
 
@@ -26,14 +25,13 @@ async def who_is_printing(interaction: discord.Interaction):
         try:
         
             user = await utils.get_current_user_printer(printer)
-            member = interaction.guild.get_member(user)
+            shortcode = utils.get_shortcode_from_discord(user)
             
-            all_printer_info += f'{printer} is currently being used by: \n ID: {user} \n Name: {member}\n\n'
+            all_printer_info += f'{printer} is currently being used by: \n ID: <@{user}> \n Shortcode: {shortcode}\n\n'
             
         except Exception as e:
             
             all_printer_info += utils.error_msg(printer, "Bad Response")
             
     await interaction.response.send_message(content=all_printer_info, ephemeral=True)
-    
-    
+       
