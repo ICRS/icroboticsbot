@@ -26,7 +26,7 @@ async def who_is_printing(interaction: discord.Interaction):
             shortcode = utils.get_shortcode_from_discord(user)
             
             if user is None:
-                all_printer_info += f'**{printer}** is currently not in use \n'
+                all_printer_info += f'**{printer}** is currently not in use \n\n'
             else:
                 all_printer_info += f'**{printer}** is currently being used by: \nID: <@{user}> \nShortcode: {shortcode}\n\n'
         
