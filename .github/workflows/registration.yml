@@ -3,7 +3,7 @@ name: main bot docker image build
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'registration/**'
       - '.github/workflows/registration.yml'
