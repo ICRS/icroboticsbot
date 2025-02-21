@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: printer-controller
-        image: localhost:32000/printer-controller  # Replace with your Python Docker image and tag
+        image: icroboticssociety/discord-printer-controller  # Replace with your Python Docker image and tag
         ports:
         - containerPort: 5000  # Port your Python application is listening on
         imagePullPolicy: "Always"
