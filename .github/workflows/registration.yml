@@ -30,6 +30,8 @@ jobs:
         run: echo "VERSION=${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_ENV
 
   docker:
+    needs:
+      - version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
