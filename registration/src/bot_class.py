@@ -173,24 +173,25 @@ class DiscordBot(commands.Bot):
             # logging.info(f"Latency: {self.latency}")
             await quote_person(ctx, name)
 
+        async def add_quote_autocomplete_(
+                interaction: discord.Interaction,
+                current: str,
+        ):
+            return [
+                app_commands.Choice(name=c, value=c)
+                for c in names if current.lower() in c]
+
         @self.tree.command(
             name="add-quote",
             description="Add quote for person"
         )
+        @app_commands.autocomplete(name=add_quote_autocomplete_)
         @committee_command
         async def add_quote_(
                 interaction: discord.Interaction,
                 name:  str,
                 quote: str):
             await add_quote(interaction, name, quote)
-
-        @add_quote_.autocomplete("name")
-        async def add_quote_autocomplete_(
-                interaction: discord.Interaction,
-                current: str,
-        ):
-            d = [c for c in quote_choices if c.name != "random"]
-            return d
 
         @self.tree.command(
             name="xkcd",
