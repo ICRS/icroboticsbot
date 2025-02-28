@@ -177,13 +177,20 @@ class DiscordBot(commands.Bot):
             name="add-quote",
             description="Add quote for person"
         )
-        @app_commands.choices(name=[app_commands.Choice(name=q, value=q) for q in quote_choices])
         @committee_command
         async def add_quote_(
                 interaction: discord.Interaction,
-                name: app_commands.Choice[str] | str,
+                name:  str,
                 quote: str):
             await add_quote(interaction, name, quote)
+
+        @add_quote_.autocomplete("name")
+        async def add_quote_autocomplete_(
+                interaction: discord.Interaction,
+                current: str,
+        ):
+            d = [c for c in quote_choices if c.name != "random"]
+            return d
 
         @self.tree.command(
             name="xkcd",
