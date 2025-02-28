@@ -13,52 +13,52 @@ spec:
         app: icrsbot
     spec:
       containers:
-      - name: icrsbot
-        image: icroboticssociety/icrs-bot  # Replace with your Python Docker image and tag
-        ports:
-        - containerPort: 5000  # Port your Python application is listening on
-        imagePullPolicy: "Always"
-        env:
-          - name: TZ
-            value: Europe/London
-          - name: DISCORD_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: discord-bot-secret
-                key: discord_token
-          - name: SERVER_IP
-            valueFrom:
-              configMapKeyRef:
-                name: database-config
-                key: endpoint-url
-          - name: NOTION_IP
-            valueFrom:
-              configMapKeyRef:
-                name: database-config
-                key: notion-url
-          - name: DATABASE_ADAPTER_USER
-            valueFrom:
-              secretKeyRef:
-                name: access-server-secret
-                key: username
-          - name: DATABASE_ADAPTER_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: access-server-secret
-                key: secret
-        volumeMounts:
-          - name: postgres-ini
-            mountPath: /app/postgres.ini
-            subPath: postgres.ini
-            readOnly: true
-          - name: discord-bot-secret
-            mountPath: /app/settings.json
-            subPath: settings.json
-            readOnly: true
-          - name: printer-config
-            mountPath: /app/printer_settings.json
-            subPath: printer_settings.json
-            readOnly: true
+        - name: icrsbot
+          image: icroboticssociety/icrs-bot:1.0.0  # Replace with your Python Docker image and tag
+          ports:
+            - containerPort: 5000  # Port your Python application is listening on
+          imagePullPolicy: "Always"
+          env:
+            - name: TZ
+              value: Europe/London
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: discord-bot-secret
+                  key: discord_token
+            - name: SERVER_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: database-config
+                  key: endpoint-url
+            - name: NOTION_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: database-config
+                  key: notion-url
+            - name: DATABASE_ADAPTER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: access-server-secret
+                  key: username
+            - name: DATABASE_ADAPTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: access-server-secret
+                  key: secret
+          volumeMounts:
+            - name: postgres-ini
+              mountPath: /app/postgres.ini
+              subPath: postgres.ini
+              readOnly: true
+            - name: discord-bot-secret
+              mountPath: /app/settings.json
+              subPath: settings.json
+              readOnly: true
+            - name: printer-config
+              mountPath: /app/printer_settings.json
+              subPath: printer_settings.json
+              readOnly: true
 
       volumes:
         - name: postgres-ini
