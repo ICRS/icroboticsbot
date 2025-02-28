@@ -1,7 +1,6 @@
 import logging
 import json
 import asyncio
-from typing import Literal
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -177,11 +176,12 @@ class DiscordBot(commands.Bot):
         @self.tree.command(
             name="add-quote",
             description="Add quote for person"
-        )  # noqa: E501
+        )
+        @app_commands.choices(name=[app_commands.Choice(name=q, value=q) for q in quote_choices])
         @committee_command
         async def add_quote_(
                 interaction: discord.Interaction,
-                name: Literal[tuple(quote_choices)] | str,  # type: ignore
+                name: app_commands.Choice[str] | str,
                 quote: str):
             await add_quote(interaction, name, quote)
 
