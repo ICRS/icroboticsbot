@@ -27,60 +27,54 @@ def success_msg(title, description):
 
 
 def success_card_linking_msg(shortcode, uuid):
-    embed = discord.Embed(
+    return success_msg(
         title="Card had been linked!",
         description=f"shortcode: {shortcode} \\ Card ID: {uuid}",
-        color=success_color)
-    return embed
+    )
 
 
 def is_inducted_msg():
-    embed = discord.Embed(
+    return success_msg(
         title="Yep",
         description=("They are a member"),
-        color=success_color)
-    return embed
+    )
 
 
 def induction_success_msg():
-    embed = discord.Embed(
+    return success_msg(
         title="Verified!",
         description=("You have been verified and should have the ICRS Member role\n"  # noqa: E501
                      "You have already completed the induction\n" +
                      INSTA_LINKTREE),
-        color=success_color)
-    return embed
+        )
 
 
 def already_inducted():
-    embed = discord.Embed(
+    return success_msg(
         title="Already Inducted!",
         description=("You have already completed the induction\n" +
                      INSTA_LINKTREE
                      ),
-        color=success_color)
-    return embed
+    )
 
 
 def reverified_msg():
-    embed = discord.Embed(
+    return success_msg(
         title="Membership reverified",
         description="Welcome back! " + INSTA_LINKTREE,
-        color=success_color)
-    return embed
+    )
 
 
 def unlink_discord_success_msg(shortcode: str):
-    return discord.Embed(
+    return success_msg(
         title="Unlinked Discord Successfully!",
         description=(f"Successfully unlinked discord by shortcode: {shortcode}"
                      ),
-        color=success_color)
+    )
 
 
 def order_successful():
-    embed = discord.Embed(
+    return success_msg(
         title="Request placed successfully!",
         description="We'll keep you up to date with your requests status!",
         color=success_color)
-    return embed
