@@ -7,10 +7,12 @@ import aiohttp
 import discord.ext
 import discord.ext.commands as commands
 from src.utils import error_msg, quote_msg, SERVER_IP
+from utils.messages.success_messages import success_msg
 
 
 __all__ = [
     "quote_person",
+    "add_quote",
 ]
 
 
@@ -62,3 +64,47 @@ async def quote_person(ctx: commands.Context | discord.Interaction,
             data.get("name", ""),
             data.get("quote", ""), file),
         file=file)
+
+
+async def add_quote(
+        interaction: discord.Interaction,
+        name: str,
+        quote: str):
+    """
+    Add a quote for a given person.
+
+    Parameters
+    ----------
+    interaction : Discord.interaction
+        interaction
+    name : str
+        Name of the person to quote
+    quote : str
+        Quote
+    """
+    async with aiohttp.ClientSession() as session:
+        async with session.post(SERVER_IP + "/meme/quote", data={
+            "name": name, "quote": quote,
+        }) as response:
+            status_code = response.status
+
+    if status_code == 409:
+        return await interaction.response.send_message(
+            embed=error_msg(
+                f"Name {name}, Quote {quote} already in DB!"),
+            ephemeral=True,
+        )
+    elif status_code != 200:
+        logging.warning(f"Bad Request: {status_code}")
+        return await interaction.response.send_message(
+            embed=error_msg(
+                f"Bad Request: {status_code}"
+            )
+        )
+
+    return await interaction.response.send(
+        embed=success_msg(
+            "Add Quote Success!",
+            f"Successfully added quote for {name}",
+        )
+    )
