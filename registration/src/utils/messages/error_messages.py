@@ -88,8 +88,10 @@ def quote_not_found():
 def is_not_inducted_msg():
     return error_msg("Not a member", "Nope")
 
+
 def order_error():
     return error_msg("Failed to place order. Please contact the lab manager.", "Order Failed")
+
 
 def error_msg(msg, title="Error"):
     logging.error(f"Error: {msg}")

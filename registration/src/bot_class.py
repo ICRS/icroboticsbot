@@ -1,6 +1,7 @@
 import logging
 import json
 import asyncio
+from typing import Literal
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -9,6 +10,7 @@ import requests
 from src.commands.printer_commands import printer_buttons
 from src.commands import (
     get_help,
+    add_quote,
     link_card,
     unlink_card,
     quote_person,
@@ -173,6 +175,17 @@ class DiscordBot(commands.Bot):
             await quote_person(ctx, name)
 
         @self.tree.command(
+            name="add-quote",
+            description="Add quote for person"
+        )  # noqa: E501
+        @committee_command
+        async def add_quote_(
+                interaction: discord.Interaction,
+                name: Literal[tuple(quote_choices)] | str,  # type: ignore
+                quote: str):
+            await add_quote(interaction, name, quote)
+
+        @self.tree.command(
             name="xkcd",
             description="Prints random xkcd meme"
         )
@@ -267,7 +280,7 @@ class DiscordBot(commands.Bot):
                 interaction: discord.Interaction,
                 update: bool = False):
             return await card_office(interaction, update=update)
-        
+
         @self.tree.command(
             name="whois-printing",
             description="**ADMIN ONLY**: Gets who is printing on a given printer"
@@ -276,7 +289,6 @@ class DiscordBot(commands.Bot):
         async def whois_printing_(
                 interaction: discord.Interaction):
             return await who_is_printing(interaction)
-
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
