@@ -7,7 +7,7 @@ import aiohttp
 import discord.ext
 import discord.ext.commands as commands
 from src.utils import error_msg, quote_msg, SERVER_IP
-from utils.messages.success_messages import success_msg
+from src.utils import success_msg
 
 
 __all__ = [
@@ -83,9 +83,13 @@ async def add_quote(
         Quote
     """
     async with aiohttp.ClientSession() as session:
-        async with session.post(SERVER_IP + "/meme/quote", data={
-            "name": name, "quote": quote,
-        }) as response:
+        async with session.post(
+                SERVER_IP + "/meme/quote",
+                json={
+                    "name": str(name),
+                    "quote": str(quote),
+                },
+                headers={"Content-Type": "application/json"}) as response:
             status_code = response.status
 
     if status_code == 409:
@@ -99,12 +103,14 @@ async def add_quote(
         return await interaction.response.send_message(
             embed=error_msg(
                 f"Bad Request: {status_code}"
-            )
+            ),
+            ephemeral=True
         )
 
-    return await interaction.response.send(
+    return await interaction.response.send_message(
         embed=success_msg(
             "Add Quote Success!",
             f"Successfully added quote for {name}",
-        )
+        ),
+        ephemeral=True
     )
