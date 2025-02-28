@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'registration/pyproject.toml'
+      - '.github/workflows/registration.yml'
 
 jobs:
   version:
