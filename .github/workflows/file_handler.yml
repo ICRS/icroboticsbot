@@ -5,8 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'file_handler/**'
-      - '.github/workflows/file_handler.yml'
+      - 'file_handler/pyproject.toml'
 
 jobs:
   version:

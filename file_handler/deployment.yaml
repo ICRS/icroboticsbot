@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: icrsbot-file-handler
-          image: icroboticssociety/discord-scp # Replace with your Python Docker image and tag
+          image: icroboticssociety/discord-scp:1.0.0
           ports:
             - containerPort: 5000 # Port your Python application is listening on
           imagePullPolicy: "Always"
