@@ -1,0 +1,5 @@
+[project]
+name = "ICRS Discord File Handler"
+version = "1.0.0"
+description = "Main ICRS Discord File Transfer."
+requires-python = ">=3.8"
