@@ -9,6 +9,7 @@ import requests
 from src.commands.printer_commands import printer_buttons
 from src.commands import (
     get_help,
+    project_dashboard,
     add_quote,
     link_card,
     unlink_card,
@@ -248,6 +249,15 @@ class DiscordBot(commands.Bot):
         async def printers_cmd(interaction):
             await printer_buttons(
                 interaction, printer_names=self.printer_names)
+
+        @self.tree.command(
+            name="project",
+            description="Project management dashboard"
+        )
+        @verified_member
+        async def project_dashboard_(interaction: discord.Interaction):
+            await project_dashboard(
+                interaction,)
 
         @self.tree.command(
             name="timelapse",
