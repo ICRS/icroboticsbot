@@ -80,6 +80,7 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
         await launch_quiz(interaction, shortcode)
 
     except Exception as e:
+        logging.error(e.with_traceback())
         await interaction.response.send_message(embed=utils.error_msg(e))
 
 
