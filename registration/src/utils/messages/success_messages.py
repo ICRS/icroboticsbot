@@ -19,7 +19,7 @@ success_color = 0x46fa64
 INSTA_LINKTREE = "Check out our Insta too: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)"  # noqa: E501
 
 
-def success_msg(title, description):
+def success_msg(title, description, **kwargs):
     return discord.Embed(
         title=title,
         description=description,
@@ -77,4 +77,4 @@ def order_successful():
     return success_msg(
         title="Request placed successfully!",
         description="We'll keep you up to date with your requests status!",
-        color=success_color)
+    )
