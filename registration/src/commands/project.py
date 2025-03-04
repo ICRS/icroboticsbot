@@ -23,8 +23,17 @@ def create_new_project(
     )
 
 
+def add_member_to_project(project_id: int, ids: list[int]):
+    return requests.post(
+        SERVER_IP + f"/project/{project_id}/member/discord",
+        json={
+            "discord_id": ids
+        },
+    )
+
+
 class ProjectSelectionView(discord.ui.View):
-    def __init__(self, project_options: list[dict[str, int | str]], *, timeout=180):
+    def __init__(self, project_options: list[dict[str, int | str]], *, timeout=None):
         super().__init__(timeout=timeout)
         self.add_item(
             ProjectSelect(project_options=project_options)
@@ -70,27 +79,28 @@ class MemberSelectView(discord.ui.View):
 
 class MemberSelect(discord.ui.UserSelect):
     def __init__(self, project_id: int, **kwargs):
-        super().__init__(min_values=1, max_values=10, **kwargs)
+        super().__init__(min_values=0, max_values=10, **kwargs)
         logging.info(f"Project id {project_id}")
         self.project_id = project_id
 
     async def callback(self, interaction: discord.Interaction):
         ids = [v.id for v in self.values]
         logging.debug(ids)
-        result = requests.post(
-            SERVER_IP + f"/project/{self.project_id}/member/discord",
-            json={
-                "discord_id": ids
-            },
-        )
+        result = add_member_to_project(self.project_id, ids)
         if result.status_code == 200:
             members = set(result.json().get("members", []))
             registered = [v for v in self.values if v in members]
             logging.info(registered)
+
+            if registered:
+                out = "Added the following members to your project:"
+                out += "\n * " + '\n * '.join(registered)
+            else:
+                out = "No members added to project."
             await interaction.response.edit_message(
                 embed=discord.Embed(
                     title="Project Members",
-                    description=f"Added the following members to your project: {registered}"
+                    description=out,
                 ),
                 view=None,
             )
@@ -100,7 +110,7 @@ class MemberSelect(discord.ui.UserSelect):
             await interaction.response.edit_message(
                 embed=error_msg(
                     title="Project Members",
-                    description=f"Could not add users to project. Please contact committee."
+                    description="Could not add users to project. Please contact committee."
                 ),
                 view=None,
             )
@@ -136,9 +146,7 @@ class ProjectCreateModal(discord.ui.Modal, title="Create Project"):
                     f"Please make a note of your project id: {id}",
                 ),
             )
-            res = requests.post(f"/project/{id}/member/discord", json={
-                "discord_id": [interaction.user.id],
-            })
+            add_member_to_project(id, [interaction.user.id])
         else:
             await interaction.response.edit_message(
                 embed=error_msg(
