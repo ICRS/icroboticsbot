@@ -116,6 +116,28 @@ class MemberSelect(discord.ui.UserSelect):
             )
 
 
+class ProjectCreateView(discord.ui.View):
+    def __init__(self, *, timeout=None):
+        super().__init__(timeout=timeout)
+
+    @discord.ui.button(style=discord.ButtonStyle.blurple, label='Back',)
+    async def return_(self, interaction: discord.Interaction, button):
+        await interaction.response.edit_message(
+            embed=discord.Embed(
+                title="Project",
+                description="Manage your projects here",
+                color=discord.Color.blue(),
+            ),
+            view=ProjectDashboard(),
+        )
+
+    @discord.ui.button(style=discord.ButtonStyle.green, label='Confirm',)
+    async def create_project(self, interaction: discord.Interaction, button):
+        await interaction.response.send_modal(
+            ProjectCreateModal()
+        )
+
+
 class ProjectCreateModal(discord.ui.Modal, title="Create Project"):
     proj_title = discord.ui.TextInput(
         label='Project Title',
@@ -170,8 +192,20 @@ class ProjectDashboard(discord.ui.View):
 
     @discord.ui.button(style=discord.ButtonStyle.green, label='Create Project',)
     async def create_project(self, interaction: discord.Interaction, button):
-        await interaction.response.send_modal(
-            ProjectCreateModal()
+        await interaction.response.edit_message(
+            embed=discord.Embed(
+                title="**Disclaimer**!",
+                description="""By creating a project, you confirm that the project and the work will be carrying out in the ICRS lab includes none of the following:
+ * High voltages (>50V)
+ * Lithium based batteries
+ * Mains wiring
+ * Non PAT tested mains equipment
+ * Hazardous chemicals that have not been pre discussed with the ICRS committee
+
+If this changes at any point, please speak to an ICRS committee member immediately.
+"""
+            ),
+            view=ProjectCreateView(),
         )
 
     @discord.ui.button(style=discord.ButtonStyle.green, label='Add Members Project',)
