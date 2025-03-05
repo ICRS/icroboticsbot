@@ -116,7 +116,7 @@ class MemberSelect(discord.ui.UserSelect):
             )
 
 
-class ProjectCreateView(discord.ui.View):
+class ReturnView(discord.ui.View):
     def __init__(self, *, timeout=None):
         super().__init__(timeout=timeout)
 
@@ -130,6 +130,11 @@ class ProjectCreateView(discord.ui.View):
             ),
             view=ProjectDashboard(),
         )
+
+
+class ProjectCreateView(ReturnView):
+    def __init__(self, *, timeout=None):
+        super().__init__(timeout=timeout)
 
     @discord.ui.button(style=discord.ButtonStyle.green, label='Confirm',)
     async def create_project(self, interaction: discord.Interaction, button):
@@ -246,6 +251,57 @@ If this changes at any point, please speak to an ICRS committee member immediate
                     "Error getting your projects!",
                     "There was an error getting your projects. "
                     "Please contact committee."
+                ),
+                view=None,
+            )
+
+    @discord.ui.button(style=discord.ButtonStyle.green, label='My Projects',)
+    async def get_projects(self, interaction: discord.Interaction, button):
+        owned_projects = requests.get(
+            SERVER_IP + "/project/discord",
+            params={
+                "id": interaction.user.id
+            }
+        )
+
+        if owned_projects.status_code == 200:
+            owned_projects = owned_projects.json()
+            title = "My Projects"
+            if len(owned_projects) == 0:
+                return await interaction.response.edit_message(
+                    embed=discord.Embed(
+                        title=title,
+                        description="You don't have any projects yet!"
+                        ),
+                    view=ReturnView()
+                )
+
+            owned = [f"({o.get('id', -1)}) {o.get('title', '')}"
+                     for o in owned_projects if o.get("priority", 0) == 0]
+            logging.info(owned)
+            member = [f"({o.get('id', -1)}) {o.get('title', '')}"
+                      for o in owned_projects if o.get("priority", 0) != 0]
+            logging.info(member)
+
+            own_msg = "\n".join(f" * {o}" for o in owned)
+            member_msg = "\n".join(f" * {o}" for o in member)
+            await interaction.response.edit_message(
+                embed=discord.Embed(
+                    title=title,
+                    description="Your Projects:\n\nProjects you own:\n"
+                    + own_msg + "\n\nYou are a member of the following projects:\n" + member_msg
+                ),
+                view=ReturnView()
+            )
+        else:
+            logging.error(
+                "An error happened getting projects: "
+                f"{owned_projects.status_code} {owned_projects.reason}")
+            await interaction.response.edit_message(
+                embed=error_msg(
+                    title="Error getting your projects!",
+                    msg="There was an error getting your projects. "
+                    "Please contact committee.",
                 ),
                 view=None,
             )
