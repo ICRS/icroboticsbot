@@ -23,11 +23,11 @@ def create_new_project(
     )
 
 
-def add_member_to_project(project_id: int, ids: list[int]):
+def add_member_to_project(project_id: int, ids: list[int], owner=0):
     return requests.post(
         SERVER_IP + f"/project/{project_id}/member/discord",
         json={
-            "discord_id": ids
+            "discord_id": [{"discord_id": i, "priority": owner} for i in ids]
         },
     )
 
@@ -86,7 +86,7 @@ class MemberSelect(discord.ui.UserSelect):
     async def callback(self, interaction: discord.Interaction):
         ids = [v.id for v in self.values]
         logging.debug(ids)
-        result = add_member_to_project(self.project_id, ids)
+        result = add_member_to_project(self.project_id, ids, owner=1)
         if result.status_code == 200:
             members = set(result.json().get("members", []))
             registered = [v for v in self.values if v in members]
