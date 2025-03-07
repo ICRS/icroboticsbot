@@ -166,14 +166,15 @@ class ProjectCreateModal(discord.ui.Modal, title="Create Project"):
 
         if res.status_code == 200:
             id = res.json()['id']
+            add_member_to_project(id, [interaction.user.id])
             await interaction.response.edit_message(
                 embed=discord.Embed(
-                    title="Created Project!",
-                    description="Successfully created project!\n"
-                    f"Please make a note of your project id: {id}",
+                    title="Project Tags",
+                    description="Please tell us what your project does so we can "
+                    "help support your project",
                 ),
+                view=ProjectTagSelect(id),
             )
-            add_member_to_project(id, [interaction.user.id])
         else:
             await interaction.response.edit_message(
                 embed=error_msg(
@@ -187,6 +188,67 @@ class ProjectCreateModal(discord.ui.Modal, title="Create Project"):
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         logging.error(
             f"Project create modal failed for some reason {error} {interaction}")
+
+
+tags = [
+    "Personal Project",
+    "Coursework",
+    "Society Project",
+]
+
+
+class ProjectTagSelect(discord.ui.View):
+    def __init__(self, id, *, timeout=None):
+        super().__init__(timeout=timeout)
+        self.id = id
+
+    @discord.ui.select(
+        min_values=1,
+        max_values=1,
+        options=[
+            discord.SelectOption(
+                label=t,
+                description=f"Select this if this project is {t}",
+            )
+            for t in tags
+        ],
+    )
+    async def select_(self,  interaction: discord.Interaction, select: discord.ui.Select,):
+        if select.values:
+            v = select.values[0]
+            logging.info(f"Adding the {v}")
+
+            tags = requests.post(
+                SERVER_IP + f"/project/{self.id}/tags",
+                json={
+                    "id": self.id,
+                    "tags": [
+                        {"tag": v, }
+                    ],
+                }
+            )
+
+            if tags.status_code == 200:
+                await self.project_success(interaction)
+            else:
+                await interaction.response.edit_message(
+                    embed=error_msg(
+                        title="Project Tag Error",
+                        msg="Could not add Tag to Project!"),
+                    view=None
+                )
+        else:
+            await self.project_success(interaction)
+
+    async def project_success(self, interaction: discord.Interaction,):
+        await interaction.response.edit_message(
+            embed=discord.Embed(
+                title="Created Project!",
+                description="Successfully created project!\n"
+                f"Please make a note of your project id: {self.id}",
+            ),
+            view=None
+        )
 
 
 class ProjectDashboard(discord.ui.View):
@@ -272,7 +334,7 @@ If this changes at any point, please speak to an ICRS committee member immediate
                     embed=discord.Embed(
                         title=title,
                         description="You don't have any projects yet!"
-                        ),
+                    ),
                     view=ReturnView()
                 )
 
