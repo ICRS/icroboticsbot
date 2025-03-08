@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: icrsbot
-          image: icroboticssociety/icrs-bot:1.0.2-rc4  # Replace with your Python Docker image and tag
+          image: icroboticssociety/icrs-bot:1.0.2-rc5  # Replace with your Python Docker image and tag
           ports:
             - containerPort: 5000  # Port your Python application is listening on
           imagePullPolicy: "Always"
