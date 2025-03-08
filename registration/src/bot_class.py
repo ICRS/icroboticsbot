@@ -26,6 +26,7 @@ from src.commands import (
     all_inducted,
     card_office,
     who_is_printing,
+    project_admin_dashboard,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -249,6 +250,15 @@ class DiscordBot(commands.Bot):
         async def printers_cmd(interaction):
             await printer_buttons(
                 interaction, printer_names=self.printer_names)
+
+        @self.tree.command(
+            name="admin-project",
+            description="**ADMIN ONLY**: Admin Project Management Dashboard"
+        )
+        @committee_command
+        async def admin_project_dashboard_(interaction: discord.Interaction):
+            await project_admin_dashboard(
+                interaction,)
 
         @self.tree.command(
             name="project",

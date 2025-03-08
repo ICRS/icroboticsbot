@@ -14,9 +14,11 @@ from .user_notes import *
 from .card_admin import *
 from .whois_printing import *
 from .project import *
+from .project_admin import *
 
 __all__ = []
 __all__.extend(project.__all__)
+__all__.extend(project_admin.__all__)
 __all__.extend(card_admin.__all__)
 __all__.extend(help.__all__)
 __all__.extend(linkcard.__all__)
