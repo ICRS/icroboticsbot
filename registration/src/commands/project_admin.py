@@ -10,13 +10,17 @@ __all__ = [
 
 
 def project_description(res: requests.Response):
-    projects = [f" * ({r['id']}) : {r['title']} - (Created: {r['created_at']})\n" +
-                "  * Description: " + str(r["description"]) +
-                f"\n  * Owners: {', '.join('<@' + str(a) + '>' for a in r['project_owners'])if r['project_owners'] else '**Warning No Project Owners**'}"
-                f"\n  * Members: {', '.join('<@' + str(a) + '>' for a in r['project_members']) if r['project_members'] else 'No Other Members'}"
-                f"\n  * Tags: { ', '.join(str(a) for a in r['tags']) if r['tags'] else 'No Tags'}"
-                for r in res.json()]
-    projects_description = "\n\n".join(projects)
+    v = res.json()
+    if v:
+        projects = [f" * ({r['id']}) : {r['title']} - (Created: {r['created_at']})\n" +
+                    "  * Description: " + str(r["description"]) +
+                    f"\n  * Owners: {', '.join('<@' + str(a) + '>' for a in r['project_owners'])if r['project_owners'] else '**Warning No Project Owners**'}"
+                    f"\n  * Members: {', '.join('<@' + str(a) + '>' for a in r['project_members']) if r['project_members'] else 'No Other Members'}"
+                    f"\n  * Tags: { ', '.join(str(a) for a in r['tags']) if r['tags'] else 'No Tags'}"
+                    for r in v]
+        projects_description = "\n\n".join(projects)
+    else:
+        projects_description = "No projects found!"
     return projects_description
 
 
