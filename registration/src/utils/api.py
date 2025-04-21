@@ -13,7 +13,9 @@ __all__ = [
     "get_percentage",
     "get_frame",
     "get_state",
-    "get_shortcode_from_discord"
+    "get_shortcode_from_discord",
+    "get_perms_from_shortcode",
+    "MemberPermissions",
 ]
 
 """
@@ -83,6 +85,32 @@ def deregister_discord_id(userid: int) -> bool:
             "discord_id": str(userid)
         })
     return result == 200
+
+
+@dataclass
+class MemberPermissions:
+    shortcode: str
+    print: bool = False
+    laser: bool = False
+    inducted: bool = False
+    time_added: str = ""
+    card_id: str = ""
+    resin: bool = False
+
+
+def get_perms_from_shortcode(shortcode: str) -> MemberPermissions:
+    res = requests.get(
+        SERVER_IP + "/member/permissions/shortcode",
+        params={"shortcode": shortcode}, auth=BASIC_AUTH)
+    if res.status_code != 200:
+        raise Exception(
+            f"Error getting permissions from shortcode {res.status_code}: "
+            f"{res.reason}"
+        )
+
+    j = res.json()
+    logging.info(j)
+    return MemberPermissions(**j)
 
 
 def get_member_perms(shortcode: str):

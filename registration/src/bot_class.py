@@ -9,6 +9,7 @@ import requests
 from src.commands.printer_commands import printer_buttons
 from src.commands import (
     get_help,
+    permissions_dashboard,
     project_dashboard,
     add_quote,
     link_card,
@@ -30,7 +31,7 @@ from src.commands import (
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
-                       validate_shortcode)
+                       validate_shortcode, get_shortcode_from_discord)
 
 
 __all__ = ["DiscordBot"]
@@ -308,6 +309,38 @@ class DiscordBot(commands.Bot):
                 interaction: discord.Interaction,
                 update: bool = False):
             return await card_office(interaction, update=update)
+
+        @self.tree.command(
+            name="permissions",
+            description="**ADMIN ONLY**: update user permissions"
+        )
+        @committee_command
+        async def permissions_(
+                interaction: discord.Interaction, user: str):
+            user = user.strip()
+
+            if user.startswith("<@") and user.endswith(">"):
+                user_id = user[2:-1]
+                if user_id.isnumeric():
+                    user = get_shortcode_from_discord(user_id)
+                    if user is None:
+                        return await interaction.response.send_message(
+                            embed=error_msg(
+                                "Could not get shortcode from user id.",
+                                "Permissions Dashboard input Error"),
+                            ephemeral=True
+                        )
+
+                    return await permissions_dashboard(interaction, user)
+                else:
+                    return await interaction.response.send_message(
+                        embed=error_msg(
+                            "Bad input into permissions command for discord user",
+                            "Permissions Dashboard input Error"),
+                        ephemeral=True
+                    )
+            else:
+                return await permissions_dashboard(interaction, user)
 
         @self.tree.command(
             name="whois-printing",
