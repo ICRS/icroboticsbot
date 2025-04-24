@@ -96,6 +96,9 @@ class MemberPermissions:
     time_added: str = ""
     card_id: str = ""
     resin: bool = False
+    print_daytime_time: int = 3 * 60
+    print_night_time: int = 9 * 60
+    printers: tuple = ()
 
 
 def get_perms_from_shortcode(shortcode: str) -> MemberPermissions:

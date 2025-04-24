@@ -13,6 +13,8 @@ INDUCTED = "Inducted"
 CAN_PRINT = "Can Print"
 CAN_LASER = "Can Laser"
 CAN_RESIN = "Can Resin"
+DAY_PRINT = "Daytime Print"
+NIGHT_PRINT = "Night Print"
 
 
 class PermissionSelect(discord.ui.Select):
