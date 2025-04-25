@@ -13,6 +13,7 @@ INDUCTED = "Inducted"
 CAN_PRINT = "Can Print"
 CAN_LASER = "Can Laser"
 CAN_RESIN = "Can Resin"
+PRINTER_OVERRIDE = "Printer Override"
 
 
 class PermissionSelect(discord.ui.Select):
@@ -49,6 +50,11 @@ class PermissionSelect(discord.ui.Select):
             value=CAN_RESIN,
             default=permission_info.resin,
         )
+        self.add_option(
+            label=PRINTER_OVERRIDE,
+            value=PRINTER_OVERRIDE,
+            default=permission_info.printer_override,
+        )
 
     async def callback(self, interaction: discord.Interaction):
         o = self.values
@@ -57,14 +63,16 @@ class PermissionSelect(discord.ui.Select):
         inducted = INDUCTED in o
         can_laser = CAN_LASER in o
         can_resin = CAN_RESIN in o
+        printer_override = PRINTER_OVERRIDE in o
 
         logging.info(
-            f"Selected {can_print} {inducted} {can_laser} {can_resin}")
+            f"Selected {can_print} {inducted} {can_laser} {can_resin} {printer_override}")
 
         if (self.permissions.print == can_print and
                 self.permissions.inducted == inducted and
                 self.permissions.laser == can_laser and
-                self.permissions.resin == can_resin):
+                self.permissions.resin == can_resin and
+                self.permissions.printer_override == printer_override):
             return await interaction.response.edit_message(
                 embed=discord.Embed(
                     title="Successfully updated Permssions",
@@ -82,6 +90,7 @@ class PermissionSelect(discord.ui.Select):
                 "inducted": inducted,
                 "laser": can_laser,
                 "resin": can_resin,
+                "printer_override": printer_override,
             },
             auth=BASIC_AUTH
         )
