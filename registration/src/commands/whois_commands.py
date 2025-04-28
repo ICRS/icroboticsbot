@@ -71,6 +71,7 @@ async def whois(interaction: discord.Interaction, *,
             "Can Print: " + str(perms.get("print", "Not Found")) + "\n" +
             "Can Laser: " + str(perms.get("laser", "Not Found")) + "\n" +
             "Can Resin: " + str(perms.get("resin", "Not Found")) + "\n"
+            "Print Override: " + str(perms.get("printer_override", "Not Found")) + "\n"
         ),
         inline=False)
 
