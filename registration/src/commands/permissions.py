@@ -24,7 +24,7 @@ class PermissionSelect(discord.ui.Select):
             **kwargs) -> None:
         super().__init__(
             min_values=0,
-            max_values=4,
+            max_values=5,
             **kwargs)
 
         self.shortcode = shortcode
