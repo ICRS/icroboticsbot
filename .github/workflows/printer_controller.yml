@@ -5,11 +5,33 @@ on:
     branches:
       - master
     paths:
-      - 'printer_controller/**'
-      - '.github/workflows/printer_controller.yml'
+      - 'printer_controller/pyproject.toml'
 
 jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install toml
+      - name: Get version from pyproject.toml file
+        id: get_version
+        working-directory: ./printer_controller
+        run: |
+          version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          echo "VERSION=${version}" >> $GITHUB_OUTPUT
+      - name: Set VERSION for next jobs
+        id: set_version
+        run: echo "VERSION=${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_ENV
+
   docker:
+    needs:
+      - version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,6 +44,7 @@ jobs:
           images: |
             icroboticssociety/discord-printer-controller
           tags: |
+            type=raw,value=${{ needs.version.outputs.VERSION }}
             type=raw,value=latest
             type=sha
       -

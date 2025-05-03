@@ -1,0 +1,5 @@
+[project]
+name = "ICRS 3D Printer Discord Control Interface"
+version = "1.0.0"
+description = "Discord Interface for controlling 3D printers. Provides basic functionality for starting/resuming prints and viewing live feed."
+requires-python = ">=3.8"
