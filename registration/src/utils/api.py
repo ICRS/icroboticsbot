@@ -16,6 +16,7 @@ __all__ = [
     "get_shortcode_from_discord",
     "get_perms_from_shortcode",
     "MemberPermissions",
+    "get_mac_addresses_from_shortcode"
 ]
 
 """
@@ -97,6 +98,7 @@ class MemberPermissions:
     card_id: str = ""
     resin: bool = False
     printer_override: bool = False
+    is_lab_trained: bool = False
 
 
 def get_perms_from_shortcode(shortcode: str) -> MemberPermissions:
@@ -136,6 +138,19 @@ def get_stats_from_discord(discord_id: str):
 
     return Stats()
 
+def get_mac_addresses_from_shortcode(shortcode: str):
+    res = requests.get(
+        SERVER_IP + "/member/mac_addresses",
+        params={
+            "shortcode": shortcode
+        },
+        auth=BASIC_AUTH
+    )
+
+    if res.status_code == 200:
+        return res.json()
+    
+    return None
 
 @dataclass
 class Print:

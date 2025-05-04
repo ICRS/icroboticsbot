@@ -16,6 +16,7 @@ from .whois_printing import *
 from .project import *
 from .project_admin import *
 from .permissions import *
+from .mac_addresses import *
 
 __all__ = []
 __all__.extend(project.__all__)
@@ -27,6 +28,7 @@ __all__.extend(linkcard.__all__)
 __all__.extend(printer_commands.__all__)
 __all__.extend(printer_status_commands.__all__)
 __all__.extend(induct.__all__)
+__all__.extend(mac_addresses.__all__)
 
 __all__.extend(timelapse.__all__)
 __all__.extend(quote.__all__)

@@ -70,7 +70,9 @@ async def whois(interaction: discord.Interaction, *,
             "Inducted: " + str(perms.get("inducted", "Not Found")) + "\n" +
             "Can Print: " + str(perms.get("print", "Not Found")) + "\n" +
             "Can Laser: " + str(perms.get("laser", "Not Found")) + "\n" +
-            "Can Resin: " + str(perms.get("resin", "Not Found")) + "\n"
+            "Can Resin: " + str(perms.get("resin", "Not Found")) + "\n" +
+            "Print Override: " + str(perms.get("printer_override", "Not Found")) + "\n" +
+            "Is Lab Trained: " + str(perms.get("is_lab_trained", "Not Found")) + "\n"
         ),
         inline=False)
 
@@ -94,6 +96,16 @@ async def whois(interaction: discord.Interaction, *,
                 f"Started At: {last_print.time_started}"
             ),
             inline=False)
+    
+    mac_addrs = utils.get_mac_addresses_from_shortcode(shortcode)
+
+    if mac_addrs:   
+        embed.add_field(
+            name="MAC Addresses",
+            value=(
+                "\n".join(mac_addrs)
+            )
+        )
     if discord_id:
         res = requests.get(
             utils.SERVER_IP + "/user/notes",

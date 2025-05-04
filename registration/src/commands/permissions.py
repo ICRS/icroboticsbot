@@ -14,6 +14,7 @@ CAN_PRINT = "Can Print"
 CAN_LASER = "Can Laser"
 CAN_RESIN = "Can Resin"
 PRINTER_OVERRIDE = "Printer Override"
+IS_LAB_TRAINED = "Is Lab Trained"
 
 
 class PermissionSelect(discord.ui.Select):
@@ -24,7 +25,7 @@ class PermissionSelect(discord.ui.Select):
             **kwargs) -> None:
         super().__init__(
             min_values=0,
-            max_values=5,
+            max_values=6,
             **kwargs)
 
         self.shortcode = shortcode
@@ -55,6 +56,11 @@ class PermissionSelect(discord.ui.Select):
             value=PRINTER_OVERRIDE,
             default=permission_info.printer_override,
         )
+        self.add_option(
+            label=IS_LAB_TRAINED,
+            value=IS_LAB_TRAINED,
+            default=permission_info.is_lab_trained,
+        )
 
     async def callback(self, interaction: discord.Interaction):
         o = self.values
@@ -64,15 +70,17 @@ class PermissionSelect(discord.ui.Select):
         can_laser = CAN_LASER in o
         can_resin = CAN_RESIN in o
         printer_override = PRINTER_OVERRIDE in o
+        is_lab_trained = IS_LAB_TRAINED in o
 
         logging.info(
-            f"Selected {can_print} {inducted} {can_laser} {can_resin} {printer_override}")
+            f"Selected {can_print} {inducted} {can_laser} {can_resin} {printer_override} {is_lab_trained}")
 
         if (self.permissions.print == can_print and
                 self.permissions.inducted == inducted and
                 self.permissions.laser == can_laser and
                 self.permissions.resin == can_resin and
-                self.permissions.printer_override == printer_override):
+                self.permissions.printer_override == printer_override and
+                self.permissions.is_lab_trained == is_lab_trained):
             return await interaction.response.edit_message(
                 embed=discord.Embed(
                     title="Successfully updated Permssions",
@@ -91,6 +99,7 @@ class PermissionSelect(discord.ui.Select):
                 "laser": can_laser,
                 "resin": can_resin,
                 "printer_override": printer_override,
+                "is_lab_trained": is_lab_trained
             },
             auth=BASIC_AUTH
         )
