@@ -9,6 +9,7 @@ __all__ = [
     "validate_card_uid",
     "validate_shortcode",
     "verified_member",
+    "is_mac_address"
 ]
 
 
@@ -25,6 +26,7 @@ from src import utils
 SHORTCODE_REGEX = r'^[a-z]{2,3}\d{2,5}$'
 UID_REGEX = r'^[0-9A-F]{8,14}$'
 DISCORD_ID_REGEX = r'^<@[0-9]{18,19}>$'
+MAC_ADDR_REGEX = r'^([0-9A-F]{2}:){5}[0-9A-F]{2}'
 
 
 def is_shortcode(message: str) -> bool:
@@ -63,6 +65,10 @@ def is_not_committee(author: discord.User | discord.Member):
 def is_member(author: discord.User | discord.Member):
     return "verified member" in [y.name.lower() for y in author.roles]
 
+def is_mac_address(mac_addr : str):
+    mac_addr = mac_addr.upper()
+    found = re.findall(MAC_ADDR_REGEX, mac_addr)
+    return any(found)
 
 def committee_command(function: Callable):
     @functools.wraps(function)

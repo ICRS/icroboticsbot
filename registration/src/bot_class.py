@@ -28,6 +28,7 @@ from src.commands import (
     card_office,
     who_is_printing,
     project_admin_dashboard,
+    add_mac_address,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -350,6 +351,18 @@ class DiscordBot(commands.Bot):
         async def whois_printing_(
                 interaction: discord.Interaction):
             return await who_is_printing(interaction)
+        
+        @self.tree.command(
+            name="add-mac-address",
+            description="**ADMIN ONLY**: Add a BLE mac address to trained committee"
+        )
+        @committee_command
+        async def add_mac_address_(
+            interaction : discord.Interaction,
+            user : str,
+            mac_addr : str
+        ):
+            return await add_mac_address(interaction, user, mac_addr)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """
