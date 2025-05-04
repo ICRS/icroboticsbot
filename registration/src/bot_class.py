@@ -29,6 +29,7 @@ from src.commands import (
     who_is_printing,
     project_admin_dashboard,
     add_mac_address,
+    trained_member_present
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -363,6 +364,17 @@ class DiscordBot(commands.Bot):
             mac_addr : str
         ):
             return await add_mac_address(interaction, user, mac_addr)
+        @self.tree.command(
+            name="trained-member-present",
+            description="**ADMIN ONLY**: Check if a lab trained member is present in a time interval"
+        )
+        @committee_command
+        async def trained_member_present_(
+            interaction: discord.Interaction,
+            timestamp: str,
+            interval: int,
+        ):
+            return await trained_member_present(interaction, timestamp, interval)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

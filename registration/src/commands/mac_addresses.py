@@ -1,10 +1,12 @@
 __all__ = [
-    "add_mac_address"
+    "add_mac_address",
+    "trained_member_present"
 ]
 
 import logging
 import discord
 import requests
+from datetime import datetime
 
 from src.utils import SERVER_IP
 import src.utils as utils
@@ -76,3 +78,44 @@ async def add_mac_address(
         ),
         ephemeral=True,
     )
+
+async def trained_member_present(
+        interaction: discord.Interaction,
+        timestamp: str,
+        interval: int
+):
+    try:
+        timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+    except:
+        return await interaction.response.send_message(
+            embed=utils.error_msg(
+                "Format should be YYYY-MM-DD HH:MM",
+                "Invalid timestamp format"
+            ),
+            ephemeral=True
+        )
+    response = requests.get(
+        SERVER_IP + "/access/trained_member_present",
+        params= {
+            "timestamp": str(timestamp),
+            "interval": interval
+        }
+    )
+
+    if len(response.json()) > 0:
+        embed = discord.Embed(
+            title="Committee Present",
+            description="\n".join(response.json())
+        )
+        return await interaction.response.send_message(
+            embed=embed,
+            ephemeral=True
+        )
+    else:
+        return await interaction.response.send_message(
+            embed=utils.error_msg(
+                "No trained members present in that time interval",
+                "NO TRAINED MEMBER"
+            ),
+            ephemeral=True
+        )
