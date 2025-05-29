@@ -16,6 +16,7 @@ from .whois_printing import *
 from .project import *
 from .project_admin import *
 from .permissions import *
+from .scans import *
 
 __all__ = []
 __all__.extend(project.__all__)
@@ -33,6 +34,7 @@ __all__.extend(quote.__all__)
 __all__.extend(register.__all__)
 __all__.extend(stats.__all__)
 __all__.extend(whois_commands.__all__)
+__all__.extend(scans.__all__)
 
 __all__.extend(order.__all__)
 __all__.extend(xkcd.__all__)
