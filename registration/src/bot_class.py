@@ -28,6 +28,7 @@ from src.commands import (
     card_office,
     who_is_printing,
     project_admin_dashboard,
+    last_scans,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -117,6 +118,17 @@ class DiscordBot(commands.Bot):
                 interaction: discord.Interaction, shortcode: str, uid: str):
             await link_card(interaction, shortcode=shortcode, uid=uid)
 
+        @self.tree.command(
+            name="last-scans",
+            description="**ADMIN ONLY**: Get last card scans",
+        )
+        @committee_command
+        async def last_scans_cmd(
+            interaction: discord.Interaction,
+            number : int = None,
+            printer: bool = None,
+        ):
+            await last_scans(interaction, number=number, printer=printer)
         @self.tree.command(
             name="notes",
             description="**ADMIN ONLY**: add notes to discord member with @user",  # noqa: E501
