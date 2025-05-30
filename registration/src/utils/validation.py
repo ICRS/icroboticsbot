@@ -34,16 +34,12 @@ def is_shortcode(message: str) -> bool:
 
 
 def is_uid(message: str) -> bool:
-    if message is None:
-        return True
     message = format_uid(message)
     found = re.findall(UID_REGEX, message)
     return any(found)
 
 
 def format_uid(message: str) -> str:
-    if message is None:
-        return ""
     message = message.upper()
     message = message.replace(" ", "")
     message = message.replace(":", "")

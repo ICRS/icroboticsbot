@@ -5,17 +5,13 @@ __all__ = [
 
 import discord
 import src.utils as utils
-import requests
-from src.utils import SERVER_IP, error_msg
-import datetime
-import logging
 
 
 @utils.committee_command
 @utils.validate_card_uid
 @utils.validate_shortcode
 async def link_card(interaction: discord.Interaction, *,
-                    shortcode: str, uid: str = None):
+                    shortcode: str, uid: str):
     """
     register_on_dm Register message when user tries to register on DM
 
@@ -29,26 +25,6 @@ async def link_card(interaction: discord.Interaction, *,
         uid of the user's card
     """
     try:
-        if uid == "":
-            res = requests.get(SERVER_IP + "/member/scans/last", params={'n': 1, 'device': 'gun'})
-            if res.status_code != 200:
-                err = error_msg(f"Error fetching UUID from DB")
-                return await interaction.response.send_message(
-                    embed=err,
-                    ephemeral=True
-                )
-            
-            data = res.json()[0]
-            timestamp = datetime.datetime.strptime(data[0], "%Y-%m-%dT%H:%M:%S")
-            if timestamp + datetime.timedelta(minutes=1) < datetime.datetime.now():
-                err = error_msg(f"Last card scan was too long ago!", title="Scan again")
-                return await interaction.response.send_message(
-                    embed=err,
-                    ephemeral=True
-                )
-
-            uid = data[1]
-
         result = utils.add_card_to_member(
             shortcode, uid)
 

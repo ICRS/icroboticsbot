@@ -117,7 +117,7 @@ class DiscordBot(commands.Bot):
             description="**ADMIN ONLY**: Link a members card to their shortcode"  # noqa: E501
         )
         async def link_card_cmd(
-                interaction: discord.Interaction, shortcode: str, uid: str = None):
+                interaction: discord.Interaction, shortcode: str, uid: str):
             await link_card(interaction, shortcode=shortcode, uid=uid)
 
         @self.tree.command(
