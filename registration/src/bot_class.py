@@ -6,6 +6,8 @@ from discord.ext import commands
 from discord import app_commands
 import requests
 
+from typing import Literal
+
 from src.commands.printer_commands import printer_buttons
 from src.commands import (
     get_help,
@@ -125,10 +127,10 @@ class DiscordBot(commands.Bot):
         @committee_command
         async def last_scans_cmd(
             interaction: discord.Interaction,
-            number : int = None,
-            printer: bool = None,
+            number : int = 5,
+            device: Literal['gun', 'printer'] = "gun",
         ):
-            await last_scans(interaction, number=number, printer=printer)
+            await last_scans(interaction, number=number, device=device)
         @self.tree.command(
             name="notes",
             description="**ADMIN ONLY**: add notes to discord member with @user",  # noqa: E501
