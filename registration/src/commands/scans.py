@@ -12,7 +12,6 @@ from src.utils import error_msg
 async def last_scans(interaction: discord.Interaction,
                number : int = 5,
                device : str = "gun"):
-    logging.info(device)
     params = {
         'n': number,
         'device': device,
