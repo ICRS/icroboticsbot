@@ -10,13 +10,13 @@ from src.utils import SERVER_IP
 from src.utils import error_msg
 
 async def last_scans(interaction: discord.Interaction,
-               number : int = None,
-               printer : bool = None):
-    params = {}
-    if number is not None:
-        params['n'] = number
-    if printer is not None:
-        params['printer'] = printer
+               number : int = 5,
+               device : str = "gun"):
+    logging.info(device)
+    params = {
+        'n': number,
+        'device': device,
+    }
 
     res = requests.get(SERVER_IP + "/member/scans/last", params=params)
 
@@ -28,7 +28,7 @@ async def last_scans(interaction: discord.Interaction,
         )
     
     embed = discord.Embed(
-        title=f"Last {number if number is not None else 5} card scans from {'printer scanner' if printer else 'scanner gun'}",
+        title=f"Last {number} card scans from {device} scanner",
         colour=discord.Colour.green(),
     )
     for scan in res.json():
