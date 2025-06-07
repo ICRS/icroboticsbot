@@ -1,5 +1,6 @@
 __all__ = [
     "add_note",
+    "delete_note",
 ]
 
 import logging
@@ -59,3 +60,52 @@ async def add_note(
         ),
         ephemeral=True,
     )
+
+
+async def delete_note(
+        interaction: discord.Interaction,
+        note_id: int):
+    res = requests.delete(SERVER_IP + "/user/notes",
+                        params={
+                            "id": note_id,
+                        })
+    if res.status_code == 304:
+        msg = f"Note Id: {note_id} not deleted from db. Not found in db."
+        logging.warning(msg)
+        return await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Delete Note",
+                description=msg,
+                color=discord.Color.yellow()
+            ),
+            ephemeral=True,
+        )
+    elif res.status_code != 200:
+        msg = f"Could not delete note with id={note_id}: {res.reason}"
+        logging.error(msg)
+        return await interaction.response.send_message(
+            embed=error_msg(msg=msg),
+            ephemeral=True,
+        )
+    else:
+        j = res.json()
+        if j["id"] != note_id:
+            msg = f"Note Id: {note_id} not deleted from db. May have already been deleted."
+            logging.warning(msg)
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Delete Note",
+                    description=msg,
+                    color=discord.Color.yellow()
+                ),
+                ephemeral=True,
+            )
+
+        return await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Delete Note",
+                description=f"Successfully deleted note: {note_id}",
+                color=discord.Color.green()
+            ),
+            ephemeral=True,
+        )

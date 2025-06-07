@@ -104,7 +104,7 @@ async def whois(interaction: discord.Interaction, *,
             msg = ""
             for k, c in enumerate(v):
                 note = c.note.replace('`', '\\`')
-                m = (f"* *{c.created_time.strftime('%b %d %Y')}*:\n"
+                m = (f"* *[{c.uid}]: {c.created_time.strftime('%b %d %Y')}*:\n"
                      "```ansi\n"
                      '\u001b'
                      f"[{0};{32}m{note}"

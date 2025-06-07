@@ -26,6 +26,7 @@ from src.commands import (
     order_component,
     xkcd_meme,
     add_note,
+    delete_note,
     all_inducted,
     card_office,
     who_is_printing,
@@ -131,6 +132,7 @@ class DiscordBot(commands.Bot):
             device: Literal['gun', 'printer'] = "gun",
         ):
             await last_scans(interaction, number=number, device=device)
+
         @self.tree.command(
             name="notes",
             description="**ADMIN ONLY**: add notes to discord member with @user",  # noqa: E501
@@ -138,6 +140,14 @@ class DiscordBot(commands.Bot):
         @committee_command
         async def notes(interaction: discord.Interaction, user: discord.User, note: str):
             await add_note(interaction, user, note)
+
+        @self.tree.command(
+            name="delete-note",
+            description="**ADMIN ONLY**: delete note given the note id",  # noqa: E501
+        )
+        @committee_command
+        async def _delete_note(interaction: discord.Interaction, note_id: int):
+            await delete_note(interaction, note_id)
 
         @self.tree.command(
             name="whois",
