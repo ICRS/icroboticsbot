@@ -84,10 +84,10 @@ async def wipe_inductions(
     await interaction.response.send_message(
         embed=discord.Embed(
             title="Wipe Inductions",
-            description="Are you sure you want to wipe all inductions? "
-            "This will remove all inductions from the system "
-            "and will remove any roles from users. "
-            "This action cannot be undone.",
+            description="Are you sure you want to wipe all inductions? \n"
+            "This will remove *all* inductions from the system "
+            "and remove *Verified Member* role from *all* users. \n"
+            "**This action cannot be undone.**",
             color=discord.Color.red()
         ),
         view=ConfirmView(
