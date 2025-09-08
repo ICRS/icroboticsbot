@@ -8,12 +8,12 @@ class ConfirmView(discord.ui.View):
         self.on_action = on_action
         super().__init__()
         
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.grey)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.stop()
         await self.on_action(False, interaction)
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.danger)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.stop()
         await self.on_action(True, interaction)

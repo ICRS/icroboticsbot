@@ -4,6 +4,7 @@ import discord
 import requests
 from src.utils.api import SERVER_IP
 import src.utils as utils
+import asyncio
 
 
 SUCCESS_MSG = (
@@ -222,12 +223,34 @@ def validate_mapping_state(
 async def wipe_all_inductions(interaction: discord.Interaction):
     role = discord.utils.get(interaction.guild.roles, name=VERIFIED_ROLE_NAME)
     logging.info(f"Role to remove: {role}")
+    await interaction.edit_original_response(
+        embed=discord.Embed(
+            title=f"Removing {VERIFIED_ROLE_NAME} role from all members...",
+            description="This may take a while depending on how many members there are.",
+            color=discord.Color.yellow()
+        )
+    )
     for member in role.members:
         try:
             await member.remove_roles(role, reason="Wiping all inductions")
             logging.info(f"Removed role from {member}")
         except Exception as e:
             logging.error(f"Failed to remove role from {member}: {e}")
+            await interaction.edit_original_response(
+                embed=discord.Embed(
+                    title="Wipe Inductions Failed",
+                    description=f"Failed to remove role from {member}.\nContinuing anyway...",
+                    color=discord.Color.red()
+                )
+            )
+            await asyncio.sleep(1)
+    await interaction.edit_original_response(
+        embed=discord.Embed(
+            title="All roles removed, now wiping inductions from database...",
+            description="This may take a while depending on how many inductions there are.",
+            color=discord.Color.yellow()
+        )
+    )
     try:
         utils.wipe_inductions_from_db()
     except Exception as e:
@@ -235,7 +258,7 @@ async def wipe_all_inductions(interaction: discord.Interaction):
         await interaction.edit_original_response(
             embed=discord.Embed(
                 title="Wipe Inductions Failed",
-                description="Failed to call wipe inductions API.",
+                description="Internal server error at wipe inductions API.",
                 color=discord.Color.red()
             ),
             view=None
