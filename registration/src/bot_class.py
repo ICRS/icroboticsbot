@@ -32,6 +32,7 @@ from src.commands import (
     who_is_printing,
     project_admin_dashboard,
     last_scans,
+    wipe_inductions,
 )
 from src.utils import (deregister_discord_id, error_msg,
                        committee_command, SERVER_IP, verified_member,
@@ -190,6 +191,13 @@ class DiscordBot(commands.Bot):
 
         quote_choices = [app_commands.Choice(name=n, value=n) for n in names]
         quote_choices.append(app_commands.Choice(name="random", value=""))
+
+        @self.tree.command(
+            name="wipe-inductions",
+            description="**ADMIN ONLY**: Wipe all inductions from the system"
+        )
+        async def wipe_inductions_cmd(interaction: discord.Interaction):
+            await wipe_inductions(interaction)
 
         @self.hybrid_command(
             name="quote",

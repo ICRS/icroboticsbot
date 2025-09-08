@@ -16,6 +16,7 @@ __all__ = [
     "get_shortcode_from_discord",
     "get_perms_from_shortcode",
     "MemberPermissions",
+    "wipe_inductions_from_db",
 ]
 
 """
@@ -350,6 +351,9 @@ def get_state(printer_url) -> GcodeState:
         return GcodeState.UNKNOWN
     r: dict = response.json()
     return GcodeState(r.get("state", "IDLE"))
+
+def wipe_inductions_from_db():
+    requests.delete(SERVER_IP + "/induction/wipe", auth=BASIC_AUTH)
 
 
 if __name__ == '__main__':

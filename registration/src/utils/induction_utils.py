@@ -4,6 +4,7 @@ import discord
 import requests
 from src.utils.api import SERVER_IP
 import src.utils as utils
+import asyncio
 
 
 SUCCESS_MSG = (
@@ -11,6 +12,7 @@ SUCCESS_MSG = (
     "**Register your card in person** for 3D printing access!\n\n"
     "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)")  # noqa: E501
 
+VERIFIED_ROLE_NAME = "Verified Member"
 
 class State(str, Enum):
     VALID = "valid"
@@ -24,7 +26,8 @@ class State(str, Enum):
 async def fullInduction(
         interaction: discord.Interaction,
         shortcode: str,
-        member: discord.Member):
+        member: discord.Member,
+        bypass : bool):
     member_id = str(member.id)
     message = await interaction.original_response()
     shortcode = shortcode.strip().lower()
@@ -44,7 +47,8 @@ async def fullInduction(
         SERVER_IP + "/discord-id/register",
         params={
             "shortcode": shortcode,
-            "discord_id": member_id
+            "discord_id": member_id,
+            "bypass": bypass,
         })
 
     if linkDiscordWorked.status_code not in (200, 304):
@@ -215,3 +219,58 @@ def validate_mapping_state(
         logging.warning("Something very bad has happened - "
                         "duplicate rows in the mappings table!!")
         return State.INVALID_STATE
+
+async def wipe_all_inductions(interaction: discord.Interaction):
+    role = discord.utils.get(interaction.guild.roles, name=VERIFIED_ROLE_NAME)
+    logging.info(f"Role to remove: {role}")
+    await interaction.edit_original_response(
+        embed=discord.Embed(
+            title=f"Removing {VERIFIED_ROLE_NAME} role from all members...",
+            description="This may take a while depending on how many members there are.",
+            color=discord.Color.yellow()
+        )
+    )
+    for member in role.members:
+        try:
+            await member.remove_roles(role, reason="Wiping all inductions")
+            logging.info(f"Removed role from {member}")
+        except Exception as e:
+            logging.error(f"Failed to remove role from {member}: {e}")
+            await interaction.edit_original_response(
+                embed=discord.Embed(
+                    title="Wipe Inductions Failed",
+                    description=f"Failed to remove role from {member}.\nContinuing anyway...",
+                    color=discord.Color.red()
+                )
+            )
+            await asyncio.sleep(1)
+    await interaction.edit_original_response(
+        embed=discord.Embed(
+            title="All roles removed, now wiping inductions from database...",
+            description="This may take a while depending on how many inductions there are.",
+            color=discord.Color.yellow()
+        )
+    )
+    try:
+        utils.wipe_inductions_from_db()
+    except Exception as e:
+        logging.error(f"Failed to call wipe inductions API: {e}")
+        await interaction.edit_original_response(
+            embed=discord.Embed(
+                title="Wipe Inductions Failed",
+                description="Internal server error at wipe inductions API.",
+                color=discord.Color.red()
+            ),
+            view=None
+        )
+        return
+    
+    logging.info("Successfully wiped all inductions")
+    await interaction.edit_original_response(
+        embed=discord.Embed(
+            title="Successfully Wiped All Inductions",
+            description="All inductions have been wiped and roles removed.",
+            color=discord.Color.green()
+        ),
+        view=None
+    )
