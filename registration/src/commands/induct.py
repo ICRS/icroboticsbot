@@ -1,13 +1,14 @@
 __all__ = [
-    "induct_member"
+    "induct_member",
+    "wipe_inductions",
 ]
 
 import logging
 import discord
 
 from src.utils import (committee_command, validate_shortcode)
-from src.utils.induction_utils import fullInduction, hasPaidForMembership
-
+from src.utils.induction_utils import fullInduction, hasPaidForMembership, wipe_all_inductions
+from src.utils.messages import ConfirmView
 
 @committee_command
 @validate_shortcode
@@ -52,3 +53,45 @@ async def induct_member(
             )
 
     await fullInduction(interaction, shortcode, discord_member, bypass)
+
+async def _wipe_inductions(wipe : bool, interaction: discord.Interaction):
+    if not wipe:
+        return await interaction.response.edit_message(
+            embed = discord.Embed(
+                title="Operation Cancelled",
+                description="Will not wipe inductions",
+                color=discord.Color.red()
+            ),
+            view = None
+        )
+    
+    await interaction.response.edit_message(
+        embed = discord.Embed(
+            title="Wiping Inductions",
+            description="Wiping all inductions from the system, please wait...",
+            color=discord.Color.yellow()
+        ),
+        view = None
+    )
+
+    await wipe_all_inductions(interaction)
+    
+
+@committee_command
+async def wipe_inductions(
+    interaction: discord.Interaction,
+):
+    await interaction.response.send_message(
+        embed=discord.Embed(
+            title="Wipe Inductions",
+            description="Are you sure you want to wipe all inductions? "
+            "This will remove all inductions from the system "
+            "and will remove any roles from users. "
+            "This action cannot be undone.",
+            color=discord.Color.red()
+        ),
+        view=ConfirmView(
+            on_action=_wipe_inductions,
+        ),
+        ephemeral=True
+    )

@@ -11,6 +11,7 @@ SUCCESS_MSG = (
     "**Register your card in person** for 3D printing access!\n\n"
     "Also check out our Insta: [linktr.ee/icrobotics](https://linktr.ee/icrobotics)")  # noqa: E501
 
+VERIFIED_ROLE_NAME = "Verified Member"
 
 class State(str, Enum):
     VALID = "valid"
@@ -217,3 +218,36 @@ def validate_mapping_state(
         logging.warning("Something very bad has happened - "
                         "duplicate rows in the mappings table!!")
         return State.INVALID_STATE
+
+async def wipe_all_inductions(interaction: discord.Interaction):
+    role = discord.utils.get(interaction.guild.roles, name=VERIFIED_ROLE_NAME)
+    logging.info(f"Role to remove: {role}")
+    for member in role.members:
+        try:
+            await member.remove_roles(role, reason="Wiping all inductions")
+            logging.info(f"Removed role from {member}")
+        except Exception as e:
+            logging.error(f"Failed to remove role from {member}: {e}")
+    try:
+        utils.wipe_inductions_from_db()
+    except Exception as e:
+        logging.error(f"Failed to call wipe inductions API: {e}")
+        await interaction.edit_original_response(
+            embed=discord.Embed(
+                title="Wipe Inductions Failed",
+                description="Failed to call wipe inductions API.",
+                color=discord.Color.red()
+            ),
+            view=None
+        )
+        return
+    
+    logging.info("Successfully wiped all inductions")
+    await interaction.edit_original_response(
+        embed=discord.Embed(
+            title="Successfully Wiped All Inductions",
+            description="All inductions have been wiped and roles removed.",
+            color=discord.Color.green()
+        ),
+        view=None
+    )
