@@ -24,7 +24,8 @@ class State(str, Enum):
 async def fullInduction(
         interaction: discord.Interaction,
         shortcode: str,
-        member: discord.Member):
+        member: discord.Member,
+        bypass : bool):
     member_id = str(member.id)
     message = await interaction.original_response()
     shortcode = shortcode.strip().lower()
@@ -44,7 +45,8 @@ async def fullInduction(
         SERVER_IP + "/discord-id/register",
         params={
             "shortcode": shortcode,
-            "discord_id": member_id
+            "discord_id": member_id,
+            "bypass": bypass,
         })
 
     if linkDiscordWorked.status_code not in (200, 304):

@@ -51,4 +51,4 @@ async def induct_member(
                 )
             )
 
-    await fullInduction(interaction, shortcode, discord_member)
+    await fullInduction(interaction, shortcode, discord_member, bypass)
