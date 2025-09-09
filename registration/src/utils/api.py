@@ -353,7 +353,11 @@ def get_state(printer_url) -> GcodeState:
     return GcodeState(r.get("state", "IDLE"))
 
 def wipe_inductions_from_db():
-    requests.delete(SERVER_IP + "/induction/wipe", auth=BASIC_AUTH)
+    res = requests.delete(SERVER_IP + "/induction/wipe", auth=BASIC_AUTH)
+    if res.status_code != 200:
+        raise Exception(
+            f"Error wiping inductions: {res.status_code}: {res.reason}"
+        )
 
 
 if __name__ == '__main__':

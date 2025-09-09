@@ -63,7 +63,8 @@ async def whois(interaction: discord.Interaction, *,
                      "\nCard ID: " + str(perms.get("card_id", "Not Found")) +
                      f"\nDate Added: {perms.get('time_added', 'Not Found')}\n"
                      ),
-        color=discord.Color.green())
+        color=discord.Color.green() if perms.get("inducted", False)
+        else discord.Color.red())
     embed.add_field(
         name="User Permissions",
         value=(
