@@ -63,6 +63,8 @@ def format_discord_id(id: str) -> str:
 def is_not_committee(author: discord.User | discord.Member):
     return "committee" not in [y.name.lower() for y in author.roles]
 
+def is_not_admin(author: discord.User | discord.Member):
+    return "based individuals (admin)" not in [y.name.lower() for y in author.roles]
 
 def is_member(author: discord.User | discord.Member):
     return "verified member" in [y.name.lower() for y in author.roles]
@@ -72,7 +74,7 @@ def committee_command(function: Callable):
     @functools.wraps(function)
     async def query_api(interaction: discord.Interaction, *args, **kwargs):
         author = interaction.user
-        if is_not_committee(author):
+        if is_not_committee(author) and is_not_admin(author):
             logging.warning(f"User {author} {author.id}: tried to use "
                             f"a committee command: {function.__name__}")
             return await interaction.response.send_message(
