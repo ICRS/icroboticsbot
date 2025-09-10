@@ -41,7 +41,8 @@ async def whois(interaction: discord.Interaction, *,
         return await interaction.response.send_message(
             embed=utils.error_msg(
                 "Couldn't get user permissions",
-                "Server Error: Whois command"))
+                "Server Error: Whois command"),
+                ephemeral=True)
 
     if not perms and not discord_id:
         return await interaction.response.send_message(
