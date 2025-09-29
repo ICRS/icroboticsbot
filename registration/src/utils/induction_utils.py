@@ -182,6 +182,14 @@ def hasPaidForMembership(shortcode: str):
         SERVER_IP + "/member",
         params={"shortcode": shortcode})
 
+def hasPaidForLabPasses(shortcode: str):
+    logging.info(f"checking union for {shortcode}")
+
+    return requests.get(
+        SERVER_IP + "/member/pass",
+        params={"shortcode":shortcode}
+    )
+
 
 def validate_mapping_state(
     discord_id: str,
