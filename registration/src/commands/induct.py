@@ -46,8 +46,8 @@ async def induct_member(
         if not membershipPaid.json():
             return await message.edit(
                 embed=discord.Embed(
-                    title="They have not paid for membership",
-                    description="here a link: <https://www.imperialcollegeunion.org/activities/a-to-z/robotics>,\n if they have, and this is a glitch, then use bypass=True",  # noqa: E501
+                    title="They have not paid for lab pass",
+                    description="here a link: <https://www.imperialcollegeunion.org/shop/csp/robotics/lab-pass>,\n if they have, and this is a glitch, then use bypass=True",  # noqa: E501
                     color=discord.Color.red()
                 )
             )

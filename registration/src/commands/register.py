@@ -70,8 +70,8 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
         if not membershipPaid.json():
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="You have not paid for membership",
-                    description="Please pay £5 for membership before trying again\n here a link: <https://www.imperialcollegeunion.org/activities/a-to-z/robotics>",  # noqa: E501
+                    title="You have not paid for lab pass",
+                    description="Please pay £5 for lab pass before trying again\n here a link: <https://www.imperialcollegeunion.org/shop/csp/robotics/lab-pass>",  # noqa: E501
                     color=discord.Color.red()
                 ),
                 ephemeral=True
