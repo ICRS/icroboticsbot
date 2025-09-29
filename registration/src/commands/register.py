@@ -10,7 +10,7 @@ import requests
 
 from src.commands.quiz import DATABASE_ADAPTER_IP, launch_quiz
 from src.utils.induction_utils import (
-    hasPaidForMembership,
+    hasPaidForLabPasses,
     mapping_state_msg,
     validate_mapping_state)
 import src.utils as utils
@@ -53,7 +53,7 @@ async def register_user(interaction: discord.Interaction, *, shortcode: str):
             return await interaction.response.send_message(
                 embed=utils.already_inducted(), ephemeral=True)
 
-        membershipPaid = hasPaidForMembership(shortcode)
+        membershipPaid = hasPaidForLabPasses(shortcode)
         if membershipPaid.status_code != 200:
             logging.warning(f"Union Member Failed: {member} - "
                             f"{shortcode}; {membershipPaid.status_code}, "

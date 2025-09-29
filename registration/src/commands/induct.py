@@ -7,7 +7,7 @@ import logging
 import discord
 
 from src.utils import (committee_command, validate_shortcode)
-from src.utils.induction_utils import fullInduction, hasPaidForMembership, wipe_all_inductions
+from src.utils.induction_utils import fullInduction, hasPaidForLabPasses, wipe_all_inductions
 from src.utils.messages import ConfirmView
 
 @committee_command
@@ -29,7 +29,7 @@ async def induct_member(
     message = await interaction.original_response()
 
     if not bypass:
-        membershipPaid = hasPaidForMembership(shortcode)
+        membershipPaid = hasPaidForLabPasses(shortcode)
         if membershipPaid.status_code != 200:
             logging.warning(
                 f"Union Member Failed: {discord_member} - "
