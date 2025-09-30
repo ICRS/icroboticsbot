@@ -27,7 +27,7 @@ async def fullInduction(
         interaction: discord.Interaction,
         shortcode: str,
         member: discord.Member,
-        bypass : bool):
+        bypass : bool=False):
     member_id = str(member.id)
     message = await interaction.original_response()
     shortcode = shortcode.strip().lower()
