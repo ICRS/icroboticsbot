@@ -32,3 +32,7 @@
 **/values.dev.yaml
 LICENSE
 README.md
+deployment.yaml
+docker_build.sh
+env_template
+settings_template.json
