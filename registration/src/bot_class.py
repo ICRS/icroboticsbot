@@ -381,7 +381,8 @@ class DiscordBot(commands.Bot):
         @committee_command
         async def whois_printing_(
                 interaction: discord.Interaction):
-            return await who_is_printing(interaction)
+            return await who_is_printing(
+                interaction, printer_names=self.printer_names)
 
     async def on_message(self, message):  # pylint: disable=arguments-differ
         """

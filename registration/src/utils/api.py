@@ -238,34 +238,29 @@ def get_shortcode_from_discord(discord_id: str):
         return res.json().get("shortcode", None)
 
 
-async def get_current_user_printer(printer_name: str):
-    async with aiohttp.ClientSession() as session:
+async def get_current_user_printer(printer_name: str) -> int | None:
+    """
+    Discord ID of whoever is printing on the printer, or None if no one is.
+    Raises if the database adapter returns an error.
+    """
+    async with aiohttp.ClientSession(
+            raise_for_status=True,
+            timeout=aiohttp.ClientTimeout(total=10)) as session:
         async with session.get(
                 f"{SERVER_IP}/print-metrics/current/printer/shortcode",
-                params={
-                    "printer_name": printer_name
-                }
-        ) as response:
-            status_code = response.status
-            if status_code == 204:
+                params={"printer_name": printer_name}) as response:
+            if response.status == 204:
                 return None
+            shortcode = await response.json()
 
-            data: dict = await response.json()
-
-    async with aiohttp.ClientSession() as session:
         async with session.get(
                 f"{SERVER_IP}/shortcode/discord-id",
-                params={
-                    "shortcode": data
-                }
-        ) as response:
-            status_code = response.status
-            if status_code == 204:
+                params={"shortcode": shortcode}) as response:
+            if response.status == 204:
                 return None
+            discord_id = (await response.json()).get("discord_id")
 
-            data: dict = await response.json()
-
-    return int(data.get("discord_id"))
+    return int(discord_id) if discord_id is not None else None
 
 
 def get_remaining_time(printer_url) -> int:
