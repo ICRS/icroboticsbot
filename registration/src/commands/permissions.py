@@ -14,6 +14,7 @@ CAN_PRINT = "Can Print"
 CAN_LASER = "Can Laser"
 CAN_RESIN = "Can Resin"
 PRINTER_OVERRIDE = "Printer Override"
+COMMITTEE_CABINET = "Committee Cabinet"
 
 
 class PermissionSelect(discord.ui.Select):
@@ -54,6 +55,11 @@ class PermissionSelect(discord.ui.Select):
             label=PRINTER_OVERRIDE,
             value=PRINTER_OVERRIDE,
             default=permission_info.printer_override,
+        )
+        self.add_option(
+            label=COMMITTEE_CABINET,
+            value=COMMITTEE_CABINET,
+            default=permission_info.committee_cabinet,
         )
 
     async def callback(self, interaction: discord.Interaction):

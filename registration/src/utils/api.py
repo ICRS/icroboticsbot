@@ -98,6 +98,7 @@ class MemberPermissions:
     card_id: str = ""
     resin: bool = False
     printer_override: bool = False
+    committee_cabinet: bool = False
 
 
 def get_perms_from_shortcode(shortcode: str) -> MemberPermissions:
