@@ -23,10 +23,7 @@ class PermissionSelect(discord.ui.Select):
             shortcode: str,
             permission_info: MemberPermissions,
             **kwargs) -> None:
-        super().__init__(
-            min_values=0,
-            max_values=5,
-            **kwargs)
+        super().__init__(min_values=0, **kwargs)
 
         self.shortcode = shortcode
         self.permissions = permission_info
@@ -61,6 +58,9 @@ class PermissionSelect(discord.ui.Select):
             value=COMMITTEE_CABINET,
             default=permission_info.committee_cabinet,
         )
+        # Any number of permissions can be granted; a fixed cap greys out
+        # the last option once the others are ticked
+        self.max_values = len(self.options)
 
     async def callback(self, interaction: discord.Interaction):
         o = self.values
@@ -70,15 +70,17 @@ class PermissionSelect(discord.ui.Select):
         can_laser = CAN_LASER in o
         can_resin = CAN_RESIN in o
         printer_override = PRINTER_OVERRIDE in o
+        committee_cabinet = COMMITTEE_CABINET in o
 
         logging.info(
-            f"Selected {can_print} {inducted} {can_laser} {can_resin} {printer_override}")
+            f"Selected {can_print} {inducted} {can_laser} {can_resin} {printer_override} {committee_cabinet}")  # noqa: E501
 
         if (self.permissions.print == can_print and
                 self.permissions.inducted == inducted and
                 self.permissions.laser == can_laser and
                 self.permissions.resin == can_resin and
-                self.permissions.printer_override == printer_override):
+                self.permissions.printer_override == printer_override and
+                self.permissions.committee_cabinet == committee_cabinet):
             return await interaction.response.edit_message(
                 embed=discord.Embed(
                     title="Successfully updated Permssions",
@@ -97,6 +99,7 @@ class PermissionSelect(discord.ui.Select):
                 "laser": can_laser,
                 "resin": can_resin,
                 "printer_override": printer_override,
+                "committee_cabinet": committee_cabinet,
             },
             auth=BASIC_AUTH
         )
